@@ -1,9 +1,8 @@
 package io.baltoro.client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
@@ -18,22 +17,22 @@ import org.glassfish.tyrus.client.ClientManager;
 
 
 @ClientEndpoint
-public class WSCountClient
+public class BaltoroWSClient
 {
 
 	private static CountDownLatch latch;
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+	private Logger log = Logger.getLogger(this.getClass().getName());
 
 
 	@OnOpen
 	public void onOpen(Session session)
 	{
-		logger.info("Connected ... " + session.getId());
+		log.info("Connected ... " + session.getId());
       
 		try
 		{
 			session.getBasicRemote().sendText("start");
-			WSCountThread thread = new WSCountThread(session);
+			BaltoroWSPing thread = new BaltoroWSPing(latch, session);
 			thread.start();
 			//latch.countDown();
 		} 
@@ -46,39 +45,35 @@ public class WSCountClient
 	@OnMessage
 	public String onMessage(String message, Session session)
 	{
-		logger.info(message);
+		log.info(message);
 		return null;
-		
-		/*
-		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-        try {
-            logger.info("Received ...." + message);
-            String userInput = bufferRead.readLine();
-            return userInput;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        */
+
+	}
+	
+	@OnMessage
+	//public void onBytes(byte[] b, boolean last, Session session) 
+	public void onBytes(ByteBuffer bytes, Session session) 
+	{
+	    log.info(bytes.toString());
 	}
 	
 
 	@OnClose
 	public void onClose(javax.websocket.Session session, CloseReason closeReason)
 	{
-		logger.info(String.format("Session %s close because of %s", session, closeReason));
+		log.info(String.format("Session %s close because of %s", session, closeReason));
 		latch.countDown();
 	}
 
-	public static void main(String[] args) 
+	public void start(String appId) 
 	{
 		latch = new CountDownLatch(1);
 
 	    ClientManager client = ClientManager.createClient();
 	    try 
 	    {
-	        client.connectToServer(WSCountClient.class, new URI("ws://localhost:8080/baltoro/ws?appid=xdcfd"));
+	        client.connectToServer(BaltoroWSClient.class, new URI("ws://localhost:8080/baltoro/ws?appid="+appId));
 	        latch.await();
-	
 	    } 
 	    catch (Exception e) 
 	    {

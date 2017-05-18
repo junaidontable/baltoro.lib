@@ -1,5 +1,7 @@
 package io.baltoro.client;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class Baltoro 
@@ -7,13 +9,15 @@ public class Baltoro
 	
 	static Logger log = Logger.getLogger(Baltoro.class.getName());
 	
-	public Baltoro(String[] packages)
+	private Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
+	
+	private Baltoro(String appId, String[] packages)
 	{
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 		
 		try
 		{
-			init(packages);
+			init(appId, packages);
 		} 
 		catch (Exception e)
 		{
@@ -21,13 +25,13 @@ public class Baltoro
 		}
 	}
 	
-	public Baltoro(String _package)
+	private Baltoro(String appId, String _package)
 	{
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 		
 		try
 		{
-			init(new String[]{_package});
+			init(appId, new String[]{_package});
 		} 
 		catch (Exception e)
 		{
@@ -36,20 +40,31 @@ public class Baltoro
 	}
 	
 	
-	private void init(String[] packages) throws Exception
+	private void init(String appId, String[] packages) throws Exception
 	{
 		
 		AnnotationProcessor p = new AnnotationProcessor();
 		for (String _package : packages)
 		{
-			p.processAnnotation(_package);
+			Map<String, WebMethod> pMap = p.processAnnotation(_package);
+			pathMap.putAll(pMap);
 		}
 		
+		
+	}
+	
+	public static void start(String appId, String[] packages)
+	{
+		new Baltoro(appId, packages);
+	}
+	
+	public static void start(String appId, String _package)
+	{
+		new Baltoro(appId, _package);
 	}
 	
     public static void main( String[] args )
     {
-    	String[] packages = new String[]{"io.baltoro.client.test"};
-        new Baltoro(packages);
+        new Baltoro("baltoro-test","io.baltoro.client.test");
     }
 }
