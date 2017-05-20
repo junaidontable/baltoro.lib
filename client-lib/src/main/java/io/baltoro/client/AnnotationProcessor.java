@@ -53,6 +53,7 @@ public class AnnotationProcessor
 							Path mpath = (Path) method.getAnnotation(Path.class);
 							String fPath = cPath+mpath.value();
 							
+							System.out.println("path --- >"+fPath+", method --->"+method.getName());
 							WebMethod wm = new WebMethod(_class, method);
 							pathMap.put(fPath, wm);
 						

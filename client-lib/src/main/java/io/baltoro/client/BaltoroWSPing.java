@@ -25,17 +25,14 @@ public class BaltoroWSPing extends Thread
 			count++;
 			try
 			{
-				session.getBasicRemote().sendText(""+count);
-				Thread.sleep(5000);
+				session.getAsyncRemote().sendText(""+count);
+				Thread.sleep(20000);
 			} 
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				break;
-			}
-			finally
-			{
 				latch.countDown();
+				break;
 			}
 		}
 		
