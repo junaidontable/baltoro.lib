@@ -14,7 +14,8 @@ public class WSTO
 	public String appId;
 	public String path;
 	public Map<String, String> headers;
-	public Map<String,String[]> params;
+	public Map<String,String[]> requestParams;
 	public byte[] data;
+	public String jsonClassName;
 	
 }
