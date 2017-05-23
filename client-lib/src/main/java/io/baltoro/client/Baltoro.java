@@ -11,7 +11,7 @@ public class Baltoro
 	
 	private Baltoro(String appId, String[] packages)
 	{
-		//System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 		
 		try
 		{
@@ -25,7 +25,7 @@ public class Baltoro
 	
 	private Baltoro(String appId, String _package)
 	{
-		//System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 		
 		try
 		{
@@ -56,6 +56,13 @@ public class Baltoro
 		client.start(appId);
 		
 		
+	}
+	
+	
+	public static Object EndPointFactory(Class<?> _class)
+	{
+		
+		return null;
 	}
 	
 	public static void start(String appId, String[] packages)

@@ -5,7 +5,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE) //can use in class.
+@Target(ElementType.TYPE)
 
 public @interface AppId 
 {

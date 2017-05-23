@@ -6,8 +6,7 @@ public class ObjectUtil
 {
 
 	
-	
-	
+
 	public static byte[] toJason(Object obj) throws Exception
 	{
 		ObjectMapper mappper = new ObjectMapper();
