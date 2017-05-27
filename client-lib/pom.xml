@@ -4,15 +4,50 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
-  <name>client-lib</name>
-  <url>http://maven.apache.org</url>
+  <name>baltoto client lib</name>
+  <description>baltoto client lib</description>
+  <url>http://www.baltoro.io</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  
+  
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+    <developers>
+        <developer>
+            <name>Junaid Syed</name>
+            <email>junaid.syed@gmail.com</email>
+            <organization>Baltoro Inc</organization>
+            <organizationUrl>http://www.baltoro.io</organizationUrl>
+        </developer>
+    </developers>
+ 
+  <scm>
+    <url>https://github.com/junaidontable/baltoro.lib.git</url>
+  </scm>
+  
+  <distributionManagement>
+	<snapshotRepository>
+		<id>io.baltoro</id>
+		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+	</snapshotRepository>
+	<repository>
+		<id>io.baltoro</id>
+		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+	</repository>
+</distributionManagement>
+
 
    <dependencies>
     
@@ -64,7 +99,6 @@
 		<version>1.1</version>
 	</dependency>
 	
-
 	
     
   </dependencies>
@@ -73,6 +107,30 @@
     <finalName>baltoro-lib</finalName>
 	<plugins>
 
+
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <configuration>
+		    <source>1.8</source>
+		    <target>1.8</target>
+		    </configuration>
+		</plugin>
+
+
+		<plugin>
+		<groupId>org.sonatype.plugins</groupId>
+		<artifactId>nexus-staging-maven-plugin</artifactId>
+		<version>1.6.7</version>
+		<extensions>true</extensions>
+		<configuration>
+			<serverId>io.baltoro</serverId>
+			<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+			<autoReleaseAfterClose>true</autoReleaseAfterClose>
+		</configuration>
+		</plugin>
+    
+    
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-jar-plugin</artifactId>
@@ -139,6 +197,66 @@
 				</execution>
 			</executions>
 		</plugin>
+		
+		<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-antrun-plugin</artifactId>
+		<version>1.8</version>
+			<configuration>
+				<target>
+					<echo>coping file web.xml</echo>
+					  <copy file="${project.build.directory}/baltoro-lib-jar-with-dependencies.jar" 
+					  tofile="${env.TOMCAT_HOME}/webapps/baltoro/baltoro-lib.jar" />
+                     
+				</target>
+			</configuration>
+		</plugin>
+		
+		
+		<plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-source-plugin</artifactId>
+      <version>2.2.1</version>
+      <executions>
+        <execution>
+          <id>attach-sources</id>
+          <goals>
+            <goal>jar-no-fork</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-javadoc-plugin</artifactId>
+      <version>2.9.1</version>
+      <executions>
+        <execution>
+          <id>attach-javadocs</id>
+          <goals>
+            <goal>jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+
+	<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <configuration>
+              <keyname>637B2CC4</keyname>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
 	</plugins>
   </build>

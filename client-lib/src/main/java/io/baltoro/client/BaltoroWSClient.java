@@ -28,13 +28,20 @@ import io.baltoro.to.WSTO;
 
 
 @ClientEndpoint
-public class BaltoroWSClient
+public class BaltoroWSClient extends Thread
 {
 
 	private static CountDownLatch latch;
 	private Logger log = Logger.getLogger(this.getClass().getName());
-
-
+	private String appId;
+	
+	BaltoroWSClient(String appId)
+	{
+		this.appId = appId;
+	}
+	
+	
+	
 	@OnOpen
 	public void onOpen(Session session)
 	{
@@ -43,8 +50,8 @@ public class BaltoroWSClient
 		try
 		{
 			session.getBasicRemote().sendText("start");
-			//BaltoroWSPing thread = new BaltoroWSPing(latch, session);
-			//thread.start();
+			BaltoroWSPing thread = new BaltoroWSPing(latch, session);
+			thread.start();
 			//latch.countDown();
 		} 
 		catch (IOException e)
@@ -192,7 +199,8 @@ public class BaltoroWSClient
 		latch.countDown();
 	}
 
-	public void start(String appId) 
+	
+	public void run() 
 	{
 		latch = new CountDownLatch(1);
 
@@ -200,7 +208,7 @@ public class BaltoroWSClient
 	    try 
 	    {
 	        //client.connectToServer(BaltoroWSClient.class, new URI("ws://localhost:8080/baltoro/ws?appid="+appId));
-	    	client.connectToServer(BaltoroWSClient.class, new URI("ws://"+appId+".baltoro.io/baltoro/ws"));
+	    	client.connectToServer(BaltoroWSClient.class, new URI("ws://"+this.appId+".baltoro.io/baltoro/ws"));
 	        latch.await();
 	    } 
 	    catch (Exception e) 

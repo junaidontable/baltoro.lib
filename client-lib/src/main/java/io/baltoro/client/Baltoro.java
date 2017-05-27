@@ -4,10 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import io.baltoro.ep.ClassBuilder;
+
 public class Baltoro 
 {
 	
 	static Logger log = Logger.getLogger(Baltoro.class.getName());
+	
+	private static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(); 
 	
 	private Baltoro(String appId, String[] packages)
 	{
@@ -52,17 +56,36 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		BaltoroWSClient client = new BaltoroWSClient();
-		client.start(appId);
+		BaltoroWSClient client = new BaltoroWSClient(appId);
+		client.start();
 		
 		
 	}
 	
 	
-	public static Object EndPointFactory(Class<?> _class)
+	public static <T> T EndPointFactory(Class<T> _class)
 	{
+		try
+		{
+			Class implClass = classMap.get(_class.getName());
+			if(implClass == null)
+			{
+				ClassBuilder builder = new ClassBuilder(_class);
+				implClass = builder.buildClass();
+				classMap.put(_class.getName(), implClass);
+			}
+			
+			//Class<?> implClass = Class.forName(_class.getName()+"Impl");
+			Object obj = implClass.newInstance();
+			return (T)obj;
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 		
-		return null;
 	}
 	
 	public static void start(String appId, String[] packages)

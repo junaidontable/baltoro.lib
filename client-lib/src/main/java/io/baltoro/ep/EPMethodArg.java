@@ -1,11 +1,11 @@
-package io.baltoro.anno;
+package io.baltoro.ep;
 
-public class EndPointMethodArg
+public class EPMethodArg
 {
 	String type ="";
 	String name;
 	
-	public EndPointMethodArg(String type, String name)
+	public EPMethodArg(String type, String name)
 	{
 		if(type != null)
 			this.type = type;

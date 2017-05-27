@@ -1,5 +1,6 @@
-package io.baltoro.client;
+package io.baltoro.ep;
 
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -16,6 +17,9 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
+
+import io.baltoro.client.CheckRequestFilter;
+import io.baltoro.client.CheckResponseFilter;
 
 public class CloudServer
 {
@@ -44,7 +48,7 @@ public class CloudServer
 	
 		try
 		{
-			areYouThere();
+			//areYouThere();
 			online = true;
 		} 
 		catch (Exception e)
@@ -96,19 +100,27 @@ public class CloudServer
 	}
 	
 
-	Object execute(String path) throws Exception
+	public <T> T execute(String path, EPData data, Class<T> returnType)
 	{
 		WebTarget target = client.target(host).path(path);	
 	
+		log.info("url --> "+target);
+		
 		Form form = new Form();
-		form.param("email", "email");
-		form.param("password", "password");
+		
+		List<Object[]> list = data.list;
+		for (Object[] objects : list)
+		{
+			String name = (String) objects[0];
+			String value = (String) objects[1];
+			form.param(name, value);
+		}
 		
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		
-		Object obj = response.readEntity(Object.class);
+		T obj = response.readEntity(returnType);
 			
 		return obj;
 	}
