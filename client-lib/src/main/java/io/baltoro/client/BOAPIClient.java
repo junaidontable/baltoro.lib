@@ -68,6 +68,7 @@ public class BOAPIClient
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		String sessionId = response.readEntity(String.class);
+		baltoro.sessionId = sessionId;
 		log.info("sessionId => "+sessionId);
 		this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
 		//handleSessionCookie(response);

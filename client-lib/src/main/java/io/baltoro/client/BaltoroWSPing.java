@@ -9,12 +9,10 @@ public class BaltoroWSPing extends Thread
 
 	Session session;
 	long count=0;
-	CountDownLatch latch;
 	
-	public BaltoroWSPing(CountDownLatch latch, Session session)
+	public BaltoroWSPing(Session session)
 	{
 		this.session = session;
-		this.latch = latch;
 	}
 	
 	public void run()
@@ -26,18 +24,19 @@ public class BaltoroWSPing extends Thread
 			try
 			{
 				session.getAsyncRemote().sendText(""+count);
+				System.out.println("sending ping "+count);
 				Thread.sleep(5000);
 			} 
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				latch.countDown();
+				BaltoroWSClient.latch.countDown();
 				break;
 			}
 		}
 		
 		
-		latch.countDown();
+		BaltoroWSClient.latch.countDown();
 	}
 	
 }

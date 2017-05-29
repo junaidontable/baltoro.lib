@@ -37,6 +37,7 @@ public class Baltoro
 	private String password;
 	String  appPrivateKey;
 	String 	appPublicKey;
+	String sessionId;
 	
 	 
 	
@@ -67,7 +68,7 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		BaltoroWSClient client = new BaltoroWSClient(this.appUuid);
+		BaltoroWSClient client = new BaltoroWSClient(this.appUuid, this.sessionId);
 		client.start();
 		
 		
