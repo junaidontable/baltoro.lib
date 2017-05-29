@@ -7,8 +7,6 @@ import java.lang.reflect.Parameter;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
 
-import io.baltoro.client.compiler.MemoryJavaCompiler;
-
 public class ClassBuilder
 {
 
@@ -86,7 +84,7 @@ public class ClassBuilder
 		code.append("}\n");
 		
 		String source = code.toString();
-		MemoryJavaCompiler compiler = new MemoryJavaCompiler();
+		EPCompiler compiler = new EPCompiler();
 		Class<?> implClass = compiler.compileClass(_package.getName(), implClassName, source);
 		
 		

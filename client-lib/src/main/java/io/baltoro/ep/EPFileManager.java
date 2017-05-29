@@ -1,4 +1,4 @@
-package io.baltoro.client.compiler;
+package io.baltoro.ep;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,7 +21,7 @@ import javax.tools.SimpleJavaFileObject;
  * JavaFileManager that keeps compiled .class bytes in memory.
  */
 @SuppressWarnings("unchecked")
-final class MemoryJavaFileManager extends ForwardingJavaFileManager
+final class EPFileManager extends ForwardingJavaFileManager
 {
 
 	/** Java source file extension. */
@@ -29,7 +29,7 @@ final class MemoryJavaFileManager extends ForwardingJavaFileManager
 
 	private Map<String, byte[]> classBytes;
 
-	public MemoryJavaFileManager(JavaFileManager fileManager)
+	public EPFileManager(JavaFileManager fileManager)
 	{
 		super(fileManager);
 		classBytes = new HashMap<>();

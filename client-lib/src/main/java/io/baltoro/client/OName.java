@@ -1,0 +1,17 @@
+package io.baltoro.client;
+
+public enum OName 
+{
+	USER_UUID,
+	CONTAINER_UUID,
+	EMAIL,
+	PASSWORD_HASH,
+	PASSWORD_SALT,
+	PRIVATE_KEY,
+	PUBLIC_KEY,
+	APP_UUID,
+	APP_PRIVATE_KEY,
+	APP_PUBLIC_KEY,
+	;
+	
+}

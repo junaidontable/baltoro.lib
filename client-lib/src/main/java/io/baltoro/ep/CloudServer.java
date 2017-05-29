@@ -31,6 +31,7 @@ public class CloudServer
 	//String host = "http://api.baltoro.org:8080";
 	String host;// = "http://127.0.0.1:8080";
 	
+	
 	boolean online = false;
 	
 	

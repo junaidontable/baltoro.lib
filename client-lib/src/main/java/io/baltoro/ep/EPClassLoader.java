@@ -1,45 +1,37 @@
-package io.baltoro.client.compiler;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+package io.baltoro.ep;
 
 /**
- * ClassLoader that loads .class bytes from memory.
+ * EPClassLoader that loads .class bytes from memory.
  */
-final class MemoryClassLoader extends URLClassLoader
+final class EPClassLoader// extends URLClassLoader
 {
+	/*
 	private Map<String, byte[]> classBytes;
 
-	public MemoryClassLoader(Map<String, byte[]> classBytes, String classPath, ClassLoader parent)
+	public EPClassLoader(Map<String, byte[]> classBytes, String classPath, EPClassLoader parent)
 	{
 		super(toURLs(classPath), parent);
 		this.classBytes = classBytes;
 	}
 
-	public MemoryClassLoader(Map<String, byte[]> classBytes, String classPath)
+	public EPClassLoader(Map<String, byte[]> classBytes, String classPath)
 	{
-		this(classBytes, classPath, ClassLoader.getSystemClassLoader());
+		super(classBytes, classPath, EPClassLoader.getSystemClassLoader());
 	}
 
-	public MemoryClassLoader(Map<String, byte[]> classBytes)
+	public EPClassLoader(Map<String, byte[]> classBytes)
 	{
-		this(classBytes, null, ClassLoader.getSystemClassLoader());
+		this(classBytes, null, EPClassLoader.getSystemClassLoader());
 	}
 
-	public Class load(String className) throws ClassNotFoundException
+	public Class<?> load(String className) throws ClassNotFoundException
 	{
 		return loadClass(className);
 	}
 
-	public Iterable<Class> loadAll() throws ClassNotFoundException
+	public Iterable<Class<?>> loadAll() throws ClassNotFoundException
 	{
-		List<Class> classes = new ArrayList<Class>(classBytes.size());
+		List<Class<?>> classes = new ArrayList<Class<?>>(classBytes.size());
 		for (String name : classBytes.keySet())
 		{
 			classes.add(loadClass(name));
@@ -47,7 +39,7 @@ final class MemoryClassLoader extends URLClassLoader
 		return classes;
 	}
 
-	protected Class findClass(String className) throws ClassNotFoundException
+	protected Class<?> findClass(String className) throws ClassNotFoundException
 	{
 		byte[] buf = classBytes.get(className);
 		if (buf != null)
@@ -96,4 +88,5 @@ final class MemoryClassLoader extends URLClassLoader
 		list.toArray(res);
 		return res;
 	}
+	*/
 }

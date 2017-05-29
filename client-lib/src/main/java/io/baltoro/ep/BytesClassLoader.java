@@ -1,5 +1,5 @@
-package io.baltoro.client.compiler;
-public class BytesClassLoader extends ClassLoader
+package io.baltoro.ep;
+final class BytesClassLoader extends ClassLoader
 {
   public Class<?> loadThisClass(String name, byte[] bytes)
   {

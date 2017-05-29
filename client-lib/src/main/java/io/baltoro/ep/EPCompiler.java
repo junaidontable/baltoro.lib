@@ -1,4 +1,4 @@
-package io.baltoro.client.compiler;
+package io.baltoro.ep;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,12 +13,12 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-public class MemoryJavaCompiler
+final class EPCompiler
 {
 	private javax.tools.JavaCompiler tool;
 	private StandardJavaFileManager stdManager;
 
-	public MemoryJavaCompiler()
+	public EPCompiler()
 	{
 		tool = ToolProvider.getSystemJavaCompiler();
 		if (tool == null)
@@ -37,7 +37,7 @@ public class MemoryJavaCompiler
 			throws ClassNotFoundException
 	{
 		final Map<String, byte[]> classBytes = compile(className + ".java", source);
-		final MemoryClassLoader classLoader = new MemoryClassLoader(classBytes);
+		final EPClassLoader classLoader = new EPClassLoader(classBytes);
 		final Class clazz = classLoader.loadClass(className);
 		return clazz;
 		
@@ -69,7 +69,7 @@ public class MemoryJavaCompiler
 		
 		System.out.println(bytes.length);
 		
-		//final MemoryClassLoader classLoader = new MemoryClassLoader(classBytes);
+		//final EPClassLoader classLoader = new EPClassLoader(classBytes);
 		
 		
 		
@@ -110,19 +110,19 @@ public class MemoryJavaCompiler
 	private Map<String, byte[]> compile(String fileName, String source, Writer err, String sourcePath, String classPath)
 	{
 		// to collect errors, warnings etc.
-		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+		//DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 
 		// create a new memory JavaFileManager
-		MemoryJavaFileManager fileManager = new MemoryJavaFileManager(stdManager);
+		EPFileManager fileManager = new EPFileManager(stdManager);
 
 		// prepare the compilation unit
 		List<JavaFileObject> compUnits = new ArrayList<JavaFileObject>(1);
-		compUnits.add(fileManager.makeStringSource(fileName, source));
+		compUnits.add(EPFileManager.makeStringSource(fileName, source));
 
 		return compile(compUnits, fileManager, err, sourcePath, classPath);
 	}
 
-	private Map<String, byte[]> compile(final List<JavaFileObject> compUnits, final MemoryJavaFileManager fileManager,
+	private Map<String, byte[]> compile(final List<JavaFileObject> compUnits, final EPFileManager fileManager,
 			Writer err, String sourcePath, String classPath)
 	{
 		// to collect errors, warnings etc.
@@ -152,7 +152,7 @@ public class MemoryJavaCompiler
 		if (task.call() == false)
 		{
 			PrintWriter perr = new PrintWriter(err);
-			for (Diagnostic diagnostic : diagnostics.getDiagnostics())
+			for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics())
 			{
 				perr.println(diagnostic);
 			}

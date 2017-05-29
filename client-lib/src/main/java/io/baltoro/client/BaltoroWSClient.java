@@ -25,6 +25,7 @@ import org.glassfish.tyrus.client.ClientManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.to.WSTO;
+import io.baltoro.util.ObjectUtil;
 
 
 @ClientEndpoint
@@ -49,12 +50,12 @@ public class BaltoroWSClient extends Thread
       
 		try
 		{
-			session.getBasicRemote().sendText("start");
+			//session.getBasicRemote().sendText("start");
 			BaltoroWSPing thread = new BaltoroWSPing(latch, session);
 			thread.start();
 			//latch.countDown();
 		} 
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -170,27 +171,6 @@ public class BaltoroWSClient extends Thread
 		return null;
 
 	}
-	
-	/*
-	@OnMessage
-	//public void onBytes(byte[] b, boolean last, Session session) 
-	public void onBytes(ByteBuffer bytes, Session session) 
-	{
-		
-		try
-		{
-			ObjectMapper mapper = new ObjectMapper();
-			WSTO to = mapper.readValue(bytes.array(),  WSTO.class);
-			
-			log.info(" appid --- >"+to.appId);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		} 
-		
-	}
-	*/
 
 	@OnClose
 	public void onClose(javax.websocket.Session session, CloseReason closeReason)

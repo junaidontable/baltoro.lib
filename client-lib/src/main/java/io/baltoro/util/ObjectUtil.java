@@ -1,4 +1,4 @@
-package io.baltoro.client;
+package io.baltoro.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
