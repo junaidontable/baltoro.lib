@@ -30,7 +30,7 @@ class LocalDB
 	public LocalDB(Baltoro baltoro)
 	{
 		this.baltoro = baltoro;
-		this.dbName = "baltoro";
+		this.dbName = "baltoro-db";
 		
 		try
 		{
