@@ -35,8 +35,6 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 import io.baltoro.to.Keys;
-import sun.security.tools.keytool.CertAndKeyGen;
-import sun.security.x509.X500Name;
 
 
 
@@ -372,6 +370,7 @@ public class CryptoUtil
 	} 
 	
 
+	/*
 	public static X509Certificate genCert(String name)
 	throws Exception
 	{
@@ -383,7 +382,7 @@ public class CryptoUtil
         
 		return cert;
 	}   
-
+	*/
     
 	public static String toHex(byte[] data, int length)
     {

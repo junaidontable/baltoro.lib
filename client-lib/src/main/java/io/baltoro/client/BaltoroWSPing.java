@@ -1,7 +1,5 @@
 package io.baltoro.client;
 
-import java.util.concurrent.CountDownLatch;
-
 import javax.websocket.Session;
 
 public class BaltoroWSPing extends Thread
@@ -30,13 +28,10 @@ public class BaltoroWSPing extends Thread
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				BaltoroWSClient.latch.countDown();
 				break;
 			}
 		}
-		
-		
-		BaltoroWSClient.latch.countDown();
+	
 	}
 	
 }

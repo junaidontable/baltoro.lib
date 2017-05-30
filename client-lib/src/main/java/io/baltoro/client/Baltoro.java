@@ -2,12 +2,22 @@ package io.baltoro.client;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.websocket.ClientEndpointConfig;
+import javax.websocket.Session;
 import javax.ws.rs.ProcessingException;
+
+import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.AppTO;
@@ -54,7 +64,7 @@ public class Baltoro
 	}
 	
 	
-	private void startClient() throws Exception
+	private Session startClient() throws Exception
 	{
 		
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
@@ -68,9 +78,47 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		BaltoroWSClient client = new BaltoroWSClient(this.appUuid, this.sessionId);
-		client.start();
+		//BaltoroWSClient client = new BaltoroWSClient(this.appUuid, this.sessionId);
+		//client.start();
+	
 		
+		ExecutorService executor = Executors.newWorkStealingPool();
+		
+		Future<Session> future = executor.submit(() -> 
+		{
+		    try 
+		    {
+		    	ClientManager clientManager = ClientManager.createClient();
+		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.sessionId);
+		 	    
+		 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
+		                 .configurator(clientConfigurator)
+		                 .build();
+		 	    
+		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid);
+		 	  Session session = clientManager.connectToServer(instance, config, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
+		 	  //Session session = clientManager.connectToServer(BaltoroClientEndpoint.class, config, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
+		 	 //Session session = clientManager.connectToServer(BaltoroClientEndpoint.class, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
+		 	 
+		 	  //Thread.sleep(1000000);
+		 	  
+		 	  return session;
+		 	  
+		    }
+		    catch (Exception e) 
+		    {
+		        throw new IllegalStateException("task interrupted", e);
+		    }
+		});
+		
+		
+		Session session = future.get();
+		
+		BaltoroWSPing thread = new BaltoroWSPing(session);
+	 	thread.start();
+	 	  
+		log.info("got session --- 1 -- > "+session);
+		return session;
 		
 	}
 	
@@ -101,7 +149,7 @@ public class Baltoro
 	}
 	
 	
-	public static void start()
+	public static Session start()
 	{
 		try
 		{
@@ -112,12 +160,15 @@ public class Baltoro
 			baltoro.appPrivateKey = appTo.privateKey;
 			baltoro.appPublicKey = appTo.publicKey;
 			
-			baltoro.startClient();
+			Session session = baltoro.startClient();
+			return session;
 		} 
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		
+		return null;
 		
 	}
 	
