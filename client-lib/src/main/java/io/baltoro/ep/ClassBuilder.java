@@ -4,9 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.QueryParam;
-
 public class ClassBuilder
 {
 
@@ -44,7 +41,7 @@ public class ClassBuilder
 				String returnType = method.getReturnType().getName();
 				EndPoint ep = method.getAnnotation(EndPoint.class);
 				
-				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appId(), ep.path());
+				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path());
 				
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				Parameter[] params = method.getParameters();
@@ -56,14 +53,11 @@ public class ClassBuilder
 					for (Annotation paramAnno : paramAnnos)
 					{
 						
-						if(paramAnno instanceof FormParam)
+						if(paramAnno instanceof Param)
 						{
-							name = ((FormParam)paramAnno).value();	
+							name = ((Param)paramAnno).value();	
 						}
-						else if(paramAnno instanceof QueryParam)
-						{
-							name = ((QueryParam)paramAnno).value();	
-						}
+						
 						
 						if(name != null)
 						{

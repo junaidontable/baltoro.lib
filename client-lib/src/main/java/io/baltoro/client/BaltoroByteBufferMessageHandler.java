@@ -10,11 +10,12 @@ import java.util.logging.Logger;
 
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.QueryParam;
+
+import org.apache.derby.tools.sysinfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.ep.Param;
 import io.baltoro.to.WSTO;
 import io.baltoro.util.ObjectUtil;
 
@@ -73,15 +74,9 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 				for (int j = 0; j < annos.length; j++)
 				{
 					Annotation anno = annos[j];
-					if(anno.annotationType() == QueryParam.class)
+					if(anno.annotationType() == Param.class)
 					{
-						QueryParam annoPraram = (QueryParam) anno;
-						annoName = annoPraram.value();
-						break;
-					}
-					else if(anno.annotationType() == FormParam.class)
-					{
-						FormParam annoPraram = (FormParam) anno;
+						Param annoPraram = (Param) anno;
 						annoName = annoPraram.value();
 						break;
 					}
@@ -123,9 +118,17 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			Object obj = _class.newInstance();
 			Object returnObj = method.invoke(obj, methodInputData);
 			
-			log.info("execute method --- > "+returnObj);
+			//log.info("execute method --- > "+returnObj);
 			
-			to.data = ((String)returnObj).getBytes();
+			if(returnObj instanceof String)
+			{
+				to.data = ((String)returnObj).getBytes();
+			}
+			else
+			{
+				to.data = mapper.writeValueAsBytes(returnObj);
+			}
+			
 			to.requestParams = null;
 			
 			byte[] bytes = ObjectUtil.toJason(to);

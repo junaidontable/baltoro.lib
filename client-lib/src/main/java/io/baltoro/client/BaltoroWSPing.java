@@ -23,7 +23,7 @@ public class BaltoroWSPing extends Thread
 			{
 				session.getAsyncRemote().sendText(""+count);
 				System.out.println("sending ping "+count);
-				Thread.sleep(5000);
+				Thread.sleep(60000);
 			} 
 			catch (Exception e)
 			{

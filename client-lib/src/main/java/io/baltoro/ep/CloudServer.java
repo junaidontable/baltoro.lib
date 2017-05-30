@@ -20,6 +20,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
+import io.baltoro.util.ObjectUtil;
 
 public class CloudServer
 {
@@ -120,48 +121,13 @@ public class CloudServer
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+	
+		//WSTO wsto = response.readEntity(WSTO.class);
+		//Object obj = ObjectUtil.toObject(returnType, wsto.data);
+		String str = response.readEntity(String.class);
 		
-		T obj = response.readEntity(returnType);
-			
-		return obj;
+		Object obj = ObjectUtil.toObject(returnType, str.getBytes());
+				
+		return (T)obj;
 	}
-	
-/*
-	UserTO login(String email, String password) throws Exception
-	{
-		WebTarget target = client.target(host).path("/baltoro/api/auth/login");	
-	
-		Form form = new Form();
-		form.param("email", email);
-		form.param("password", password);
-		
-		Invocation.Builder ib =	getIB(target);
-		
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		
-		UserTO user = response.readEntity(UserTO.class);
-			
-		return user;
-	}
-	
-	
-	
-	UserTO createUser(String email, String password, ContainerTO container) throws Exception
-	{
-		
-		WebTarget target = client.target(host).path("/baltoro/api/bo/createUser");
-		 
-		Form form = new Form();
-		form.param("email", email);
-		form.param("password", password);
-		form.param("container-uuid", container.uuid);
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		UserTO user = response.readEntity(UserTO.class);
-		return user;
-		
-	}
-	
-*/
-
 }

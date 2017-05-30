@@ -6,11 +6,9 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.websocket.ClientEndpointConfig;
@@ -97,10 +95,6 @@ public class Baltoro
 		 	    
 		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid);
 		 	  Session session = clientManager.connectToServer(instance, config, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
-		 	  //Session session = clientManager.connectToServer(BaltoroClientEndpoint.class, config, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
-		 	 //Session session = clientManager.connectToServer(BaltoroClientEndpoint.class, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
-		 	 
-		 	  //Thread.sleep(1000000);
 		 	  
 		 	  return session;
 		 	  
@@ -135,7 +129,6 @@ public class Baltoro
 				classMap.put(_class.getName(), implClass);
 			}
 			
-			//Class<?> implClass = Class.forName(_class.getName()+"Impl");
 			Object obj = implClass.newInstance();
 			return (T)obj;
 			

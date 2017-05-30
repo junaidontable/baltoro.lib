@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface EndPoint
 {
-	public String appId();
+	public String appName();
 	public String path();
 }
