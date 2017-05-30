@@ -118,8 +118,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			Object obj = _class.newInstance();
 			Object returnObj = method.invoke(obj, methodInputData);
 			
-			//log.info("execute method --- > "+returnObj);
-			
+			/*
 			if(returnObj instanceof String)
 			{
 				to.data = ((String)returnObj).getBytes();
@@ -128,6 +127,9 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			{
 				to.data = mapper.writeValueAsBytes(returnObj);
 			}
+			*/
+			
+			to.data = mapper.writeValueAsBytes(returnObj);
 			
 			to.requestParams = null;
 			
