@@ -13,15 +13,14 @@ import java.util.logging.Logger;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Session;
-import javax.ws.rs.ProcessingException;
 
 import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
+import io.baltoro.exception.APIException;
+import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
-import io.baltoro.to.Keys;
 import io.baltoro.to.UserTO;
-import io.baltoro.util.CryptoUtil;
 
 public class Baltoro 
 {
@@ -34,18 +33,15 @@ public class Baltoro
 	}
 	
 	private static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(); 
-	private String appUuid;
 	private String packages;
-	private LocalDB db;
+	//private LocalDB db;
 	private BOAPIClient cs;
-	 String privateKey;
-	 String publicKey;
 	boolean logedin = false;
 	private String email;
 	private String password;
-	String  appPrivateKey;
-	String 	appPublicKey;
 	String sessionId;
+	UserTO user;
+	AppTO currentApp;
 	
 	 
 	
@@ -93,8 +89,8 @@ public class Baltoro
 		                 .configurator(clientConfigurator)
 		                 .build();
 		 	    
-		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid);
-		 	  Session session = clientManager.connectToServer(instance, config, new URI("ws://"+this.appUuid+".baltoro.io/baltoro/ws"));
+		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.currentApp.uuid);
+		 	  Session session = clientManager.connectToServer(instance, config, new URI("ws://"+this.currentApp.uuid+".baltoro.io/baltoro/ws"));
 		 	  
 		 	  return session;
 		 	  
@@ -111,7 +107,6 @@ public class Baltoro
 		BaltoroWSPing thread = new BaltoroWSPing(session);
 	 	thread.start();
 	 	  
-		log.info("got session --- 1 -- > "+session);
 		return session;
 		
 	}
@@ -121,7 +116,7 @@ public class Baltoro
 	{
 		try
 		{
-			Class implClass = classMap.get(_class.getName());
+			Class<?> implClass = classMap.get(_class.getName());
 			if(implClass == null)
 			{
 				ClassBuilder builder = new ClassBuilder(_class);
@@ -142,17 +137,13 @@ public class Baltoro
 	}
 	
 	
-	public static Session start()
+	public static Session start(String _package)
 	{
 		try
 		{
 			Baltoro baltoro = new Baltoro();
-			AppTO appTo = baltoro.getMyApp();
-			baltoro.appUuid = appTo.uuid;
-			baltoro.packages = "com";
-			baltoro.appPrivateKey = appTo.privateKey;
-			baltoro.appPublicKey = appTo.publicKey;
-			
+			baltoro.currentApp = baltoro.getMyApp();
+			baltoro.packages = _package;
 			Session session = baltoro.startClient();
 			return session;
 		} 
@@ -167,21 +158,22 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.start();
+    	Baltoro.start("io");
     }
     
-    void init() throws Exception
+    /*
+    void init_db() throws Exception
     {
     	cs = new BOAPIClient(this);
-    	db = new LocalDB(this);
     	
+    	db = new LocalDB(this);
     	boolean isSetup = db.isSetup();
 		if(!isSetup)
 		{
 			setupDB();
 			return;	
 		}
-		
+	
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -215,36 +207,38 @@ public class Baltoro
 				
 			
 	}
+    */
     
-    
-    private void setupDB() throws Exception
+    private void init() throws Exception
     {
-    	UserTO user = null;
-		Keys keys = CryptoUtil.generateKeys();
-		privateKey = keys.getPrivateKey();
-		publicKey = keys.getPublicKey();
+    	cs = new BOAPIClient(this);
 		
-		String option = systemIn("enter 1 to signup : \nenter 2 to login : ");
-		
-		email = systemIn("email : ");
-		password = systemIn("password : ");
-
-		try
+    	String option = systemIn("Do you have an account ? [y/n] : ");
+    	for (int i = 0; i < 3; i++)
 		{
-			if(option.equals("1"))
+    		email = systemIn("email : ");
+			password = systemIn("password : ");
+			
+			try
 			{
-				user = cs.createUser(email, password);
+				if(option.toLowerCase().equals("n"))
+				{
+					user = cs.createUser(email, password);
+				}
+				user = cs.login(email, password);
+				logedin = true;
+				return;
+			} 
+			catch (RuntimeException e)
+			{
+				System.out.println("=====> "+e.getMessage());
 			}
-			user = cs.login(email, password);
-			logedin = true;
-			db.setup(user,password);
-		} 
-		catch (ProcessingException e)
-		{
-			System.out.println(e.getMessage());
+			
 		}
+    	
+    	System.out.println("Would not process sfter 3 tries. restart the program");
+		System.exit(1);
 		
-
     }
     
     AppTO getMyApp() throws Exception
@@ -252,6 +246,7 @@ public class Baltoro
     	if(!logedin)
     		return null;
     	
+    	/*
     	String lastAppUuid = db.get(OName.APP_UUID);
     	if(lastAppUuid !=  null)
     	{
@@ -267,14 +262,15 @@ public class Baltoro
     		
     		return appTO;
     	}
+    	*/
     	
-    	boolean newApp = false;
+    	boolean newApp = true;
     	
 		List<AppTO> apps = cs.getMyApps();
-		AppTO selectedApp = null;
 		
 		if(apps.size() > 0)
 		{
+			newApp = false;
 			System.out.println(" ========  apps ========= ");
 			System.out.println("0 -- to create new app : ");
 			
@@ -293,25 +289,29 @@ public class Baltoro
 			else
 			{
 				int opt = Integer.parseInt(option);
-				selectedApp = apps.get(opt-1);
-				System.out.println("selected app : "+selectedApp.name);
+				currentApp = apps.get(opt-1);
+				System.out.println("selected app : "+currentApp.name);
 			}
 			
 		}
 		
 		if(newApp)
 		{
-			String name = systemIn("create new app : ");
+			String name = systemIn("enter name of your new app : ");
 			AppTO to = cs.createApp(name);
-			selectedApp = to;
-		}
+			currentApp = to;
 			
+		}
+		
+		
+		/*
 		db.save(OName.APP_UUID, selectedApp.uuid);
 		String appPrivKey = CryptoUtil.encryptWithPassword(password, selectedApp.privateKey);
 		db.save(OName.APP_PRIVATE_KEY, appPrivKey);
 		db.save(OName.APP_PUBLIC_KEY, selectedApp.publicKey);
+		*/
 		
-		return selectedApp;
+		return currentApp;
 				
     }
 	

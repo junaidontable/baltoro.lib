@@ -11,8 +11,6 @@ import java.util.logging.Logger;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import org.apache.derby.tools.sysinfo;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.ep.Param;
@@ -36,7 +34,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 	@Override
 	public void onMessage(ByteBuffer bytesBuffer)
 	{
-		log.info(" appid --- > text"+appId);
+		//log.info(" appid --- > text"+appId);
 		
 		
 		try

@@ -7,6 +7,8 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.core.Response.StatusType;
 
+import io.baltoro.to.APIError;
+
 public class CheckResponseFilter implements ClientResponseFilter
 {
  
@@ -21,12 +23,10 @@ public class CheckResponseFilter implements ClientResponseFilter
 		
 		String error = responseContext.getHeaderString("api-error");
 		
-		//System.out.println(error);
-		
 		if(status == 455)
 		{
-			System.out.println(error);
-			//throw new APIError(error);
+			//System.out.println(error);
+			throw new APIError(error);
 		}
 	}
 	

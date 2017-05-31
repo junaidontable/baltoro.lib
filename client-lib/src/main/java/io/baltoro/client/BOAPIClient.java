@@ -74,7 +74,7 @@ public class BOAPIClient
 		//handleSessionCookie(response);
 	}
 	
-	///*
+	/*
 	void handleSessionCookie(Response response) throws Exception
 	{
 		Map<String, NewCookie> map = response.getCookies();
@@ -114,6 +114,7 @@ public class BOAPIClient
 		if(sessionCookie != null)
 		{
 			ib.cookie(sessionCookie); 
+			//System.out.println("session cookie : "+sessionCookie);
 		}
 			
 		return ib;

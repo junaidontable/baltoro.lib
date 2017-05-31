@@ -21,6 +21,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.util.ObjectUtil;
+import io.baltoro.util.StringUtil;
 
 public class CloudServer
 {
@@ -106,7 +107,7 @@ public class CloudServer
 	{
 		WebTarget target = client.target(host).path(path);	
 	
-		log.info("url --> "+target);
+		//log.info("url --> "+target);
 		
 		Form form = new Form();
 		
@@ -122,6 +123,11 @@ public class CloudServer
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 	
+		String error = response.getHeaderString("BALTORO-ERROR");
+		if(StringUtil.isNotNullAndNotEmpty(error))
+		{
+			return (T)error;
+		}
 		//WSTO wsto = response.readEntity(WSTO.class);
 		//Object obj = ObjectUtil.toObject(returnType, wsto.data);
 		String str = response.readEntity(String.class);

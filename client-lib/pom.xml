@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.1</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -54,27 +54,27 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     
     <dependency>
     	<groupId>org.glassfish.jersey.core</groupId>
     	<artifactId>jersey-client</artifactId>
-    	<version>2.22.1</version>
+    	<version>2.25.1</version>
 	</dependency>
 	
 	<dependency>
     	<groupId>org.glassfish.jersey.media</groupId>
     	<artifactId>jersey-media-json-jackson</artifactId>
-    	<version>2.22.1</version>
+    	<version>2.25.1</version>
 	</dependency>
 	
 	<!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
 	<dependency>
 	    <groupId>org.reflections</groupId>
 	    <artifactId>reflections</artifactId>
-	    <version>0.9.10</version>
+	    <version>0.9.11</version>
 	</dependency>
 
 	<!-- https://mvnrepository.com/artifact/org.glassfish.tyrus/tyrus-client -->
@@ -106,18 +106,18 @@
 	</dependency>
 	
 		<!-- https://mvnrepository.com/artifact/org.apache.derby/derby -->
-	<dependency>
+	<!--   dependency>
 	    <groupId>org.apache.derby</groupId>
 	    <artifactId>derby</artifactId>
 	    <version>10.12.1.1</version>
-	</dependency>
+	</dependency -->
 
 	<!-- https://mvnrepository.com/artifact/org.apache.derby/derbyclient -->
-	<dependency>
+	<!--  -dependency>
 	    <groupId>org.apache.derby</groupId>
 	    <artifactId>derbyclient</artifactId>
 	    <version>10.12.1.1</version>
-	</dependency>
+	</dependency -->
     
   </dependencies>
   

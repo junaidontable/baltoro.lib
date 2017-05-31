@@ -1,24 +1,11 @@
 package io.baltoro.client;
 
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.baltoro.to.UserTO;
-import io.baltoro.util.CryptoUtil;
-import io.baltoro.util.UUIDGenerator;
-
 class LocalDB
 {
 
 	//private String framework = "embedded";
+	
+	/*
 	private String protocol = "jdbc:derby:";
 
 	private String dbName;
@@ -224,5 +211,6 @@ class LocalDB
 		
 	}
 
+*/
 
 }
