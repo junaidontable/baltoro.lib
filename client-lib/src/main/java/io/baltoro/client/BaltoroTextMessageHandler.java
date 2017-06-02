@@ -7,12 +7,14 @@ public class BaltoroTextMessageHandler implements MessageHandler.Whole<String>
 {
 	
 	private Session session;
-	private String appId;
+	private String appUuid;
+	private String instanceUuid;
 	
-	public BaltoroTextMessageHandler(String appId, Session session)
+	public BaltoroTextMessageHandler(String appUuid, String instanceUuid, Session session)
 	{
 		this.session = session;
-		this.appId = appId;
+		this.appUuid = appUuid;
+		this.instanceUuid = instanceUuid;
 	}
 
 	@Override

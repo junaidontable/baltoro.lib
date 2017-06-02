@@ -1,7 +1,7 @@
 package io.baltoro.client;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
@@ -14,7 +14,6 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -30,19 +29,19 @@ public class BOAPIClient
 	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
 	
 	Client webClient;
-	Cookie sessionCookie;
 	String host = "http://api.baltoro.io";
-	//String host = "http://127.0.0.1:8080";
 	
 	Baltoro baltoro;
 	boolean online = false;
 	
 	BOAPIClient(Baltoro baltoro)
 	{
+		CheckResponseFilter responseFilter = new CheckResponseFilter(baltoro.agentCookieMap);
+		
 		webClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)
-				.register(CheckResponseFilter.class)
+				.register(responseFilter)
 				.build();
 		
 		this.baltoro = baltoro;
@@ -67,29 +66,10 @@ public class BOAPIClient
 		WebTarget target = webClient.target(host).path("/baltoro/api/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
-		String sessionId = response.readEntity(String.class);
-		baltoro.sessionId = sessionId;
-		log.info("sessionId => "+sessionId);
-		this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
-		//handleSessionCookie(response);
+		log.info("sessionId ==>"+response);
 	}
 	
-	/*
-	void handleSessionCookie(Response response) throws Exception
-	{
-		Map<String, NewCookie> map = response.getCookies();
-		for (String key : map.keySet())
-		{
-			NewCookie cookie = map.get(key);
-			log.info(key+" : "+cookie);
-			if(key.equals("JSESSIONID"))
-			{
-				String domain = cookie.getDomain();
-				sessionCookie = new Cookie(cookie.getName(), cookie.getValue(),cookie.getPath(), domain);
-			}
-		}	
-	}
-	//*/
+	
 	
 	UserTO login(String email, String password) throws Exception
 	{
@@ -111,12 +91,14 @@ public class BOAPIClient
 	Builder getIB(WebTarget target)
 	{
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		if(sessionCookie != null)
+		Set<String> cookieNames = baltoro.agentCookieMap.keySet();
+		
+		for (String cookieName : cookieNames)
 		{
-			ib.cookie(sessionCookie); 
-			//System.out.println("session cookie : "+sessionCookie);
-		}
-			
+			Cookie cookie = baltoro.agentCookieMap.get(cookieName);
+			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
+			ib.cookie(cookie);
+		}	
 		return ib;
 	}
 	

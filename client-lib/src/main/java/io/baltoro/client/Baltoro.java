@@ -13,14 +13,14 @@ import java.util.logging.Logger;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Session;
+import javax.ws.rs.core.NewCookie;
 
 import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
-import io.baltoro.exception.APIException;
-import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.UserTO;
+import io.baltoro.util.UUIDGenerator;
 
 public class Baltoro 
 {
@@ -33,6 +33,9 @@ public class Baltoro
 	}
 	
 	private static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(); 
+	
+	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
+	
 	private String packages;
 	//private LocalDB db;
 	private BOAPIClient cs;
@@ -42,6 +45,7 @@ public class Baltoro
 	String sessionId;
 	UserTO user;
 	AppTO currentApp;
+	String instanceUuid;
 	
 	 
 	
@@ -83,7 +87,7 @@ public class Baltoro
 		    try 
 		    {
 		    	ClientManager clientManager = ClientManager.createClient();
-		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.sessionId);
+		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.agentCookieMap, this.currentApp.uuid, this.instanceUuid);
 		 	    
 		 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
 		                 .configurator(clientConfigurator)
@@ -212,6 +216,7 @@ public class Baltoro
     private void init() throws Exception
     {
     	cs = new BOAPIClient(this);
+		this.instanceUuid = UUIDGenerator.randomString(10);
 		
     	String option = systemIn("Do you have an account ? [y/n] : ");
     	for (int i = 0; i < 3; i++)

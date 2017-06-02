@@ -23,12 +23,14 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 	static Logger log = Logger.getLogger(BaltoroByteBufferMessageHandler.class.getName());
 	
 	private Session session;
-	private String appId;
+	private String appUuid;
+	private String instanceUuid;
 	
-	public BaltoroByteBufferMessageHandler(String appId, Session session)
+	public BaltoroByteBufferMessageHandler(String appUuid, String instanceUuid, Session session)
 	{
 		this.session = session;
-		this.appId = appId;
+		this.appUuid = appUuid;
+		this.instanceUuid = instanceUuid;
 	}
 
 	@Override

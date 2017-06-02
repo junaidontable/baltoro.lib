@@ -1,7 +1,9 @@
 package io.baltoro.ep;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
@@ -29,22 +31,22 @@ public class CloudServer
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
 	
 	Client client;
-	Cookie sessionCookie;
-	//String host = "http://api.baltoro.org:8080";
 	String host;// = "http://127.0.0.1:8080";
-	
+	Map<String, NewCookie> cookieMap = new HashMap<String, NewCookie>(100);
 	
 	boolean online = false;
 	
 	
 	
-	public CloudServer(String appId)
+	public CloudServer(String appUuid)
 	{
-		this.host = "http://"+appId+".baltoro.io/baltoro/app";
+		CheckResponseFilter responseFilter = new CheckResponseFilter(cookieMap);
+	
+		this.host = "http://"+appUuid+".baltoro.io/baltoro/app";
 		client = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)
-				.register(CheckResponseFilter.class)
+				.register(responseFilter)
 				.build();
 		
 
@@ -69,24 +71,21 @@ public class CloudServer
 		WebTarget target = client.target(host).path("/baltoro/api/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
-		String sessionId = response.readEntity(String.class);
-		this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
+		handleCookie(response);
+		//String sessionId = response.readEntity(String.class);
+		//this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
 		//handleSessionCookie(response);
 	}
 	
 
-	void handleSessionCookie(Response response) throws Exception
+	void handleCookie(Response response)
 	{
 		Map<String, NewCookie> map = response.getCookies();
 		for (String key : map.keySet())
 		{
 			NewCookie cookie = map.get(key);
-			log.info(key+" : "+cookie);
-			if(key.equals("JSESSIONID"))
-			{
-				String domain = cookie.getDomain();
-				sessionCookie = new Cookie(cookie.getName(), cookie.getValue(),cookie.getPath(), domain);
-			}
+			log.info("received ============= >>>>>>>>>>> "+key+" : "+cookie);
+			cookieMap.put(key, cookie);
 		}	
 	}
 
@@ -95,10 +94,14 @@ public class CloudServer
 	Builder getIB(WebTarget target)
 	{
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		if(sessionCookie != null)
+		Set<String> cookieNames = cookieMap.keySet();
+		for (String cookieName : cookieNames)
 		{
-			ib.cookie(sessionCookie); 
+			Cookie cookie = cookieMap.get(cookieName);
+			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
+			ib.cookie(cookie);
 		}
+		
 		return ib;
 	}
 	
@@ -122,7 +125,8 @@ public class CloudServer
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-	
+		handleCookie(response);
+		
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
 		{

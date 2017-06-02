@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
 import javax.websocket.OnClose;
 import javax.websocket.Session;
 
@@ -14,13 +13,13 @@ public class BaltoroClientEndpoint extends Endpoint
 {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
-	private String appId;
+	private String appUuid;
+	private String instanceUuid;
 	
 	
-	
-	public BaltoroClientEndpoint(String appId)
+	public BaltoroClientEndpoint(String appUuid)
 	{
-		this.appId = appId;
+		this.appUuid = appUuid;
 	}
 	
 	
@@ -29,8 +28,8 @@ public class BaltoroClientEndpoint extends Endpoint
 	{
 		log.info(" ******** Connected ... " + session.getId());
 		
-		session.addMessageHandler(new BaltoroTextMessageHandler(this.appId, session));
-		session.addMessageHandler(new BaltoroByteBufferMessageHandler(this.appId, session));
+		session.addMessageHandler(new BaltoroTextMessageHandler(this.appUuid, this.instanceUuid,session));
+		session.addMessageHandler(new BaltoroByteBufferMessageHandler(this.appUuid, this.instanceUuid, session));
 	}
 	
 	
