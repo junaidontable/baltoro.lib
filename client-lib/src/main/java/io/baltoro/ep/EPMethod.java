@@ -8,7 +8,7 @@ public class EPMethod
 	public String returnType = "void";
 	public String name;
 	public List<EPMethodArg> args = new ArrayList<EPMethodArg>();
-	public String appId;
+	public String appName;
 	public String path;
 	
 	public EPMethod(String returnType, String name, String appId, String path)
@@ -18,7 +18,7 @@ public class EPMethod
 			this.returnType = returnType;
 		}
 		this.name = name;
-		this.appId = appId;
+		this.appName = appId;
 		this.path = path;
 	}
 	
@@ -47,13 +47,13 @@ public class EPMethod
 		buffer.append(")\n");
 				
 		buffer.append("	{\n");
-		buffer.append("		String appId = \""+this.appId+"\";\r\n");
+		buffer.append("		String appName = \""+this.appName+"\";\r\n");
 		buffer.append("		String path = \""+this.path+"\";\r\n");
 		buffer.append("		EPData data = new EPData();\r\n");
 		buffer.append(epData.toString());
 		
 		
-		buffer.append("		CloudServer server = new CloudServer(appId);\r\n");
+		buffer.append("		CloudServer server = new CloudServer(appName);\r\n");
 		//buffer.append("		Class rType = Class.forName("+returnType+");\r\n");
 		buffer.append("		"+returnType+" obj = server.execute(path, data, "+returnType+".class);\r\n");
 		

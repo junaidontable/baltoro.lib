@@ -50,14 +50,31 @@ public class AnnotationProcessor
 
 						if (method.isAnnotationPresent(Path.class))
 						{
-							Path mpath = (Path) method.getAnnotation(Path.class);
-							String fPath = cPath+mpath.value();
+							Path pathAnno = (Path) method.getAnnotation(Path.class);
+							String fPath = null;
+							String mPath = pathAnno.value();
 							
+							if(!mPath.startsWith("/"))
+							{
+								mPath = "/"+mPath;
+							}
+							
+							if(cPath.equals("/"))
+							{
+								fPath = mPath;
+							}
+							else
+							{
+								fPath = cPath+mPath;
+							}
+								
 							System.out.println("path --- >"+fPath+", method --->"+method.getName());
 							WebMethod wm = new WebMethod(_class, method);
 							pathMap.put(fPath, wm);
 						
 						}
+						
+						
 					}
 					
 				}

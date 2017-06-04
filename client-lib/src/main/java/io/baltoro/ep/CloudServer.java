@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
@@ -28,6 +32,7 @@ import io.baltoro.util.StringUtil;
 public class CloudServer
 {
 	
+	static ExecutorService executor = Executors.newWorkStealingPool();
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
 	
 	Client client;
@@ -38,11 +43,11 @@ public class CloudServer
 	
 	
 	
-	public CloudServer(String appUuid)
+	public CloudServer(String appName)
 	{
 		CheckResponseFilter responseFilter = new CheckResponseFilter(cookieMap);
 	
-		this.host = "http://"+appUuid+".baltoro.io/baltoro/app";
+		this.host = "http://"+appName+".baltoro.io/baltoro/app";
 		client = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)
@@ -125,6 +130,7 @@ public class CloudServer
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
 		handleCookie(response);
 		
 		String error = response.getHeaderString("BALTORO-ERROR");
@@ -140,4 +146,21 @@ public class CloudServer
 				
 		return (T)obj;
 	}
+	
+	public Response execute(Form form, WebTarget target)
+	{
+		
+		Callable<Response> apiCall = () ->
+		{
+			Invocation.Builder ib =	getIB(target);
+			Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+			return response;
+			
+		};
+		
+		Future<Response> future = executor.submit(apiCall);
+		
+		return null;
+	}
+
 }

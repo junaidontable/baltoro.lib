@@ -8,9 +8,10 @@ import javax.ws.rs.Path;
 public class Class1
 {
 
-	@RolesAllowed("Admin")
+	@Path("/method1")
 	public void method1()
 	{
 		
 	}
+
 }

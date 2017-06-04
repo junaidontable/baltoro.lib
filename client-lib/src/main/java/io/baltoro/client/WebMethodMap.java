@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 public class WebMethodMap

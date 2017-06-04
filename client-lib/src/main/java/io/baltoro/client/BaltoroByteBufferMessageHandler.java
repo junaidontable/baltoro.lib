@@ -14,6 +14,7 @@ import javax.websocket.Session;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.ep.Param;
+import io.baltoro.to.RequestContext;
 import io.baltoro.to.WSTO;
 import io.baltoro.util.ObjectUtil;
 
@@ -45,6 +46,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			
 			ObjectMapper mapper = new ObjectMapper();
 			WSTO to = mapper.readValue(jsonBytes,  WSTO.class);
+			RequestContext ctx = to.requestContext;
 			
 			Map<String, String[]> requestParam = to.requestParams;
 			if(requestParam == null || requestParam.size()==0)
@@ -80,6 +82,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 						annoName = annoPraram.value();
 						break;
 					}
+					
 				}
 					
 				
@@ -94,6 +97,11 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 				{
 					methodInputData[i] = requestValue;
 				}
+				else if(paramClass == RequestContext.class)
+				{
+					methodInputData[i] = ctx;
+				}
+					
 				
 				System.out.println("anno === "+annoName);
 					

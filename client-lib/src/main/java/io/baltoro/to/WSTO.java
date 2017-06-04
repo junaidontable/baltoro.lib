@@ -19,5 +19,6 @@ public class WSTO
 	public Map<String,String[]> requestParams;
 	public byte[] data;
 	public String jsonClassName;
+	public RequestContext requestContext;
 	
 }
