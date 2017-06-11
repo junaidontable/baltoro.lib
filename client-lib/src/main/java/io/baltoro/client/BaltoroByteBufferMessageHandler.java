@@ -17,6 +17,7 @@ import io.baltoro.ep.Param;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.WSTO;
 import io.baltoro.util.ObjectUtil;
+import io.baltoro.util.StringUtil;
 
 public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<ByteBuffer>
 {
@@ -47,6 +48,11 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			ObjectMapper mapper = new ObjectMapper();
 			WSTO to = mapper.readValue(jsonBytes,  WSTO.class);
 			RequestContext ctx = to.requestContext;
+			
+			if(StringUtil.isNotNullAndNotEmpty(ctx.sessionId))
+			{
+				UserSession userSession = new UserSession(ctx.sessionId);
+			}
 			
 			Map<String, String[]> requestParam = to.requestParams;
 			if(requestParam == null || requestParam.size()==0)
@@ -101,9 +107,6 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 				{
 					methodInputData[i] = ctx;
 				}
-					
-				
-				System.out.println("anno === "+annoName);
 					
 				
 				

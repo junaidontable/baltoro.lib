@@ -19,6 +19,8 @@ import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.AppTO;
+import io.baltoro.to.Principal;
+import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
 import io.baltoro.util.UUIDGenerator;
 
@@ -45,20 +47,15 @@ public class Baltoro
 	String sessionId;
 	UserTO user;
 	AppTO currentApp;
+	PrivateDataTO currentAppPrivateData;
 	String instanceUuid;
+	boolean debug = false;
 	
 	 
 	
 	private Baltoro()
 	{
-		try
-		{
-			init();
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		
 	}
 	
 	
@@ -94,7 +91,16 @@ public class Baltoro
 		                 .build();
 		 	    
 		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.currentApp.uuid);
-		 	  Session session = clientManager.connectToServer(instance, config, new URI("ws://"+this.currentApp.uuid+".baltoro.io/baltoro/ws"));
+		 	  String url = null;
+		 	  if(this.debug)
+		 	  {
+		 		 url = "ws://"+this.currentApp.uuid+".baltoro.io:8080/baltoro/ws";
+		 	  }
+		 	  else
+		 	  {
+		 		 url = "ws://"+this.currentApp.uuid+".baltoro.io/baltoro/ws";
+		 	  }
+		 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
 		 	  
 		 	  return session;
 		 	  
@@ -141,11 +147,48 @@ public class Baltoro
 	}
 	
 	
+	public static void asignPrincipalToSession(String sessionId, Principal principal)
+	{
+		UserSession userSession = SessionManager.getSession(sessionId);
+		userSession.principal = principal;
+	}
+	
+	
+	public static UserSession getUserSession(String sessionId)
+	{
+		UserSession userSession = SessionManager.getSession(sessionId);
+		return userSession;
+	}
+	
+	
+	public static Session start(String _package, boolean debug)
+	{
+		
+		try
+		{
+			Baltoro baltoro = new Baltoro();
+			baltoro.debug = debug;
+			baltoro.init();
+			baltoro.currentApp = baltoro.getMyApp();
+			baltoro.packages = _package;
+			Session session = baltoro.startClient();
+			return session;
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
 	public static Session start(String _package)
 	{
 		try
 		{
 			Baltoro baltoro = new Baltoro();
+			baltoro.init();
 			baltoro.currentApp = baltoro.getMyApp();
 			baltoro.packages = _package;
 			Session session = baltoro.startClient();
@@ -162,7 +205,7 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.start("io");
+    	Baltoro.start("io", true);
     }
     
     /*
@@ -307,6 +350,11 @@ public class Baltoro
 			currentApp = to;
 			
 		}
+		
+		
+		System.out.println(" =-==== "+currentApp.privateDataUuid);
+		
+		this.currentAppPrivateData = cs.getBO(currentApp.privateDataUuid, PrivateDataTO.class);
 		
 		
 		/*

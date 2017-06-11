@@ -36,6 +36,11 @@ public class BOAPIClient
 	
 	BOAPIClient(Baltoro baltoro)
 	{
+		if(baltoro.debug)
+		{
+			host = "http://api.baltoro.io:8080";
+		}
+		
 		CheckResponseFilter responseFilter = new CheckResponseFilter(baltoro.agentCookieMap);
 		
 		webClient = ClientBuilder.newBuilder()
@@ -128,7 +133,8 @@ public class BOAPIClient
 	<T extends BaseTO> T getBO(String baseUuid, Class<T> type) throws Exception
 	{
 	
-		String url = "/baltoro/api/bo/";
+		String url = "/baltoro/api/bo/get";
+		/*
 		if(type == ContainerTO.class)
 		{
 			url = url+"getContainer";
@@ -141,10 +147,10 @@ public class BOAPIClient
 		{
 			url = url+"getApp";
 		}
-		
+		*/
 		
 		WebTarget target = webClient.target(host).path(url);
-		target = target.queryParam("uuid", baseUuid);
+		target = target.queryParam("base-uuid", baseUuid);
 		 
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();

@@ -73,7 +73,7 @@ public class CloudServer
 	{
 		log.info("... Are you There ...");
 	
-		WebTarget target = client.target(host).path("/baltoro/api/areyouthere");	
+		WebTarget target = client.target(host).path("/api/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		handleCookie(response);

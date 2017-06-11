@@ -1,22 +1,18 @@
 package io.baltoro.util;
 
 
-import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Date;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
@@ -25,14 +21,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
 import io.baltoro.to.Keys;
 
@@ -308,81 +298,7 @@ public class CryptoUtil
 	}
 
 	
-	public static X509Certificate signCert(KeyPair pair, String name, X509Certificate caCert, PrivateKey caKey)
-	throws Exception
-	{
-	  
-		/*
-		String sigAlg = "SHA1WithRSAEncryption";
-        PKCS10 pkcs10 = new PKCS10(pair.getPublic());
-        Signature signature = Signature.getInstance(sigAlg);
-        signature.initSign(pair.getPrivate());
-        X500Name x500Name = new X500Name("baltoro", name, "ca", "Palo Alto","California", "USA");
-        pkcs10.encodeAndSign(x500Name,signature);
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(bs);
-        pkcs10.print(ps);
-        byte[] csrbytes = bs.toByteArray();
-        
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509"); 
-        
-        //certFact.generateCertificate(inStream);
-        */
-		
-        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-
-        certGen.setSerialNumber(BigInteger.valueOf(1));
-        certGen.setIssuerDN(caCert.getSubjectX500Principal());
-        certGen.setNotBefore(new Date(System.currentTimeMillis()));
-        certGen.setNotAfter(new Date(System.currentTimeMillis() + 10000000));
-        certGen.setSubjectDN(new X500Principal("CN=baltoro,OU="+name));
-        certGen.setPublicKey(pair.getPublic());
-        certGen.setSignatureAlgorithm("SHA1WithRSA");
-        
-        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-        //certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(entityKey));
-        certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
-        
-        X509Certificate cert = certGen.generateX509Certificate(pair.getPrivate(), "BC");
-        
-        
-        return cert;
-        /*
-        X509V1CertificateGenerator  certGen = new X509V1CertificateGenerator();
-
-        certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-        certGen.setIssuerDN(new X500Principal("CN=baltoro,OU="+name));
-        certGen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
-        certGen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        certGen.setSubjectDN(new X500Principal("CN=Test Certificate"));
-        certGen.setPublicKey(pair.getPublic());
-        certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-
-        
-        return cert; 
-        */
-        //InputStream  bis  = new ByteArrayInputStream(csrbytes);
-       // javax.security.cert.Certificate cert = certFact.generateCertificate(bis); 
-	   
-        
-		
-	} 
 	
-
-	/*
-	public static X509Certificate genCert(String name)
-	throws Exception
-	{
-	  
-		CertAndKeyGen certGen = new CertAndKeyGen("RSA","SHA1WithRSA",null);
-		certGen.generate(1024);
-		
-        X509Certificate cert = certGen.getSelfCertificate(new X500Name("CN=Baltoro.com"), (long)365*24*3600);
-        
-		return cert;
-	}   
-	*/
     
 	public static String toHex(byte[] data, int length)
     {
