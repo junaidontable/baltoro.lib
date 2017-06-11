@@ -19,13 +19,15 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
     private String appUuid;
     private String instanceUuid;
     private Map<String, NewCookie> cookieMap;
+    private String token;
     
-    public BaltoroClientConfigurator(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid)
+    public BaltoroClientConfigurator(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
 	{
 		//this.sessionId = sessionId;
     	this.cookieMap = cookieMap;
 		this.appUuid = appUuid;
 		this.instanceUuid = insatnceUuid;
+		this.token = token;
 	}
 
     @Override
@@ -40,12 +42,10 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
 			headers.put("Cookie", Arrays.asList(cookie.toString()));
 		}	
         
-        //headers.put("Cookie", Arrays.asList("JSESSIONID="+this.sessionId));
-        
         
         headers.put("BLT_APP_UUID", Arrays.asList(this.appUuid));
         headers.put("BLT_INSTANCE_UUID", Arrays.asList(this.instanceUuid));
-        //headers.put("Origin", Arrays.asList("myOrigin"));
+        headers.put("BLT_TOKEN", Arrays.asList(this.token));
        
     }
 

@@ -110,7 +110,7 @@ public class CryptoUtil
     	return pair;
     }
     
-	public static String encrypt(String encodedKey, String encodedInput) 
+	public static String encrypt(String encodedKey, byte[] bytes) 
 	throws RuntimeException
 	{
 		try 
@@ -140,7 +140,7 @@ public class CryptoUtil
 			//Cipher cipher = Cipher.getInstance("RSA/None/NoPadding", "BC");
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			
-			byte[] bytes = Base64.getDecoder().decode(encodedInput);
+			//byte[] bytes = Base64.getDecoder().decode(encodedInput);
 			byte[] encBytes = cipher.doFinal(bytes);
 			
 			String encStr = Base64.getEncoder().encodeToString(encBytes);

@@ -1,11 +1,16 @@
 package io.baltoro.client;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -22,6 +27,7 @@ import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
+import io.baltoro.util.CryptoUtil;
 import io.baltoro.util.UUIDGenerator;
 
 public class Baltoro 
@@ -46,10 +52,17 @@ public class Baltoro
 	private String password;
 	String sessionId;
 	UserTO user;
-	AppTO currentApp;
-	PrivateDataTO currentAppPrivateData;
+	//AppTO currentApp;
+	//PrivateDataTO currentAppPrivateData;
 	String instanceUuid;
 	boolean debug = false;
+	Properties props = null;
+	String appUuid;
+	String appPrivateKey;
+	String appName;
+	String userUuid;
+	File propFile = new File(".baltoro.props");
+	
 	
 	 
 	
@@ -73,9 +86,8 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		//BaltoroWSClient client = new BaltoroWSClient(this.appUuid, this.sessionId);
-		//client.start();
-	
+		String token = "["+System.currentTimeMillis()+"]"+this.appUuid;
+		String eToken = CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
 		
 		ExecutorService executor = Executors.newWorkStealingPool();
 		
@@ -84,21 +96,21 @@ public class Baltoro
 		    try 
 		    {
 		    	ClientManager clientManager = ClientManager.createClient();
-		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.agentCookieMap, this.currentApp.uuid, this.instanceUuid);
+		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.agentCookieMap, this.appUuid, this.instanceUuid, eToken);
 		 	    
 		 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
 		                 .configurator(clientConfigurator)
 		                 .build();
 		 	    
-		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.currentApp.uuid);
+		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid);
 		 	  String url = null;
 		 	  if(this.debug)
 		 	  {
-		 		 url = "ws://"+this.currentApp.uuid+".baltoro.io:8080/baltoro/ws";
+		 		 url = "ws://"+this.appUuid+".baltoro.io:8080/baltoro/ws";
 		 	  }
 		 	  else
 		 	  {
-		 		 url = "ws://"+this.currentApp.uuid+".baltoro.io/baltoro/ws";
+		 		 url = "ws://"+this.appUuid+".baltoro.io/baltoro/ws";
 		 	  }
 		 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
 		 	  
@@ -161,35 +173,32 @@ public class Baltoro
 	}
 	
 	
-	public static Session start(String _package, boolean debug)
+	public static Session startDebug(String _package)
 	{
-		
-		try
-		{
-			Baltoro baltoro = new Baltoro();
-			baltoro.debug = debug;
-			baltoro.init();
-			baltoro.currentApp = baltoro.getMyApp();
-			baltoro.packages = _package;
-			Session session = baltoro.startClient();
-			return session;
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-		
+		return _start(_package, true);
 	}
 	
 	public static Session start(String _package)
 	{
+		return _start(_package, false);
+	}
+	
+	private static Session _start(String _package, boolean debug)
+	{
 		try
 		{
 			Baltoro baltoro = new Baltoro();
-			baltoro.init();
-			baltoro.currentApp = baltoro.getMyApp();
+			baltoro.debug = debug;
+			boolean useLocal = baltoro.init();
+			if(!useLocal)
+			{
+				FileOutputStream output = new FileOutputStream(baltoro.propFile);
+				AppTO selectedApp = baltoro.getMyApp();
+				PrivateDataTO to = baltoro.cs.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
+				baltoro.props.put("app.key", to.privateKey);
+				baltoro.props.store(output, "updated on "+new Date());
+			}
+			
 			baltoro.packages = _package;
 			Session session = baltoro.startClient();
 			return session;
@@ -200,12 +209,12 @@ public class Baltoro
 		}
 		
 		return null;
-		
 	}
+	
 	
     public static void main(String[] args )
     {
-    	Baltoro.start("io", true);
+    	Baltoro.startDebug("io");
     }
     
     /*
@@ -256,11 +265,33 @@ public class Baltoro
 	}
     */
     
-    private void init() throws Exception
+    private boolean init() throws Exception
     {
     	cs = new BOAPIClient(this);
 		this.instanceUuid = UUIDGenerator.randomString(10);
+		props = new Properties();
 		
+    	if(propFile.exists())
+    	{
+    		
+    		props.load(new FileInputStream(propFile));
+    		this.appPrivateKey = props.getProperty("app.key");
+    		this.appUuid = props.getProperty("app.uuid");
+    		this.appName = props.getProperty("app.name");
+    		this.userUuid = props.getProperty("user.uuid");
+    		this.email = props.getProperty("user.email");
+    		
+    		String option = systemIn("Start "+this.appName+" ? [y/n] : ");
+    		if(option.equals("y"))
+    		{
+    			return true;
+    		}
+    		else
+    		{
+    			propFile.delete();
+    		}
+    	}
+    		
     	String option = systemIn("Do you have an account ? [y/n] : ");
     	for (int i = 0; i < 3; i++)
 		{
@@ -275,7 +306,11 @@ public class Baltoro
 				}
 				user = cs.login(email, password);
 				logedin = true;
-				return;
+				
+				props.put("user.email", this.email);
+				props.put("user.uuid", user.uuid);
+				
+				return false;
 			} 
 			catch (RuntimeException e)
 			{
@@ -286,6 +321,8 @@ public class Baltoro
     	
     	System.out.println("Would not process sfter 3 tries. restart the program");
 		System.exit(1);
+		
+		return false;
 		
     }
     
@@ -314,6 +351,8 @@ public class Baltoro
     	
     	boolean newApp = true;
     	
+    	AppTO selectApp = null;
+    	
 		List<AppTO> apps = cs.getMyApps();
 		
 		if(apps.size() > 0)
@@ -337,8 +376,8 @@ public class Baltoro
 			else
 			{
 				int opt = Integer.parseInt(option);
-				currentApp = apps.get(opt-1);
-				System.out.println("selected app : "+currentApp.name);
+				selectApp = apps.get(opt-1);
+				System.out.println("selected app : "+selectApp.name);
 			}
 			
 		}
@@ -347,14 +386,15 @@ public class Baltoro
 		{
 			String name = systemIn("enter name of your new app : ");
 			AppTO to = cs.createApp(name);
-			currentApp = to;
+			selectApp = to;
 			
 		}
 		
 		
-		System.out.println(" =-==== "+currentApp.privateDataUuid);
+		System.out.println(" =-==== "+selectApp.privateDataUuid);
 		
-		this.currentAppPrivateData = cs.getBO(currentApp.privateDataUuid, PrivateDataTO.class);
+		props.put("app.uuid", selectApp.uuid);
+		props.put("app.name", selectApp.name);
 		
 		
 		/*
@@ -364,7 +404,7 @@ public class Baltoro
 		db.save(OName.APP_PUBLIC_KEY, selectedApp.publicKey);
 		*/
 		
-		return currentApp;
+		return selectApp;
 				
     }
 	
