@@ -47,7 +47,7 @@ public class CloudServer
 	{
 		CheckResponseFilter responseFilter = new CheckResponseFilter(cookieMap);
 	
-		this.host = "http://"+appName+".baltoro.io/baltoro/app";
+		this.host = "http://"+appName+".baltoro.io/app";
 		client = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)

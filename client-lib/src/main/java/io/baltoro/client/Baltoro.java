@@ -86,7 +86,7 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		String token = "["+System.currentTimeMillis()+"]"+this.appUuid;
+		String token = System.currentTimeMillis()+"|"+this.appUuid;
 		String eToken = CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
 		
 		ExecutorService executor = Executors.newWorkStealingPool();
@@ -106,11 +106,11 @@ public class Baltoro
 		 	  String url = null;
 		 	  if(this.debug)
 		 	  {
-		 		 url = "ws://"+this.appUuid+".baltoro.io:8080/baltoro/ws";
+		 		 url = "ws://"+this.appUuid+".baltoro.io:8080/ws";
 		 	  }
 		 	  else
 		 	  {
-		 		 url = "ws://"+this.appUuid+".baltoro.io/baltoro/ws";
+		 		 url = "ws://"+this.appUuid+".baltoro.io/ws";
 		 	  }
 		 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
 		 	  
