@@ -3,9 +3,14 @@ package io.baltoro.client;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +33,10 @@ import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
 import io.baltoro.util.CryptoUtil;
+import io.baltoro.util.ObjectUtil;
+import io.baltoro.util.StreamUtil;
 import io.baltoro.util.UUIDGenerator;
+
 
 public class Baltoro 
 {
@@ -63,7 +71,6 @@ public class Baltoro
 	String userUuid;
 	File propFile = new File(".baltoro.props");
 	
-	
 	 
 	
 	private Baltoro()
@@ -87,7 +94,7 @@ public class Baltoro
 		WebMethodMap.getInstance().setMap(pathMap);
 		
 		String token = System.currentTimeMillis()+"|"+this.appUuid;
-		String eToken = CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
+		String eToken = token;//CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
 		
 		ExecutorService executor = Executors.newWorkStealingPool();
 		
@@ -423,6 +430,44 @@ public class Baltoro
 		}
 		
 	}
-    		
+	
 
+	
+	static WebFile fileServer(String webPath, String localPath)
+	{
+		String path = null;
+		if(localPath.endsWith("/"))
+		{
+			path = localPath+webPath;
+		}
+		else
+		{
+			path = localPath+"/"+webPath;
+		}
+		
+		
+		File file = new File(path);
+		
+		System.out.println(" ---- > file : "+file.getName()+", "+file.length());
+		try
+		{
+		
+			WebFile webFile = new WebFile();
+			webFile.file = file;
+			
+			Path filePath = Paths.get(path);
+			byte[] data = Files.readAllBytes(filePath);
+			webFile.data = data;
+			return webFile;
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
 }

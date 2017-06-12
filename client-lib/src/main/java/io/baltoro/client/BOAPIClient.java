@@ -29,7 +29,7 @@ public class BOAPIClient
 	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
 	
 	Client webClient;
-	String host = "http://api.baltoro.io";
+	String host = "http://baltoro-api.baltoro.io";
 	
 	Baltoro baltoro;
 	boolean online = false;
@@ -38,7 +38,7 @@ public class BOAPIClient
 	{
 		if(baltoro.debug)
 		{
-			host = "http://api.baltoro.io:8080";
+			host = "http://baltoro-api.baltoro.io:8080";
 		}
 		
 		CheckResponseFilter responseFilter = new CheckResponseFilter(baltoro.agentCookieMap);
@@ -68,7 +68,7 @@ public class BOAPIClient
 	{
 		log.info("... Are you There ...");
 	
-		WebTarget target = webClient.target(host).path("/api/areyouthere");	
+		WebTarget target = webClient.target(host).path("/baltoro-api/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		log.info("sessionId ==>"+response);
@@ -78,7 +78,7 @@ public class BOAPIClient
 	
 	UserTO login(String email, String password) throws Exception
 	{
-		WebTarget target = webClient.target(host).path("/api/auth/login");	
+		WebTarget target = webClient.target(host).path("/baltoro-api/auth/login");	
 	
 		Form form = new Form();
 		form.param("email", email);
@@ -112,7 +112,7 @@ public class BOAPIClient
 	{
 		//log.info("... create container ...");
 		
-		WebTarget target = webClient.target(host).path("/api/bo/createContainer");
+		WebTarget target = webClient.target(host).path("/baltoro-api/bo/createContainer");
 		 
 		Form form = new Form();
 		form.param("name", "customer 1");
@@ -133,7 +133,7 @@ public class BOAPIClient
 	<T extends BaseTO> T getBO(String baseUuid, Class<T> type) throws Exception
 	{
 	
-		String url = "/api/bo/get";
+		String url = "/baltoro-api/bo/get";
 	
 		WebTarget target = webClient.target(host).path(url);
 		target = target.queryParam("base-uuid", baseUuid);
@@ -151,7 +151,7 @@ public class BOAPIClient
 	UserTO createUser(String email, String password) throws Exception
 	{
 		
-		WebTarget target = webClient.target(host).path("/api/bo/createUser");
+		WebTarget target = webClient.target(host).path("/baltoro-api/bo/createUser");
 		 
 		Form form = new Form();
 		form.param("email", email);
@@ -166,7 +166,7 @@ public class BOAPIClient
 	AppTO createApp(String name) throws Exception
 	{
 		
-		WebTarget target = webClient.target(host).path("/api/bo/createApp");
+		WebTarget target = webClient.target(host).path("/baltoro-api/bo/createApp");
 		 
 		Form form = new Form();
 		form.param("name", name);
@@ -179,7 +179,7 @@ public class BOAPIClient
 	
 	List<AppTO> getMyApps() throws Exception
 	{
-		WebTarget target = webClient.target(host).path("/api/bo/getMyApps");
+		WebTarget target = webClient.target(host).path("/baltoro-api/bo/getMyApps");
 		Form form = new Form();
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));

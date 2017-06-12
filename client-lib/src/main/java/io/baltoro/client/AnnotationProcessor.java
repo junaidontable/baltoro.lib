@@ -31,19 +31,25 @@ public class AnnotationProcessor
 			
 			Annotation[] annoArray =  _class.getAnnotations();
 	
+			FileServer fileServerAnno = _class.getAnnotation(FileServer.class);
 			for (Annotation anno : annoArray)
 			{
-				/*
-				if(anno instanceof AppId)
-				{
-					AppId appId = (AppId) anno;
-					System.out.println("appId = "+appId.value());
-				}
-				*/
-				
+			
 				if(anno instanceof Path)
 				{
 					String cPath = ((Path) anno).value();
+					if(fileServerAnno != null)
+					{
+						WebMethod wm = new WebMethod(null, null);
+						wm.webPath = cPath;
+						wm.localFilePath = fileServerAnno.value();
+						pathMap.put(cPath+"*", wm);
+						
+						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
+						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
+						System.out.println(" ^^^^^^^^^"+fileServerAnno.value()+"^^^^^^^^  ");
+						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
+					}
 					
 					for (Method method : _class.getDeclaredMethods())
 					{
@@ -68,7 +74,6 @@ public class AnnotationProcessor
 								fPath = cPath+mPath;
 							}
 								
-							System.out.println("path --- >"+fPath+", method --->"+method.getName());
 							WebMethod wm = new WebMethod(_class, method);
 							pathMap.put(fPath, wm);
 						
@@ -93,27 +98,13 @@ public class AnnotationProcessor
 				
 			}
 			
-			/*
-			if(_class.isAnnotationPresent(Path.class))
-			{
-				
-				Path path = (Path) _class.getAnnotation(Path.class);
-				System.out.println(_class+"->"+path.value());
-				
-				for (Method method : _class.getDeclaredMethods())
-				{
-
-					if (method.isAnnotationPresent(Path.class))
-					{
-						Path mpath = (Path) method.getAnnotation(Path.class);
-						System.out.println(method.getName()+"->"+mpath.value());
-					
-					}
-				}
-			
-			}
-			*/
 		}
+		
+		
+		for (String key : pathMap.keySet())
+		{
+			System.out.println("PATH -> "+key+" --> "+pathMap.get(key));
+		} 
 		
 		return pathMap;
 	}

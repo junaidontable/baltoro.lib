@@ -32,10 +32,6 @@ public class WebMethodMap
 	public WebMethod getMethod(String path)
 	{
 		WebMethod webMethod = pMap.get(path);
-		if(webMethod == null)
-		{
-			throw new RuntimeException("method not found for "+path);
-		}
 		return webMethod;
 		
 	}

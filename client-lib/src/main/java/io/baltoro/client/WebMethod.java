@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 public class WebMethod
 {
 	
+	String webPath;
+	String localFilePath;
+	
 	private Class<?> _class;
 	public Class<?> get_class()
 	{
@@ -24,6 +27,31 @@ public class WebMethod
 		this.method = method;
 	}
 	
-	
+	@Override
+	public String toString()
+	{
+		StringBuffer str = new StringBuffer();
+		
+		if(webPath != null)
+		{
+			str.append(webPath+", ");
+		}
+		
+		if(localFilePath != null)
+		{
+			str.append(localFilePath+", ");
+		}
+		
+		if(_class != null)
+		{
+			str.append(_class.getSimpleName()+", ");
+		}
+		
+		if(method != null)
+		{
+			str.append(method.getName()+", ");
+		}
+		return str.toString();
+	}
 
 }

@@ -2,12 +2,15 @@ package io.baltoro.client.test;
 
 import javax.ws.rs.Path;
 
+import io.baltoro.client.FileServer;
 import io.baltoro.to.RequestContext;
 
 @Path("/")
+@FileServer("/Users/junaid/Desktop/webfiles/")
 public class Class2
 {
 
+	
 	@Path("/method2")
 	public String method2(RequestContext rc)
 	{
@@ -20,4 +23,5 @@ public class Class2
 	{
 		return "hello forom henry!";
 	}
+
 }
