@@ -1,13 +1,15 @@
-package io.baltoro.client;
+package io.baltoro.features;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface CTX
+@Documented
+public @interface Path 
 {
-
+	String value();
 }

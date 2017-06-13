@@ -13,7 +13,8 @@ import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.ep.Param;
+import io.baltoro.features.CTX;
+import io.baltoro.features.Param;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.WSTO;
 import io.baltoro.util.ObjectUtil;
@@ -70,7 +71,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			
 			
 			
-			to.requestParams = null;
+			to.requestContext = null;
 			
 			byte[] bytes = ObjectUtil.toJason(to);
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
@@ -122,7 +123,7 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 			UserSession userSession = new UserSession(ctx.sessionId);
 		}
 		
-		Map<String, String[]> requestParam = to.requestParams;
+		Map<String, String[]> requestParam = ctx.requestParams;
 		if(requestParam == null || requestParam.size()==0)
 		{
 			requestParam = new HashMap<String, String[]>();
@@ -180,6 +181,8 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 
 		
 		Object obj = _class.newInstance();
+		
+		
 		Object returnObj = method.invoke(obj, methodInputData);
 		
 		return returnObj;

@@ -3,14 +3,17 @@ package io.baltoro.client;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.Path;
 
 import org.reflections.Reflections;
+
+import io.baltoro.features.LocalFile;
+import io.baltoro.features.Path;
 
 public class AnnotationProcessor
 {
@@ -31,25 +34,33 @@ public class AnnotationProcessor
 			
 			Annotation[] annoArray =  _class.getAnnotations();
 	
-			FileServer fileServerAnno = _class.getAnnotation(FileServer.class);
+			
 			for (Annotation anno : annoArray)
 			{
 			
+				if(anno instanceof LocalFiles)
+				{
+					LocalFiles filesAnno = (LocalFiles) anno;
+					for (LocalFile file : filesAnno.value())
+					{
+						WebMethod wm = new WebMethod(null, null);
+						wm.webPath = file.webPath();
+						wm.localFilePath = file.localPath();
+						if(wm.localFilePath.endsWith("/"))
+						{
+							pathMap.put(wm.webPath+"*", wm);
+						}
+						else
+						{
+							pathMap.put(wm.webPath, wm);
+						}
+					}
+									
+				}
+				
 				if(anno instanceof Path)
 				{
 					String cPath = ((Path) anno).value();
-					if(fileServerAnno != null)
-					{
-						WebMethod wm = new WebMethod(null, null);
-						wm.webPath = cPath;
-						wm.localFilePath = fileServerAnno.value();
-						pathMap.put(cPath+"*", wm);
-						
-						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
-						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
-						System.out.println(" ^^^^^^^^^"+fileServerAnno.value()+"^^^^^^^^  ");
-						System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^  ");
-					}
 					
 					for (Method method : _class.getDeclaredMethods())
 					{
@@ -112,8 +123,16 @@ public class AnnotationProcessor
 	static Set<Class<?>> getClasses(String packageName) throws Exception
 	{
 		Reflections reflections = new Reflections(packageName);
-		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Path.class);
-		return annotated;
+		Set<Class<?>> masterClassSet = new HashSet<Class<?>>();
+		
+		Set<Class<?>> set = reflections.getTypesAnnotatedWith(Path.class);
+		masterClassSet.addAll(set);
+		
+		set = reflections.getTypesAnnotatedWith(LocalFiles.class);
+		masterClassSet.addAll(set);
+		
+		
+		return masterClassSet;
 
 	}
 }

@@ -61,11 +61,11 @@ final class EPClassLoader// extends URLClassLoader
 		}
 
 		List<URL> list = new ArrayList<URL>();
-		StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
+		StringTokenizer st = new StringTokenizer(classPath, LocalFile.pathSeparator);
 		while (st.hasMoreTokens())
 		{
 			String token = st.nextToken();
-			File file = new File(token);
+			LocalFile file = new LocalFile(token);
 			if (file.exists())
 			{
 				try

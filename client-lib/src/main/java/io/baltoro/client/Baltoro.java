@@ -222,6 +222,8 @@ public class Baltoro
     public static void main(String[] args )
     {
     	Baltoro.startDebug("io");
+    	
+    	//Baltoro.start("io");
     }
     
     /*
@@ -275,7 +277,6 @@ public class Baltoro
     private boolean init() throws Exception
     {
     	cs = new BOAPIClient(this);
-		this.instanceUuid = UUIDGenerator.randomString(10);
 		props = new Properties();
 		
     	if(propFile.exists())
@@ -287,6 +288,9 @@ public class Baltoro
     		this.appName = props.getProperty("app.name");
     		this.userUuid = props.getProperty("user.uuid");
     		this.email = props.getProperty("user.email");
+    		this.instanceUuid = props.getProperty("app.instance.uuid");
+    		
+    		
     		
     		String option = systemIn("Start "+this.appName+" ? [y/n] : ");
     		if(option.equals("y"))
@@ -316,6 +320,8 @@ public class Baltoro
 				
 				props.put("user.email", this.email);
 				props.put("user.uuid", user.uuid);
+				this.instanceUuid = UUIDGenerator.uuid("INST");
+				props.put("app.instance.uuid",this.instanceUuid);
 				
 				return false;
 			} 

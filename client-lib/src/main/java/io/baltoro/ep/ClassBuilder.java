@@ -4,6 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import io.baltoro.features.Endpoint;
+import io.baltoro.features.Param;
+
 public class ClassBuilder
 {
 
@@ -34,12 +37,12 @@ public class ClassBuilder
 		Method[] methods = interfaze.getDeclaredMethods();
 		for (Method method : methods)
 		{
-			boolean isEPMethod = method.isAnnotationPresent(EndPoint.class);
+			boolean isEPMethod = method.isAnnotationPresent(Endpoint.class);
 			if(isEPMethod)
 			{
 				String methodName = method.getName();
 				String returnType = method.getReturnType().getName();
-				EndPoint ep = method.getAnnotation(EndPoint.class);
+				Endpoint ep = method.getAnnotation(Endpoint.class);
 				
 				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path());
 				

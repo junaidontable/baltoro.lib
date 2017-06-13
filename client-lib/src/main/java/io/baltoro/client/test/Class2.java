@@ -1,12 +1,14 @@
 package io.baltoro.client.test;
 
-import javax.ws.rs.Path;
 
-import io.baltoro.client.FileServer;
+
+import io.baltoro.features.LocalFile;
+import io.baltoro.features.Path;
 import io.baltoro.to.RequestContext;
 
 @Path("/")
-@FileServer("/Users/junaid/Desktop/webfiles/")
+@LocalFile(localPath="/Users/junaid/Desktop/webfiles/", webPath="/")
+@LocalFile(localPath="/Users/junaid/Desktop/baltoro.lib/client-lib/target/baltoro-lib-jar-with-dependencies.jar",webPath="/downloads/client-lib.jar")
 public class Class2
 {
 

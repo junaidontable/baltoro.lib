@@ -2,13 +2,13 @@ package io.baltoro.ep;
 
 import javax.ws.rs.FormParam;
 
-import io.baltoro.ep.EndPoint;
+import io.baltoro.features.Endpoint;
 
 public interface TestEndpointCall1
 {
-	@EndPoint(appName="junaid",path="/hello")
+	@Endpoint(appName="junaid",path="/hello")
 	public  String hello();
 	
-	@EndPoint(appName="junaid",path="/test")
+	@Endpoint(appName="junaid",path="/test")
 	public  String test(@FormParam("name") String name,@FormParam("count") int count);
 }

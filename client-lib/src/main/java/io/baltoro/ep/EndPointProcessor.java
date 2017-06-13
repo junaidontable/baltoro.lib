@@ -107,7 +107,7 @@ public class EndPointProcessor extends AbstractProcessor
 			String methoName = methodElement.getSimpleName().toString();
 			
 			
-			EndPoint methodAnno = methodElement.getAnnotation(EndPoint.class);
+			Endpoint methodAnno = methodElement.getAnnotation(Endpoint.class);
 			
 			
 			EPMethod endPointMethod = new EPMethod(returnType, methoName, methodAnno.appId(), methodAnno.path());
