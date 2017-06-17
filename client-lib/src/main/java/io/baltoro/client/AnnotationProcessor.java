@@ -12,7 +12,6 @@ import javax.annotation.security.RolesAllowed;
 
 import org.reflections.Reflections;
 
-import io.baltoro.features.LocalFile;
 import io.baltoro.features.Path;
 
 public class AnnotationProcessor
@@ -38,25 +37,47 @@ public class AnnotationProcessor
 			for (Annotation anno : annoArray)
 			{
 			
+				/*
 				if(anno instanceof LocalFiles)
 				{
 					LocalFiles filesAnno = (LocalFiles) anno;
 					for (LocalFile file : filesAnno.value())
 					{
-						WebMethod wm = new WebMethod(null, null);
-						wm.webPath = file.webPath();
-						wm.localFilePath = file.localPath();
-						if(wm.localFilePath.endsWith("/"))
+						WebMethod wm = new WebMethod(file.webPath(), file.localPath());
+						wm.authRequired = file.authRequired();
+						
+						if(wm.getLocalFilePath().endsWith("/"))
 						{
-							pathMap.put(wm.webPath+"*", wm);
+							List<String> dirs = LocalFileHelper.getDirectories(wm.getLocalFilePath());
+							for (String dir : dirs)
+							{
+								
+								System.out.println(" === +++ ===== > "+dir);
+								
+								String relLocalPath = dir.substring(file.localPath().length()-1);
+								
+								System.out.println(" ======== > "+relLocalPath);
+								
+								String webDirPath = file.webPath()+relLocalPath.substring(1);
+								
+									//System.out.println("=============== "+webDirPath);
+								
+								WebMethod wmSub = new WebMethod(webDirPath, dir);
+								wmSub.authRequired = file.authRequired();
+							
+								
+								pathMap.put(webDirPath, wm);
+							}
+							
 						}
 						else
 						{
-							pathMap.put(wm.webPath, wm);
+							pathMap.put(wm.getWebPath(), wm);
 						}
 					}
 									
 				}
+				*/
 				
 				if(anno instanceof Path)
 				{
@@ -85,7 +106,8 @@ public class AnnotationProcessor
 								fPath = cPath+mPath;
 							}
 								
-							WebMethod wm = new WebMethod(_class, method);
+							WebMethod wm = new WebMethod(fPath, _class, method);
+							wm.authRequired = pathAnno.authRequired();
 							pathMap.put(fPath, wm);
 						
 						}
@@ -128,8 +150,6 @@ public class AnnotationProcessor
 		Set<Class<?>> set = reflections.getTypesAnnotatedWith(Path.class);
 		masterClassSet.addAll(set);
 		
-		set = reflections.getTypesAnnotatedWith(LocalFiles.class);
-		masterClassSet.addAll(set);
 		
 		
 		return masterClassSet;

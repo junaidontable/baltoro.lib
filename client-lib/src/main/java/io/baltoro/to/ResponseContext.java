@@ -2,38 +2,33 @@ package io.baltoro.to;
 
 import java.util.Map;
 
-public class RequestContext
+public class ResponseContext
 {
 
-	private String url;
-	private String ip;
+	private String redirect;
+	private String error;
 	private String sessionId;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
 	private Principal principal;
-	private Map<String,String[]> requestParams;
 	private byte[] data;
-	private String apiPath;
-	private String relativePath;
 	
 	
-
-	
-	public String getUrl()
+	public String getRedirect()
 	{
-		return url;
+		return redirect;
 	}
-	public void setUrl(String url)
+	public void setRedirect(String redirect)
 	{
-		this.url = url;
+		this.redirect = redirect;
 	}
-	public String getIp()
+	public String getError()
 	{
-		return ip;
+		return error;
 	}
-	public void setIp(String ip)
+	public void setError(String error)
 	{
-		this.ip = ip;
+		this.error = error;
 	}
 	public String getSessionId()
 	{
@@ -67,14 +62,6 @@ public class RequestContext
 	{
 		this.principal = principal;
 	}
-	public Map<String, String[]> getRequestParams()
-	{
-		return requestParams;
-	}
-	public void setRequestParams(Map<String, String[]> requestParams)
-	{
-		this.requestParams = requestParams;
-	}
 	public byte[] getData()
 	{
 		return data;
@@ -83,22 +70,8 @@ public class RequestContext
 	{
 		this.data = data;
 	}
-	public String getApiPath()
-	{
-		return apiPath;
-	}
-	public void setApiPath(String apiPath)
-	{
-		this.apiPath = apiPath;
-	}
-	public String getRelativePath()
-	{
-		return relativePath;
-	}
-	public void setRelativePath(String relativePath)
-	{
-		this.relativePath = relativePath;
-	}
+	
+	
 	
 	
 	

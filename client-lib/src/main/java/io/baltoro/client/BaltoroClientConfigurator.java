@@ -15,7 +15,6 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
 	static Logger log = Logger.getLogger(BaltoroClientConfigurator.class.getName());
 	
     static volatile boolean called = false;
-    //private String sessionId;
     private String appUuid;
     private String instanceUuid;
     private Map<String, NewCookie> cookieMap;
@@ -23,7 +22,6 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
     
     public BaltoroClientConfigurator(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
 	{
-		//this.sessionId = sessionId;
     	this.cookieMap = cookieMap;
 		this.appUuid = appUuid;
 		this.instanceUuid = insatnceUuid;
@@ -42,7 +40,7 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
 			headers.put("Cookie", Arrays.asList(cookie.toString()));
 		}	
         
-        
+       
         headers.put("BLT_APP_UUID", Arrays.asList(this.appUuid));
         headers.put("BLT_INSTANCE_UUID", Arrays.asList(this.instanceUuid));
         headers.put("BLT_TOKEN", Arrays.asList(this.token));

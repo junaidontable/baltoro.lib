@@ -3,9 +3,7 @@ package io.baltoro.client;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
@@ -16,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,9 +31,6 @@ import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
-import io.baltoro.util.CryptoUtil;
-import io.baltoro.util.ObjectUtil;
-import io.baltoro.util.StreamUtil;
 import io.baltoro.util.UUIDGenerator;
 
 
@@ -48,7 +44,7 @@ public class Baltoro
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 	}
 	
-	private static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(); 
+	static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(100); 
 	
 	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
@@ -81,6 +77,7 @@ public class Baltoro
 	
 	private Session startClient() throws Exception
 	{
+		this.sessionId = UUID.randomUUID().toString();
 		
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
 		
@@ -109,7 +106,7 @@ public class Baltoro
 		                 .configurator(clientConfigurator)
 		                 .build();
 		 	    
-		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid);
+		 	  
 		 	  String url = null;
 		 	  if(this.debug)
 		 	  {
@@ -119,6 +116,9 @@ public class Baltoro
 		 	  {
 		 		 url = "ws://"+this.appUuid+".baltoro.io/ws";
 		 	  }
+		 	  
+		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid, clientManager, config, url);
+		 	 
 		 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
 		 	  
 		 	  return session;
@@ -139,6 +139,7 @@ public class Baltoro
 		return session;
 		
 	}
+	
 	
 	
 	public static <T> T EndPointFactory(Class<T> _class)
@@ -180,14 +181,14 @@ public class Baltoro
 	}
 	
 	
-	public static Session startDebug(String _package)
+	public static void startDebug(String _package)
 	{
-		return _start(_package, true);
+		Session session = _start(_package, true);
 	}
 	
-	public static Session start(String _package)
+	public static void start(String _package)
 	{
-		return _start(_package, false);
+		Session session = _start(_package, false);
 	}
 	
 	private static Session _start(String _package, boolean debug)
@@ -436,44 +437,6 @@ public class Baltoro
 		}
 		
 	}
-	
 
-	
-	static WebFile fileServer(String webPath, String localPath)
-	{
-		String path = null;
-		if(localPath.endsWith("/"))
-		{
-			path = localPath+webPath;
-		}
-		else
-		{
-			path = localPath+"/"+webPath;
-		}
-		
-		
-		File file = new File(path);
-		
-		System.out.println(" ---- > file : "+file.getName()+", "+file.length());
-		try
-		{
-		
-			WebFile webFile = new WebFile();
-			webFile.file = file;
-			
-			Path filePath = Paths.get(path);
-			byte[] data = Files.readAllBytes(filePath);
-			webFile.data = data;
-			return webFile;
-			
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-		
-	}
 	
 }

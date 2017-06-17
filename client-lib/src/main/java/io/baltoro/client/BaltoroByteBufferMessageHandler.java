@@ -1,9 +1,11 @@
 package io.baltoro.client;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.ByteBuffer;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -13,9 +15,10 @@ import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.features.CTX;
+import io.baltoro.exception.AuthException;
 import io.baltoro.features.Param;
 import io.baltoro.to.RequestContext;
+import io.baltoro.to.ResponseContext;
 import io.baltoro.to.WSTO;
 import io.baltoro.util.ObjectUtil;
 import io.baltoro.util.StringUtil;
@@ -39,91 +42,147 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 	@Override
 	public void onMessage(ByteBuffer bytesBuffer)
 	{
-		//log.info(" appid --- > text"+appId);
 		
 		
-		try
-		{
 			byte[] jsonBytes = bytesBuffer.array();
 			
 			ObjectMapper mapper = new ObjectMapper();
-			WSTO to = mapper.readValue(jsonBytes,  WSTO.class);
 			
 			
-			WebMethod wMethod = WebMethodMap.getInstance().getMethod(to.path);
-			
-			if(wMethod == null)
+			WSTO to = null;
+			try
 			{
-				WebFile webFile = getFile(to);
-				if(webFile != null)
-				{
-					to.data = webFile.data;
-				}
-			}
-			else
+				to = mapper.readValue(jsonBytes,  WSTO.class);
+			} 
+			catch (Exception e)
 			{
-				Object returnObj = executeMethod(wMethod, to);
-				if(returnObj != null)
-				{
-					to.data = mapper.writeValueAsBytes(returnObj);
-				}
+				e.printStackTrace();
+				return;
 			}
 			
+			RequestContext req = to.requestContext;
+			
+			WebMethod wm = WebMethodMap.getInstance().getMethod(req.getApiPath());
+			if(wm == null)
+			{
+				String path = req.getApiPath();
+				String[] tokens = path.split("/");
+				for (int i = 0; i < tokens.length; i++)
+				{
+					int lIndex = path.lastIndexOf('/');
+					path = path.substring(0, lIndex);
+					String lPath = req.getApiPath().substring(lIndex+1);
+					wm = WebMethodMap.getInstance().getMethod(path+"/*");
+					if(wm != null)
+					{
+						req.setRelativePath(lPath);
+						break;
+					}
+					
+				}
+			}
 			
 			
-			to.requestContext = null;
 			
-			byte[] bytes = ObjectUtil.toJason(to);
-			ByteBuffer buffer = ByteBuffer.wrap(bytes);
-			session.getAsyncRemote().sendBinary(buffer);
+			ResponseContext res = new ResponseContext();
+			to.responseContext = res;
 			
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
+			if(wm == null)
+			{
+				res.setError("API for path ["+req.getApiPath()+"] not found ");
+			}
+			
+			try
+			{
+	
+					checkAuth(wm,to, wm.getWebPath());
+					Object returnObj = executeMethod(wm, to);
+					if(returnObj != null)
+					{
+						if(returnObj instanceof byte[])
+						{
+							to.responseContext.setData((byte[]) returnObj);
+						}
+						else
+						{
+							to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
+						}
+					}
+				
+			} 
+			catch(Exception e)
+			{
+				if(e.getCause() instanceof SendRedirect)
+				{
+					SendRedirect sd = (SendRedirect) e.getCause();
+					res.setRedirect(sd.getUrl());
+				}
+				
+				if(e instanceof AuthException)
+				{
+					res.setError(e.getMessage());
+				}
+				
+			}
+			
+			
+			try
+			{
+				to.requestContext = null;
+				
+				byte[] bytes = ObjectUtil.toJason(to);
+				ByteBuffer buffer = ByteBuffer.wrap(bytes);
+				session.getAsyncRemote().sendBinary(buffer);
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			
+			
+			
+	
 	}
 	
-	private WebFile getFile(WSTO to) throws Exception
+	
+	private void checkAuth(WebMethod wm, WSTO to, String path)
+	throws AuthException
 	{
-		String path = to.path;
-		String[] tokens = path.split("/");
-		for (int i = 0; i < tokens.length; i++)
+		if(!wm.authRequired)
 		{
-			int lIndex = path.lastIndexOf('/');
-			path = path.substring(0, lIndex);
-			String lPath = to.path.substring(lIndex+1);
-			WebMethod wMethod = WebMethodMap.getInstance().getMethod(path+"/*");
-			if(wMethod != null)
-			{
-				System.out.println(wMethod);
-				
-				WebFile webFile = Baltoro.fileServer(lPath, wMethod.localFilePath);
-				if(webFile == null)
-				{
-					return null;
-				}
-				return webFile;
-				
-			}
-			
+			return;
 		}
 		
-		return null;
+		String sessionId = to.requestContext.getSessionId();
+		if(sessionId == null)
+		{
+			throw new AuthException("sessionId is null, cannot execute "+path);
+		}
+		
+		UserSession userSession = Baltoro.getUserSession(sessionId);
+		if(userSession == null)
+		{
+			throw new AuthException("session object is null, cannot execute "+path);
+		}
+		
+		Principal principal = userSession.getPrincipal();
+		if(principal == null)
+		{
+			throw new AuthException("no user in session, cannot execute "+path);
+		}
 	}
-	
 	
 	private Object executeMethod(WebMethod wMethod, WSTO to) throws Exception
 	{
 		RequestContext ctx = to.requestContext;
 		
-		if(StringUtil.isNotNullAndNotEmpty(ctx.sessionId))
+		if(StringUtil.isNotNullAndNotEmpty(ctx.getSessionId()))
 		{
-			UserSession userSession = new UserSession(ctx.sessionId);
+			UserSession userSession = new UserSession(ctx.getSessionId());
 		}
 		
-		Map<String, String[]> requestParam = ctx.requestParams;
+		Map<String, String[]> requestParam = ctx.getRequestParams();
 		if(requestParam == null || requestParam.size()==0)
 		{
 			requestParam = new HashMap<String, String[]>();

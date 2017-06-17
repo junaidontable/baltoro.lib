@@ -37,4 +37,9 @@ public class UserSession
 	{
 		return this.principal;
 	}
+	
+	public void setPrincipal(Principal principal)
+	{
+		this.principal = principal;
+	}
 }

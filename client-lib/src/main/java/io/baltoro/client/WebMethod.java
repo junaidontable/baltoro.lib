@@ -5,10 +5,19 @@ import java.lang.reflect.Method;
 public class WebMethod
 {
 	
-	String webPath;
-	String localFilePath;
-	
+	private String webPath;
+	boolean authRequired = true;
 	private Class<?> _class;
+	private Method method;
+	
+	public WebMethod(String webPath, Class<?> _class, Method method)
+	{
+		this.webPath = webPath;
+		this._class = _class;
+		this.method = method;
+	}
+	
+
 	public Class<?> get_class()
 	{
 		return _class;
@@ -19,13 +28,11 @@ public class WebMethod
 		return method;
 	}
 
-	private Method method;
-	
-	public WebMethod(Class<?> _class, Method method)
+	public String getWebPath()
 	{
-		this._class = _class;
-		this.method = method;
+		return webPath;
 	}
+	
 	
 	@Override
 	public String toString()
@@ -36,12 +43,7 @@ public class WebMethod
 		{
 			str.append(webPath+", ");
 		}
-		
-		if(localFilePath != null)
-		{
-			str.append(localFilePath+", ");
-		}
-		
+			
 		if(_class != null)
 		{
 			str.append(_class.getSimpleName()+", ");

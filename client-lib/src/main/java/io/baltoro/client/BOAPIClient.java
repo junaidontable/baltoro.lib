@@ -29,7 +29,7 @@ public class BOAPIClient
 	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
 	
 	Client webClient;
-	String host = "http://baltoro-api.baltoro.io";
+	String host = "http://baltoro.baltoro.io";
 	
 	Baltoro baltoro;
 	boolean online = false;
@@ -38,7 +38,7 @@ public class BOAPIClient
 	{
 		if(baltoro.debug)
 		{
-			host = "http://baltoro-api.baltoro.io:8080";
+			host = "http://baltoro.baltoro.io:8080";
 		}
 		
 		CheckResponseFilter responseFilter = new CheckResponseFilter(baltoro.agentCookieMap);
@@ -68,7 +68,7 @@ public class BOAPIClient
 	{
 		log.info("... Are you There ...");
 	
-		WebTarget target = webClient.target(host).path("/baltoro-api/areyouthere");	
+		WebTarget target = webClient.target(host).path("/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		log.info("sessionId ==>"+response);
