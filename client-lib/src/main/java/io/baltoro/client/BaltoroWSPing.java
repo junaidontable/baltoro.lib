@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 
 import javax.websocket.Session;
 
+import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.WSTO;
-import io.baltoro.util.ObjectUtil;
 
 public class BaltoroWSPing extends Thread
 {
@@ -35,8 +35,8 @@ public class BaltoroWSPing extends Thread
 				//to.cpuPercent = Integer.to os.getSystemLoadAverage();
 				//to.memoryGB = os.
 				
-				byte[] bytes = ObjectUtil.toJason(to);
-				ByteBuffer buffer = ByteBuffer.wrap(bytes);
+				//byte[] bytes = ObjectUtil.toJason(to);
+				//ByteBuffer buffer = ByteBuffer.wrap(bytes);
 				//session.getAsyncRemote().sendBinary(buffer);
 				
 				

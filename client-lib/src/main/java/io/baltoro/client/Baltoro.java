@@ -26,12 +26,12 @@ import javax.ws.rs.core.NewCookie;
 
 import org.glassfish.tyrus.client.ClientManager;
 
+import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
-import io.baltoro.util.UUIDGenerator;
 
 
 public class Baltoro 

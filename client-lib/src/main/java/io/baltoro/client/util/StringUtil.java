@@ -1,4 +1,4 @@
-package io.baltoro.util;
+package io.baltoro.client.util;
 
 import java.util.Base64;
 

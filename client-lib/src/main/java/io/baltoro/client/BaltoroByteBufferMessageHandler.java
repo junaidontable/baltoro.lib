@@ -15,13 +15,13 @@ import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.ObjectUtil;
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.exception.AuthException;
 import io.baltoro.features.Param;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 import io.baltoro.to.WSTO;
-import io.baltoro.util.ObjectUtil;
-import io.baltoro.util.StringUtil;
 
 public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<ByteBuffer>
 {

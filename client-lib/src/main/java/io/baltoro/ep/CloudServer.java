@@ -26,8 +26,8 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
-import io.baltoro.util.ObjectUtil;
-import io.baltoro.util.StringUtil;
+import io.baltoro.client.util.ObjectUtil;
+import io.baltoro.client.util.StringUtil;
 
 public class CloudServer
 {
