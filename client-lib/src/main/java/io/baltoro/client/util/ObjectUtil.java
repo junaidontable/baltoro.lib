@@ -12,6 +12,7 @@ public class ObjectUtil
 		byte[] bytes = mappper.writeValueAsBytes(obj);
 		return bytes;
 	}
+
 	
 	public static <T> T toObject(Class<?> clazz, byte[] bytes)
 	{

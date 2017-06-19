@@ -133,7 +133,7 @@ public class Baltoro
 		
 		Session session = future.get();
 		
-		BaltoroWSPing thread = new BaltoroWSPing(session);
+		BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
 	 	thread.start();
 	 	  
 		return session;
@@ -294,13 +294,13 @@ public class Baltoro
     		
     		
     		String option = systemIn("Start "+this.appName+" ? [y/n] : ");
-    		if(option.equals("y"))
+    		if(option.equals("n"))
     		{
-    			return true;
+    			propFile.delete();
     		}
     		else
     		{
-    			propFile.delete();
+    			return true;
     		}
     	}
     		
