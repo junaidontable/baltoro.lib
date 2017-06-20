@@ -19,13 +19,16 @@ public class AnnotationProcessor
 
 	static Logger log = Logger.getLogger(AnnotationProcessor.class.getName());
 	
+	Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(100);
+	
+	
 	public Map<String, WebMethod> processAnnotation(String packageName) throws Exception
 	{
 		log.info("packageName = "+packageName);
 		
 		Set<Class<?>> classes = getClasses(packageName);
 		
-		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>();
+		
 		
 		for (Class<?> _class : classes)
 		{

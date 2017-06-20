@@ -5,12 +5,16 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.websocket.Session;
 
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.MonitoringContext;
+import io.baltoro.to.PathTO;
 import io.baltoro.to.WSTO;
 
 public class BaltoroWSHeartbeat extends Thread
@@ -32,18 +36,40 @@ public class BaltoroWSHeartbeat extends Thread
 	
 	public void run()
 	{
+		
 		while(true)
 		{
 			count++;
 			try
 			{
-				
 				WSTO to = new WSTO();
+				to = new WSTO();
 				to.instanceUuid = baltoro.instanceUuid;
 				to.appUuid = baltoro.appUuid;
 				to.appName = baltoro.appName;
 				
 				MonitoringContext ctx = new MonitoringContext();
+				if(count == 1)
+				{
+					Map<String, WebMethod> map = WebMethodMap.getInstance().getMap();
+					List<PathTO> pathList = new ArrayList<>(200);
+					
+					for (String key : map.keySet())
+					{
+						WebMethod wm = map.get(key);
+						
+						PathTO pto = new PathTO();
+						pto.appUuid = to.appUuid;
+						pto.createdBy = to.instanceUuid;
+						pto.path = key;
+						pto.authRequired = wm.authRequired;
+						
+						pathList.add(pto);
+						System.out.println("PATH ADDING TO LIST -> "+key+" --> "+map.get(key));
+					} 
+					
+					ctx.setPathTOs(pathList);
+				}
 				
 				String localName =  Optional.ofNullable(InetAddress.getLocalHost().getHostName()).orElse(InetAddress.getLocalHost().getHostAddress());
 				

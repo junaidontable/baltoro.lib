@@ -82,7 +82,7 @@ public class EndPointProcessor extends AbstractProcessor
 
 	
 		
-		Map<String, List<EPMethod>> classMap = new HashMap<String, List<EPMethod>>();
+		Map<String, List<EPMethod>> pathClassMap = new HashMap<String, List<EPMethod>>();
 		Map<String, PackageElement> packageMap = new HashMap<String, PackageElement>();
 
 
@@ -96,11 +96,11 @@ public class EndPointProcessor extends AbstractProcessor
 			String _package = classElement.toString().substring(0,classElement.toString().lastIndexOf('.'));
 			packageMap.put(_package, packageElement);
 			
-			List<EPMethod> methodList = classMap.get(classElement.toString());
+			List<EPMethod> methodList = pathClassMap.get(classElement.toString());
 			if (methodList == null)
 			{
 				methodList = new ArrayList<EPMethod>();
-				classMap.put(classElement.toString(), methodList);
+				pathClassMap.put(classElement.toString(), methodList);
 			}
 
 			String returnType = methodElement.getReturnType().toString();
@@ -128,7 +128,7 @@ public class EndPointProcessor extends AbstractProcessor
 
 		
 		
-		Set<String> classes = classMap.keySet();
+		Set<String> classes = pathClassMap.keySet();
 		for (String className : classes)
 		{
 			StringBuffer code = new StringBuffer(); 
@@ -141,7 +141,7 @@ public class EndPointProcessor extends AbstractProcessor
 			code.append("public class "+_className+" implements "+className+"\n");
 			code.append("{\n");
 			
-			List<EPMethod> methods = classMap.get(className);
+			List<EPMethod> methods = pathClassMap.get(className);
 			for (EPMethod endPointMethod : methods)
 			{
 				code.append("\n\n");

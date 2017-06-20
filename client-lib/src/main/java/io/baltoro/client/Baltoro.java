@@ -6,9 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +41,7 @@ public class Baltoro
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 	}
 	
-	static Map<String, Class<?>> classMap = new HashMap<String, Class<?>>(100); 
+	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
 	
 	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
@@ -146,12 +143,12 @@ public class Baltoro
 	{
 		try
 		{
-			Class<?> implClass = classMap.get(_class.getName());
+			Class<?> implClass = pathClassMap.get(_class.getName());
 			if(implClass == null)
 			{
 				ClassBuilder builder = new ClassBuilder(_class);
 				implClass = builder.buildClass();
-				classMap.put(_class.getName(), implClass);
+				pathClassMap.put(_class.getName(), implClass);
 			}
 			
 			Object obj = implClass.newInstance();

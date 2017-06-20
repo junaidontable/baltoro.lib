@@ -35,4 +35,10 @@ public class WebMethodMap
 		return webMethod;
 		
 	}
+	
+	Map<String, WebMethod> getMap()
+	{
+		return pMap;
+	}
+	
 }

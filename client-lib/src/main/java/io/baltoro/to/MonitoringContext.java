@@ -1,5 +1,7 @@
 package io.baltoro.to;
 
+import java.util.List;
+
 public class MonitoringContext
 {
 	private String hostName;
@@ -7,7 +9,7 @@ public class MonitoringContext
 	private int memoryGB;
 	private int heartBeatCount;
 	private long localTimestamp;
-	
+	private List<PathTO> pathTOs;
 	
 	public int getCpuPercent()
 	{
@@ -49,6 +51,16 @@ public class MonitoringContext
 	{
 		this.localTimestamp = localTimestamp;
 	}
+	public List<PathTO> getPathTOs()
+	{
+		return pathTOs;
+	}
+	public void setPathTOs(List<PathTO> pathTOs)
+	{
+		this.pathTOs = pathTOs;
+	}
+	
+	
 	
 	
 	
