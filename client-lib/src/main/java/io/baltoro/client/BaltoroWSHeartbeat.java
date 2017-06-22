@@ -94,7 +94,7 @@ public class BaltoroWSHeartbeat extends Thread
 				session.getBasicRemote().sendBinary(msg);
 				
 				System.out.println("sending monitoring "+count);
-				Thread.sleep(5000);
+				Thread.sleep(30000);
 			} 
 			catch (Exception e)
 			{

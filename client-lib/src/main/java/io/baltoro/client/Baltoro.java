@@ -127,17 +127,19 @@ public class Baltoro
 		*/
 		
 		ExecutorService executor = Executors.newFixedThreadPool(8);
-		
-		for (int i = 0; i <8; i++)
+		Session session = null;
+		for (int i = 0; i <5; i++)
 		{
 			Future<Session> future = executor.submit(new WSClient(this));
-			Session session = future.get();
-			BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
-		 	thread.start();
-	
+			session = future.get();
+
+			//BaltoroWSPing thread = new BaltoroWSPing(this, session);
+		 	//thread.start();
 		}
 		
-	 	  
+		BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
+	 	thread.start();
+	 	
 		return null;
 		
 	}
