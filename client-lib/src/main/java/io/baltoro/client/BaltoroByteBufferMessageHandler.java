@@ -116,10 +116,13 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 					SendRedirect sd = (SendRedirect) e.getCause();
 					res.setRedirect(sd.getUrl());
 				}
-				
-				if(e instanceof AuthException)
+				else if(e instanceof AuthException)
 				{
 					res.setError(e.getMessage());
+				}
+				else
+				{
+					e.printStackTrace();
 				}
 				
 			}
