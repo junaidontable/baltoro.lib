@@ -87,11 +87,9 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		String token = System.currentTimeMillis()+"|"+this.appUuid;
-		String eToken = token;//CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
 		
-		ExecutorService executor = Executors.newWorkStealingPool();
-		
+	
+		/*
 		Future<Session> future = executor.submit(() -> 
 		{
 		    try 
@@ -126,14 +124,21 @@ public class Baltoro
 		        throw new IllegalStateException("task interrupted", e);
 		    }
 		});
+		*/
 		
+		ExecutorService executor = Executors.newFixedThreadPool(8);
 		
-		Session session = future.get();
+		for (int i = 0; i <8; i++)
+		{
+			Future<Session> future = executor.submit(new WSClient(this));
+			Session session = future.get();
+			BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
+		 	thread.start();
+	
+		}
 		
-		BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
-	 	thread.start();
 	 	  
-		return session;
+		return null;
 		
 	}
 	
