@@ -1,12 +1,24 @@
 package io.baltoro.client.util;
 
 import java.util.Base64;
+import java.util.Collection;
 
 public class StringUtil 
 {
 	public static boolean isNullOrEmpty(String str)
 	{
 		if(str != null && str.length() > 0)
+		{
+			return false;
+		}
+		
+		return true;
+			
+	}
+	
+	public static boolean isNullOrEmpty(Collection<?> col)
+	{
+		if(col != null && col.size() > 0)
 		{
 			return false;
 		}

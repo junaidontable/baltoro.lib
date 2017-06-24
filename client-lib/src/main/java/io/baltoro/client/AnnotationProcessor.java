@@ -109,6 +109,8 @@ public class AnnotationProcessor
 								fPath = cPath+mPath;
 							}
 								
+							fPath = fPath.toLowerCase();
+							
 							WebMethod wm = new WebMethod(fPath, _class, method);
 							wm.authRequired = pathAnno.authRequired();
 							pathMap.put(fPath, wm);

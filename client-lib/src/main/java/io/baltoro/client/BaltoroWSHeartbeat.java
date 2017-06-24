@@ -105,4 +105,9 @@ public class BaltoroWSHeartbeat extends Thread
 	
 	}
 	
+	public Session getSession()
+	{
+		return session;
+	}
+	
 }

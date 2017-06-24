@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
-
-import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
@@ -46,15 +42,12 @@ public class Baltoro
 	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
 	private String packages;
-	//private LocalDB db;
 	private BOAPIClient cs;
 	boolean logedin = false;
 	private String email;
 	private String password;
 	String sessionId;
 	UserTO user;
-	//AppTO currentApp;
-	//PrivateDataTO currentAppPrivateData;
 	String instanceUuid;
 	boolean debug = false;
 	Properties props = null;
@@ -63,7 +56,9 @@ public class Baltoro
 	String appName;
 	String userUuid;
 	File propFile = new File(".baltoro.props");
-	
+	BaltoroWSHeartbeat mgntThread;
+	RequestPoller requestPoller;
+	ResponsePoller responsePoller;
 	 
 	
 	private Baltoro()
@@ -128,17 +123,23 @@ public class Baltoro
 		
 		ExecutorService executor = Executors.newFixedThreadPool(8);
 		Session session = null;
-		for (int i = 0; i <5; i++)
+		for (int i = 0; i <1; i++)
 		{
 			Future<Session> future = executor.submit(new WSClient(this));
 			session = future.get();
 
-			//BaltoroWSPing thread = new BaltoroWSPing(this, session);
-		 	//thread.start();
+			ClientWSSession csession = new ClientWSSession(session);
+			WSSessions.get().addSession(csession);
 		}
 		
-		BaltoroWSHeartbeat thread = new BaltoroWSHeartbeat(this, session);
-	 	thread.start();
+		mgntThread = new BaltoroWSHeartbeat(this, session);
+		mgntThread.start();
+		
+		requestPoller = new RequestPoller(this);
+		requestPoller.start();
+		
+		responsePoller = new ResponsePoller(this);
+		responsePoller.start();
 	 	
 		return null;
 		
