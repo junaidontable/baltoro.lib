@@ -8,6 +8,7 @@ public class ResponseContext
 	private String redirect;
 	private String error;
 	private String sessionId;
+	private String mimeType;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
 	private Principal principal;
@@ -69,6 +70,14 @@ public class ResponseContext
 	public void setData(byte[] data)
 	{
 		this.data = data;
+	}
+	public String getMimeType()
+	{
+		return mimeType;
+	}
+	public void setMimeType(String mimeType)
+	{
+		this.mimeType = mimeType;
 	}
 	
 	

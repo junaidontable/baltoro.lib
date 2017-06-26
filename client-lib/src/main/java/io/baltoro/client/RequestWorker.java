@@ -22,6 +22,9 @@ public class RequestWorker extends Thread
 {
 	private ByteBuffer byteBuffer;
 	static ObjectMapper objectMapper = new ObjectMapper();
+	
+	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
+	//static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
 
 	public RequestWorker(ByteBuffer byteBuffer)
 	{
@@ -35,13 +38,17 @@ public class RequestWorker extends Thread
 		try
 		{
 			WSTO to = process();
-
+			requestCtx.set(to.requestContext);
+			
+			
 			System.out.println("......... ********  ......... processibng byte buffer "+to.appName);
 			
 			byte[] bytes = ObjectUtil.toJason(to);
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 			WSSessions.get().addToResponseQueue(buffer);
+			
+			requestCtx.set(null);
 
 		} 
 		catch (Exception e)
@@ -159,7 +166,7 @@ public class RequestWorker extends Thread
 			throw new AuthException("sessionId is null, cannot execute " + path);
 		}
 
-		UserSession userSession = Baltoro.getUserSession(sessionId);
+		UserSession userSession = Baltoro.getUserSession();
 		if (userSession == null)
 		{
 			throw new AuthException("session object is null, cannot execute " + path);
@@ -233,7 +240,8 @@ public class RequestWorker extends Thread
 		}
 
 		Object obj = _class.newInstance();
-
+		
+		
 		Object returnObj = method.invoke(obj, methodInputData);
 
 		return returnObj;

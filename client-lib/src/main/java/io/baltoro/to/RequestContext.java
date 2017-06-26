@@ -8,6 +8,7 @@ public class RequestContext
 	private String url;
 	private String ip;
 	private String sessionId;
+	private String method;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
 	private Principal principal;
@@ -98,6 +99,14 @@ public class RequestContext
 	public void setRelativePath(String relativePath)
 	{
 		this.relativePath = relativePath;
+	}
+	public String getMethod()
+	{
+		return method;
+	}
+	public void setMethod(String method)
+	{
+		this.method = method;
 	}
 	
 	

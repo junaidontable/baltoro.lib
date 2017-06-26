@@ -24,6 +24,7 @@ import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
+import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
 
 
@@ -179,9 +180,10 @@ public class Baltoro
 	}
 	
 	
-	public static UserSession getUserSession(String sessionId)
+	public static UserSession getUserSession()
 	{
-		UserSession userSession = SessionManager.getSession(sessionId);
+		RequestContext rc = RequestWorker.requestCtx.get();
+		UserSession userSession = SessionManager.getSession(rc.getSessionId());
 		return userSession;
 	}
 	
