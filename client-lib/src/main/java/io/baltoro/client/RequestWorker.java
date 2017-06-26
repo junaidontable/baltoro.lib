@@ -182,12 +182,15 @@ public class RequestWorker extends Thread
 	private Object executeMethod(WebMethod wMethod, WSTO to) throws Exception
 	{
 		RequestContext ctx = to.requestContext;
+		
+		
 		UserSession userSession = null;
 		if (StringUtil.isNotNullAndNotEmpty(ctx.getSessionId()))
 		{
 			userSession = SessionManager.getSession(ctx.getSessionId());
 		}
-
+		
+		
 		Map<String, String[]> requestParam = ctx.getRequestParams();
 		if (requestParam == null || requestParam.size() == 0)
 		{

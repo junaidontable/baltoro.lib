@@ -2,7 +2,7 @@ package io.baltoro.to;
 
 import java.util.List;
 
-public class MonitoringContext
+public class MgntContext
 {
 	private String hostName;
 	private int cpuPercent;

@@ -21,6 +21,7 @@ import javax.ws.rs.core.NewCookie;
 
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
+import io.baltoro.exception.NoValidSession;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
@@ -39,6 +40,7 @@ public class Baltoro
 	}
 	
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
+	
 	
 	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
@@ -173,10 +175,17 @@ public class Baltoro
 	}
 	
 	
-	public static void asignPrincipalToSession(String sessionId, Principal principal)
+	public static void setPrincipalToSession(Principal principal)
 	{
-		UserSession userSession = SessionManager.getSession(sessionId);
-		userSession.principal = principal;
+		RequestContext rc = RequestWorker.requestCtx.get();
+		if(rc == null)
+		{
+			return;
+		}
+		
+		UserSession userSession = SessionManager.getSession(rc.getSessionId());
+		userSession.setPrincipal(principal);
+		
 	}
 	
 	

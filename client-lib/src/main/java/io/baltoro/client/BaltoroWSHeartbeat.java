@@ -13,7 +13,7 @@ import java.util.Optional;
 import javax.websocket.Session;
 
 import io.baltoro.client.util.ObjectUtil;
-import io.baltoro.to.MonitoringContext;
+import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.WSTO;
 
@@ -48,7 +48,7 @@ public class BaltoroWSHeartbeat extends Thread
 				to.appUuid = baltoro.appUuid;
 				to.appName = baltoro.appName;
 				
-				MonitoringContext ctx = new MonitoringContext();
+				MgntContext ctx = new MgntContext();
 				if(count == 1)
 				{
 					Map<String, WebMethod> map = WebMethodMap.getInstance().getMap();
@@ -85,7 +85,7 @@ public class BaltoroWSHeartbeat extends Thread
 				ctx.setMemoryGB(freeMem);
 				ctx.setLocalTimestamp(System.currentTimeMillis());
 				ctx.setHeartBeatCount(count);
-				to.monitoringContext = ctx;
+				to.mgntContext = ctx;
 				
 				byte[]  bytes = ObjectUtil.toJason(to);
 					
@@ -94,6 +94,8 @@ public class BaltoroWSHeartbeat extends Thread
 				session.getBasicRemote().sendBinary(msg);
 				
 				System.out.println("sending monitoring "+count);
+				
+				
 				Thread.sleep(30000);
 			} 
 			catch (Exception e)

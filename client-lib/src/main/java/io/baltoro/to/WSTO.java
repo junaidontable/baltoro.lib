@@ -10,7 +10,8 @@ public class WSTO
 	
 	public RequestContext requestContext;
 	public ResponseContext responseContext;
-	public MonitoringContext monitoringContext;
+	public MgntContext mgntContext;
+
 
 	
 }

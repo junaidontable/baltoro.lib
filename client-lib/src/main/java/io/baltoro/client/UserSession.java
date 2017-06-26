@@ -11,7 +11,7 @@ public class UserSession
 	
 	private final String sessionId;
 	private Map<String, Object> attMap = new HashMap<String, Object>(200);
-	Principal principal;
+	private Principal principal;
 	
 	UserSession(String sessionId)
 	{
