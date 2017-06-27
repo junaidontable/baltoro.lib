@@ -49,7 +49,11 @@ public class BaltoroClientEndpoint extends Endpoint
 	@OnClose
 	public void onClose(javax.websocket.Session session, CloseReason closeReason)
 	{
-		log.info(String.format("Session close because of %s", closeReason));
+		
+		WSSessions.get().removeSession(session);
+		
+		
+		//log.info(String.format("Session close because of %s", closeReason));
 		try
 		{
 			//Session _session = clientManager.connectToServer(this, config, new URI(url));

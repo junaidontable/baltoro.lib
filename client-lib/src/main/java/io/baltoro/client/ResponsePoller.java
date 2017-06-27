@@ -20,6 +20,19 @@ public class ResponsePoller extends Thread
 		while(run)
 		{
 			
+			int count = WSSessions.get().checkSessions();
+			{
+				if(count == 0)
+				{
+					System.out.println("No running sessions plz restart the instance ");
+					System.exit(1);
+				}
+				else
+				{
+					System.out.println("total valid connections ["+count+"] ");
+				}
+			}
+			
 			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getResponseQueue();
 			if(queue == null || queue.size() == 0)
 			{
@@ -36,17 +49,8 @@ public class ResponsePoller extends Thread
 			}
 				
 			
-			ClientWSSession session;
-			try
-			{
-				session = WSSessions.get().getSession();
-			} 
-			catch (NoRunningSessionException e)
-			{
-				sleep("2 No running sessions for waiting the polling thread ");
-				break;
-			}
-			
+			ClientWSSession session = WSSessions.get().getSession();
+				
 			if(session == null)
 			{
 				sleep(" no free session ! try again in 5 secs ");

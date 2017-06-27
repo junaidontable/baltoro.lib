@@ -84,13 +84,23 @@ public class WSSessions
 	}
 
 
-	
-	ClientWSSession getSession()
-	throws NoRunningSessionException
+	int checkSessions()
 	{
 		if(StringUtil.isNullOrEmpty(set))
 		{
-			throw new NoRunningSessionException();
+			return 0;
+		}
+		else
+		{
+			return set.size();
+		}
+	}
+	
+	ClientWSSession getSession()
+	{
+		if(StringUtil.isNullOrEmpty(set))
+		{
+			return null;
 		}
 		
 	
@@ -130,6 +140,15 @@ public class WSSessions
 			{
 				set.remove(rm);
 			}
+			
+			if(set.size() == 0)
+			{
+				System.out.println("No running sessions plz restart the instance ");
+				System.exit(1);
+			}
+			
 		}
+		
+		
 	}
 }

@@ -21,7 +21,6 @@ import javax.ws.rs.core.NewCookie;
 
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
-import io.baltoro.exception.NoValidSession;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
