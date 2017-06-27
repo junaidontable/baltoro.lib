@@ -22,7 +22,6 @@ import javax.ws.rs.core.NewCookie;
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.AppTO;
-import io.baltoro.to.Principal;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
@@ -46,17 +45,17 @@ public class Baltoro
 	private String packages;
 	private BOAPIClient cs;
 	boolean logedin = false;
-	private String email;
-	private String password;
-	String sessionId;
+	static private String email;
+	static private String password;
+	static String sessionId;
 	UserTO user;
-	String instanceUuid;
+	static String instanceUuid;
 	boolean debug = false;
 	Properties props = null;
-	String appUuid;
-	String appPrivateKey;
-	String appName;
-	String userUuid;
+	static String appUuid;
+	static String appPrivateKey;
+	static String appName;
+	static String userUuid;
 	File propFile = new File(".baltoro.props");
 	BaltoroWSHeartbeat mgntThread;
 	RequestPoller requestPoller;
@@ -174,7 +173,7 @@ public class Baltoro
 	}
 	
 	
-	public static void setPrincipalToSession(Principal principal)
+	public static void setUserToSession(String name)
 	{
 		RequestContext rc = RequestWorker.requestCtx.get();
 		if(rc == null)
@@ -183,7 +182,7 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(rc.getSessionId());
-		userSession.setPrincipal(principal);
+		userSession.setUserName(name);
 		
 	}
 	
@@ -299,16 +298,16 @@ public class Baltoro
     	{
     		
     		props.load(new FileInputStream(propFile));
-    		this.appPrivateKey = props.getProperty("app.key");
-    		this.appUuid = props.getProperty("app.uuid");
-    		this.appName = props.getProperty("app.name");
-    		this.userUuid = props.getProperty("user.uuid");
-    		this.email = props.getProperty("user.email");
-    		this.instanceUuid = props.getProperty("app.instance.uuid");
+    		appPrivateKey = props.getProperty("app.key");
+    		appUuid = props.getProperty("app.uuid");
+    		appName = props.getProperty("app.name");
+    		userUuid = props.getProperty("user.uuid");
+    		email = props.getProperty("user.email");
+    		instanceUuid = props.getProperty("app.instance.uuid");
     		
     		
     		
-    		String option = systemIn("Start "+this.appName+" ? [y/n] : ");
+    		String option = systemIn("Start "+appName+" ? [y/n] : ");
     		if(option.equals("n"))
     		{
     			propFile.delete();

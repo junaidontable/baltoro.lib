@@ -11,7 +11,6 @@ public class ResponseContext
 	private String mimeType;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
-	private Principal principal;
 	private byte[] data;
 	
 	
@@ -55,14 +54,7 @@ public class ResponseContext
 	{
 		this.cookies = cookies;
 	}
-	public Principal getPrincipal()
-	{
-		return principal;
-	}
-	public void setPrincipal(Principal principal)
-	{
-		this.principal = principal;
-	}
+
 	public byte[] getData()
 	{
 		return data;

@@ -1,9 +1,15 @@
 package io.baltoro.client;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import io.baltoro.to.Principal;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.baltoro.to.UserSessionContext;
 import io.baltoro.to.WSTO;
 
 public class UserSession
@@ -11,8 +17,9 @@ public class UserSession
 
 	
 	private final String sessionId;
-	private Map<String, Object> attMap = new HashMap<String, Object>(200);
-	private Principal principal;
+	Map<String, Object> attMap = new HashMap<String, Object>(200);
+	Set<String> roles = new HashSet<>();
+	String userName;
 	
 	UserSession(String sessionId)
 	{
@@ -24,27 +31,67 @@ public class UserSession
 		return attMap.get(attName);
 	}
 	
-	public Object addObject(String attName, Object obj)
+	public void addObject(String attName, Object obj)
 	{
-		return attMap.put(attName, obj);
+		attMap.put(attName, obj);
+		sendSession();
 	}
+	
+	public void addRoles(String roleName)
+	{
+		roles.add(roleName);
+		sendSession();
+	}
+
 
 	public String getSessionId()
 	{
 		return sessionId;
 	}
-	
-	public Principal getPrincipal()
+
+	public String getUserName()
 	{
-		return this.principal;
+		return userName;
+	}
+
+	public void setUserName(String userName)
+	{
+		this.userName = userName;
+		sendSession();
 	}
 	
-	public void setPrincipal(Principal principal)
+	private void sendSession()
 	{
-		this.principal = principal;
-		
 		WSTO to = new WSTO();
+		to.appUuid = Baltoro.appUuid;
+		to.instanceUuid = Baltoro.instanceUuid;
+		
+		UserSessionContext uctx = new UserSessionContext();
+		uctx.setSessionUuid(getSessionId());
+		uctx.setPrincipalName(getUserName());
+		
+		ObjectMapper mapper = new ObjectMapper();
+		String json = null;
+		byte[] toBytes = null;
+		try
+		{
+			json = mapper.writeValueAsString(attMap);
+			
+			System.out.println("------------");
+			System.out.println(json);
+			System.out.println("------------");
+			
+			uctx.setAttJson(json);
+			to.userSessionContext = uctx;
+			toBytes = mapper.writeValueAsBytes(to);
+		} 
+		catch (JsonProcessingException e)
+		{
+			e.printStackTrace();
+		}
 		
 		
+		ByteBuffer byteBuffer = ByteBuffer.wrap(toBytes);
+		WSSessions.get().addToResponseQueue(byteBuffer);
 	}
 }

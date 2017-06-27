@@ -13,9 +13,9 @@ import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exception.AuthException;
 import io.baltoro.features.Param;
-import io.baltoro.to.Principal;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
+import io.baltoro.to.UserSessionContext;
 import io.baltoro.to.WSTO;
 
 public class RequestWorker extends Thread
@@ -37,8 +37,8 @@ public class RequestWorker extends Thread
 		
 		try
 		{
+			
 			WSTO to = process();
-			requestCtx.set(to.requestContext);
 			
 			
 			System.out.println("......... ********  ......... processibng byte buffer "+to.appName);
@@ -85,6 +85,9 @@ public class RequestWorker extends Thread
 		}
 
 		RequestContext req = to.requestContext;
+		
+		requestCtx.set(to.requestContext);
+		
 
 		WebMethod wm = WebMethodMap.getInstance().getMethod(req.getApiPath());
 		if (wm == null)
@@ -172,8 +175,8 @@ public class RequestWorker extends Thread
 			throw new AuthException("session object is null, cannot execute " + path);
 		}
 
-		Principal principal = userSession.getPrincipal();
-		if (principal == null)
+		String userName = userSession.getUserName();
+		if (userName == null)
 		{
 			throw new AuthException("no user in session, cannot execute " + path);
 		}
@@ -184,10 +187,26 @@ public class RequestWorker extends Thread
 		RequestContext ctx = to.requestContext;
 		
 		
+		
 		UserSession userSession = null;
 		if (StringUtil.isNotNullAndNotEmpty(ctx.getSessionId()))
 		{
 			userSession = SessionManager.getSession(ctx.getSessionId());
+			UserSessionContext uctx = to.userSessionContext;
+			if(uctx != null)
+			{
+				String userName = uctx.getPrincipalName();
+				userSession.userName = userName;
+				
+				Map<String, Object> attMap = mapper.readValue(uctx.getAttJson(), Map.class);
+				for (String key : attMap.keySet())
+				{
+					Object val = attMap.get(key);
+					userSession.attMap.put(key, val);
+				}
+			}
+			
+			
 		}
 		
 		

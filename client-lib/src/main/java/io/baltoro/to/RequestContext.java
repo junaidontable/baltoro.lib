@@ -11,7 +11,6 @@ public class RequestContext
 	private String method;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
-	private Principal principal;
 	private Map<String,String[]> requestParams;
 	private byte[] data;
 	private String apiPath;
@@ -60,14 +59,7 @@ public class RequestContext
 	{
 		this.cookies = cookies;
 	}
-	public Principal getPrincipal()
-	{
-		return principal;
-	}
-	public void setPrincipal(Principal principal)
-	{
-		this.principal = principal;
-	}
+	
 	public Map<String, String[]> getRequestParams()
 	{
 		return requestParams;
