@@ -21,7 +21,7 @@ import io.baltoro.to.WSTO;
 public class RequestWorker extends Thread
 {
 	private ByteBuffer byteBuffer;
-	static ObjectMapper objectMapper = new ObjectMapper();
+	static ObjectMapper mapper = new ObjectMapper();
 	
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
 	//static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
@@ -71,7 +71,7 @@ public class RequestWorker extends Thread
 
 		byte[] jsonBytes = byteBuffer.array();
 
-		ObjectMapper mapper = new ObjectMapper();
+		
 
 		WSTO to = null;
 		try

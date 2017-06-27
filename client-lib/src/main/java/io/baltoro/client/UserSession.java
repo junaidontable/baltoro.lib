@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.baltoro.to.Principal;
+import io.baltoro.to.WSTO;
 
 public class UserSession
 {
@@ -41,5 +42,9 @@ public class UserSession
 	public void setPrincipal(Principal principal)
 	{
 		this.principal = principal;
+		
+		WSTO to = new WSTO();
+		
+		
 	}
 }

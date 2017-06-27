@@ -11,7 +11,7 @@ public class WSTO
 	public RequestContext requestContext;
 	public ResponseContext responseContext;
 	public MgntContext mgntContext;
-
+	public UserSessionConrtext userSessionConrtext;
 
 	
 }
