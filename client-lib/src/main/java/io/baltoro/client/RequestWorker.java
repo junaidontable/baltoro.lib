@@ -198,10 +198,10 @@ public class RequestWorker extends Thread
 				String userName = uctx.getPrincipalName();
 				userSession.userName = userName;
 				
-				Map<String, Object> attMap = mapper.readValue(uctx.getAttJson(), Map.class);
+				Map<String, String> attMap = mapper.readValue(uctx.getAttJson(), Map.class);
 				for (String key : attMap.keySet())
 				{
-					Object val = attMap.get(key);
+					String val = attMap.get(key);
 					userSession.attMap.put(key, val);
 				}
 			}

@@ -17,7 +17,7 @@ public class UserSession
 
 	
 	private final String sessionId;
-	Map<String, Object> attMap = new HashMap<String, Object>(200);
+	Map<String, String> attMap = new HashMap<String, String>(200);
 	Set<String> roles = new HashSet<>();
 	String userName;
 	
@@ -26,14 +26,14 @@ public class UserSession
 		this.sessionId = sessionId;
 	}
 	
-	public Object getObject(String attName)
+	public String getAttribute(String name)
 	{
-		return attMap.get(attName);
+		return attMap.get(name);
 	}
 	
-	public void addObject(String attName, Object obj)
+	public void addAttribute(String name, String value)
 	{
-		attMap.put(attName, obj);
+		attMap.put(name, value);
 		sendSession();
 	}
 	
