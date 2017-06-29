@@ -60,6 +60,7 @@ public class Baltoro
 	BaltoroWSHeartbeat mgntThread;
 	RequestPoller requestPoller;
 	ResponsePoller responsePoller;
+	static String clusterPath = "/*";
 	 
 	
 	private Baltoro()
@@ -195,22 +196,24 @@ public class Baltoro
 	}
 	
 	
-	public static void startDebug(String _package)
+	public static void startDebug(String _package, String clusterPath)
 	{
-		Session session = _start(_package, true);
+		Session session = _start(_package, clusterPath, true);
 	}
 	
-	public static void start(String _package)
+	public static void start(String _package, String clusterPath)
 	{
-		Session session = _start(_package, false);
+		Session session = _start(_package, clusterPath, false);
 	}
 	
-	private static Session _start(String _package, boolean debug)
+	private static Session _start(String _package, String clusterPath, boolean debug)
 	{
 		try
 		{
 			Baltoro baltoro = new Baltoro();
 			baltoro.debug = debug;
+			Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
+			
 			boolean useLocal = baltoro.init();
 			if(!useLocal)
 			{
@@ -236,7 +239,7 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.startDebug("io");
+    	Baltoro.startDebug("io", "/*");
     	
     	//Baltoro.start("io");
     }

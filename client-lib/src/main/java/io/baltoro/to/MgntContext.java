@@ -9,6 +9,7 @@ public class MgntContext
 	private int memoryGB;
 	private int heartBeatCount;
 	private long localTimestamp;
+	private String clusterPath;
 	private List<PathTO> pathTOs;
 	
 	public int getCpuPercent()
@@ -58,6 +59,14 @@ public class MgntContext
 	public void setPathTOs(List<PathTO> pathTOs)
 	{
 		this.pathTOs = pathTOs;
+	}
+	public String getClusterPath()
+	{
+		return clusterPath;
+	}
+	public void setClusterPath(String clusterPath)
+	{
+		this.clusterPath = clusterPath;
 	}
 	
 	

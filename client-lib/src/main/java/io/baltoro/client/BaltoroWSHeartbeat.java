@@ -73,7 +73,7 @@ public class BaltoroWSHeartbeat extends Thread
 				
 				String localName =  Optional.ofNullable(InetAddress.getLocalHost().getHostName()).orElse(InetAddress.getLocalHost().getHostAddress());
 				
-				
+				ctx.setClusterPath(Baltoro.clusterPath);
 				ctx.setHostName(localName);
 				ctx.setCpuPercent((int)os.getSystemLoadAverage());
 				
