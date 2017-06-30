@@ -1,15 +1,23 @@
 package io.baltoro.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.baltoro.features.AbstractFilter;
 
 public class WebMethodMap
 {
 	private static WebMethodMap _instance;
 	private Map<String, WebMethod> pMap;
-
+	private Map<String, Class<AbstractFilter>> filterMap;
+	private List<String> filterList;
 	private WebMethodMap()
 	{
-		// TODO Auto-generated constructor stub
+		filterMap = new HashMap<>();
+		filterList = new ArrayList<>();
 	}
 	
 	
@@ -40,5 +48,27 @@ public class WebMethodMap
 	{
 		return pMap;
 	}
+	
+	void addFilter(int sortOrder, Class<AbstractFilter> clazz)
+	{
+		filterMap.put(sortOrder+clazz.toGenericString(), clazz);
+		filterList.add(sortOrder+clazz.toGenericString());
+		
+		Collections.sort(filterList);
+	}
+
+
+
+	public List<String> getFilterNames()
+	{
+		return filterList;
+	}
+	
+	public Class<AbstractFilter> getFilterClass(String key)
+	{
+		return filterMap.get(key);
+	}
+	
+	
 	
 }

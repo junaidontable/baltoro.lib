@@ -14,7 +14,11 @@ public class FileServer
 	{
 		String path = null;
 		
-		if(dirPath.endsWith("/"))
+		if(req.getRelativePath() == null)
+		{
+			path = dirPath;
+		}
+		else if(dirPath.endsWith("/"))
 		{
 			path = dirPath+req.getRelativePath();
 		}

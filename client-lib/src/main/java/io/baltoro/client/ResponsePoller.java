@@ -57,7 +57,6 @@ public class ResponsePoller extends Thread
 				continue;
 			}
 			
-			System.out.println(" /////////////////////////// got session  ----->   : "+session.getSession().getId());
 			byteBuffer = queue.poll();
 			
 			ResponseWorker worker = new ResponseWorker(byteBuffer, session);
@@ -77,7 +76,7 @@ public class ResponsePoller extends Thread
 			{
 				System.out.println(text);
 				sync.intern().wait(50000);
-				System.out.println("waited : "+(System.currentTimeMillis() - t0));
+				System.out.println("client lib response waited : "+(System.currentTimeMillis() - t0));
 			}
 		} 
 		catch (Exception e)

@@ -1,10 +1,13 @@
 package io.baltoro.client;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exception.AuthException;
+import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
@@ -21,6 +25,8 @@ import io.baltoro.to.WSTO;
 public class RequestWorker extends Thread
 {
 	private ByteBuffer byteBuffer;
+	UserSession userSession;
+	List<AbstractFilter> filters = new ArrayList<>();
 	static ObjectMapper mapper = new ObjectMapper();
 	
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
@@ -39,27 +45,28 @@ public class RequestWorker extends Thread
 		{
 			
 			WSTO to = process();
+			to.requestContext = null;
 			
-			
-			System.out.println("......... ********  ......... processibng byte buffer "+to.appName);
 			
 			byte[] bytes = ObjectUtil.toJason(to);
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 			WSSessions.get().addToResponseQueue(buffer);
-			
-			requestCtx.set(null);
 
 		} 
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			requestCtx.set(null);
+		}
 
 		String sync = "response-queue";
 		synchronized (sync.intern())
 		{
-			sync.intern().notify();
+			sync.intern().notifyAll();
 		}
 
 	
@@ -85,8 +92,82 @@ public class RequestWorker extends Thread
 		}
 
 		RequestContext req = to.requestContext;
+	
 		
 		requestCtx.set(to.requestContext);
+		
+		ResponseContext res = new ResponseContext();
+		to.responseContext = res;
+		
+		if (StringUtil.isNotNullAndNotEmpty(req.getSessionId()))
+		{
+			userSession = SessionManager.getSession(req.getSessionId());
+			UserSessionContext uctx = to.userSessionContext;
+			if(uctx != null)
+			{
+				String userName = uctx.getPrincipalName();
+				userSession.userName = userName;
+				
+				Map<String, String> attMap = null;
+				try
+				{
+					attMap = mapper.readValue(uctx.getAttJson(), Map.class);
+				} 
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+				
+				for (String key : attMap.keySet())
+				{
+					String val = attMap.get(key);
+					userSession.attMap.put(key, val);
+				}
+			}
+			
+			
+		}
+		
+		
+		
+		List<String> filterNames = WebMethodMap.getInstance().getFilterNames();
+		for (String fNames : filterNames)
+		{
+			Class<AbstractFilter> _class = WebMethodMap.getInstance().getFilterClass(fNames);
+			try
+			{
+				System.out.println(" filter  >>>>>>> "+fNames);
+				AbstractFilter filter = _class.newInstance();
+				filters.add(filter);
+				filter.before(to, userSession);
+			} 
+			catch (Exception e)
+			{
+				if (e instanceof SendRedirect)
+				{
+					SendRedirect sd = (SendRedirect) e;
+					res.setRedirect(sd.getUrl());
+					return to;
+				} 
+				else if (e.getCause() instanceof SendRedirect)
+				{
+					SendRedirect sd = (SendRedirect) e.getCause();
+					res.setRedirect(sd.getUrl());
+					return to;
+				} 
+				else if (e instanceof AuthException)
+				{
+					res.setError(e.getMessage());
+					return to;
+				} 
+				else
+				{
+					e.printStackTrace();
+				}
+
+			}
+		}
+		
 		
 
 		WebMethod wm = WebMethodMap.getInstance().getMethod(req.getApiPath());
@@ -109,8 +190,7 @@ public class RequestWorker extends Thread
 			}
 		}
 
-		ResponseContext res = new ResponseContext();
-		to.responseContext = res;
+		
 
 		if (wm == null)
 		{
@@ -122,6 +202,13 @@ public class RequestWorker extends Thread
 
 			checkAuth(wm, to, wm.getWebPath());
 			Object returnObj = executeMethod(wm, to);
+			
+			for (AbstractFilter filter : filters)
+			{
+				filter.after(returnObj, to, userSession);
+			}
+			
+			
 			if (returnObj != null)
 			{
 				if (returnObj instanceof byte[])
@@ -134,23 +221,31 @@ public class RequestWorker extends Thread
 				}
 			}
 
-		} catch (Exception e)
+		} 
+		catch (Exception e)
 		{
-			if (e.getCause() instanceof SendRedirect)
+			if (e instanceof SendRedirect)
+			{
+				SendRedirect sd = (SendRedirect) e;
+				res.setRedirect(sd.getUrl());
+			}
+			else if (e.getCause() instanceof SendRedirect)
 			{
 				SendRedirect sd = (SendRedirect) e.getCause();
 				res.setRedirect(sd.getUrl());
-			} else if (e instanceof AuthException)
+			} 
+			else if (e instanceof AuthException)
 			{
 				res.setError(e.getMessage());
-			} else
+			}
+			else
 			{
 				e.printStackTrace();
 			}
 
 		}
 
-		to.requestContext = null;
+		
 		
 		return to;
 
@@ -188,26 +283,7 @@ public class RequestWorker extends Thread
 		
 		
 		
-		UserSession userSession = null;
-		if (StringUtil.isNotNullAndNotEmpty(ctx.getSessionId()))
-		{
-			userSession = SessionManager.getSession(ctx.getSessionId());
-			UserSessionContext uctx = to.userSessionContext;
-			if(uctx != null)
-			{
-				String userName = uctx.getPrincipalName();
-				userSession.userName = userName;
-				
-				Map<String, String> attMap = mapper.readValue(uctx.getAttJson(), Map.class);
-				for (String key : attMap.keySet())
-				{
-					String val = attMap.get(key);
-					userSession.attMap.put(key, val);
-				}
-			}
-			
-			
-		}
+		
 		
 		
 		Map<String, String[]> requestParam = ctx.getRequestParams();

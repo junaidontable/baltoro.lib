@@ -26,7 +26,6 @@ public class ResponseWorker extends  Thread
 			{
 				
 				session.setWorking(true);
-				System.out.println("......... ////////////// ......... sending byte buffer ");
 				session.getSession().getBasicRemote().sendBinary(byteBuffer);
 				session.setWorking(false);
 				

@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.websocket.Session;
-
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
@@ -20,16 +18,13 @@ import io.baltoro.to.WSTO;
 public class BaltoroWSHeartbeat extends Thread
 {
 
-	Session session;
 	int count=0;
 	OperatingSystemMXBean os;
 	MemoryMXBean mem;
-	Baltoro baltoro;
 	
-	public BaltoroWSHeartbeat(Baltoro baltoro, Session session)
+	
+	public BaltoroWSHeartbeat()
 	{
-		this.baltoro = baltoro;
-		this.session = session;
 		os = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 		mem = ManagementFactory.getPlatformMXBean(MemoryMXBean.class);
 	}
@@ -44,10 +39,11 @@ public class BaltoroWSHeartbeat extends Thread
 			{
 				WSTO to = new WSTO();
 				to = new WSTO();
-				to.instanceUuid = baltoro.instanceUuid;
-				to.appUuid = baltoro.appUuid;
-				to.appName = baltoro.appName;
+				to.instanceUuid = Baltoro.instanceUuid;
+				to.appUuid = Baltoro.appUuid;
+				to.appName = Baltoro.appName;
 				
+				String localName = null;
 				MgntContext ctx = new MgntContext();
 				if(count == 1)
 				{
@@ -69,9 +65,11 @@ public class BaltoroWSHeartbeat extends Thread
 					} 
 					
 					ctx.setPathTOs(pathList);
+					
+				
+					localName =  new String(InetAddress.getLocalHost().getAddress());
 				}
 				
-				String localName =  Optional.ofNullable(InetAddress.getLocalHost().getHostName()).orElse(InetAddress.getLocalHost().getHostAddress());
 				
 				ctx.setClusterPath(Baltoro.clusterPath);
 				ctx.setHostName(localName);
@@ -91,9 +89,15 @@ public class BaltoroWSHeartbeat extends Thread
 					
 				
 				ByteBuffer  msg = ByteBuffer.wrap(bytes);
-				session.getBasicRemote().sendBinary(msg);
 				
+				WSSessions.get().addToResponseQueue(msg);
+				
+				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("sending monitoring "+count);
+				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+				
 				
 				
 				Thread.sleep(30000);
@@ -107,9 +111,5 @@ public class BaltoroWSHeartbeat extends Thread
 	
 	}
 	
-	public Session getSession()
-	{
-		return session;
-	}
 	
 }

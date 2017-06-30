@@ -12,6 +12,8 @@ import javax.annotation.security.RolesAllowed;
 
 import org.reflections.Reflections;
 
+import io.baltoro.features.AbstractFilter;
+import io.baltoro.features.Filter;
 import io.baltoro.features.Path;
 
 public class AnnotationProcessor
@@ -40,47 +42,12 @@ public class AnnotationProcessor
 			for (Annotation anno : annoArray)
 			{
 			
-				/*
-				if(anno instanceof LocalFiles)
+				if(anno instanceof Filter)
 				{
-					LocalFiles filesAnno = (LocalFiles) anno;
-					for (LocalFile file : filesAnno.value())
-					{
-						WebMethod wm = new WebMethod(file.webPath(), file.localPath());
-						wm.authRequired = file.authRequired();
-						
-						if(wm.getLocalFilePath().endsWith("/"))
-						{
-							List<String> dirs = LocalFileHelper.getDirectories(wm.getLocalFilePath());
-							for (String dir : dirs)
-							{
-								
-								System.out.println(" === +++ ===== > "+dir);
-								
-								String relLocalPath = dir.substring(file.localPath().length()-1);
-								
-								System.out.println(" ======== > "+relLocalPath);
-								
-								String webDirPath = file.webPath()+relLocalPath.substring(1);
-								
-									//System.out.println("=============== "+webDirPath);
-								
-								WebMethod wmSub = new WebMethod(webDirPath, dir);
-								wmSub.authRequired = file.authRequired();
-							
-								
-								pathMap.put(webDirPath, wm);
-							}
-							
-						}
-						else
-						{
-							pathMap.put(wm.getWebPath(), wm);
-						}
-					}
-									
+					Filter filterAnno = (Filter) anno;
+					Class<AbstractFilter> filter = (Class<AbstractFilter>) _class;
+					WebMethodMap.getInstance().addFilter(filterAnno.value(), filter);
 				}
-				*/
 				
 				if(anno instanceof Path)
 				{
@@ -153,6 +120,9 @@ public class AnnotationProcessor
 		Set<Class<?>> masterClassSet = new HashSet<Class<?>>();
 		
 		Set<Class<?>> set = reflections.getTypesAnnotatedWith(Path.class);
+		masterClassSet.addAll(set);
+		
+		set = reflections.getTypesAnnotatedWith(Filter.class);
 		masterClassSet.addAll(set);
 		
 		

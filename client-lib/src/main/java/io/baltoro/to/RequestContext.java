@@ -15,7 +15,8 @@ public class RequestContext
 	private byte[] data;
 	private String apiPath;
 	private String relativePath;
-	
+	private boolean authRequired;
+	private String roles;
 	
 
 	
@@ -100,6 +101,26 @@ public class RequestContext
 	{
 		this.method = method;
 	}
+	public boolean isAuthRequired()
+	{
+		return authRequired;
+	}
+	public void setAuthRequired(boolean authRequired)
+	{
+		this.authRequired = authRequired;
+	}
+	public String getRoles()
+	{
+		return roles;
+	}
+	public void setRoles(String roles)
+	{
+		this.roles = roles;
+	}
+	
+	
+	
+	
 	
 	
 	

@@ -86,56 +86,21 @@ public class Baltoro
 		
 		
 	
-		/*
-		Future<Session> future = executor.submit(() -> 
-		{
-		    try 
-		    {
-		    	ClientManager clientManager = ClientManager.createClient();
-		 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(this.agentCookieMap, this.appUuid, this.instanceUuid, eToken);
-		 	    
-		 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
-		                 .configurator(clientConfigurator)
-		                 .build();
-		 	    
-		 	  
-		 	  String url = null;
-		 	  if(this.debug)
-		 	  {
-		 		 url = "ws://"+this.appUuid+".baltoro.io:8080/ws";
-		 	  }
-		 	  else
-		 	  {
-		 		 url = "ws://"+this.appUuid+".baltoro.io/ws";
-		 	  }
-		 	  
-		 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(this.appUuid, clientManager, config, url);
-		 	 
-		 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
-		 	  
-		 	  return session;
-		 	  
-		    }
-		    catch (Exception e) 
-		    {
-		        throw new IllegalStateException("task interrupted", e);
-		    }
-		});
-		*/
 		
-		ExecutorService executor = Executors.newFixedThreadPool(8);
-		Session session = null;
-		for (int i = 0; i <1; i++)
+		ExecutorService executor = Executors.newFixedThreadPool(5);
+		for (int i = 0; i <5; i++)
 		{
 			Future<Session> future = executor.submit(new WSClient(this));
-			session = future.get();
+			Session session = future.get();
 
 			ClientWSSession csession = new ClientWSSession(session);
 			WSSessions.get().addSession(csession);
 		}
 		
-		mgntThread = new BaltoroWSHeartbeat(this, session);
+			
+		mgntThread = new BaltoroWSHeartbeat();
 		mgntThread.start();
+	
 		
 		requestPoller = new RequestPoller(this);
 		requestPoller.start();

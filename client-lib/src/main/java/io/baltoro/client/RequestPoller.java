@@ -37,7 +37,6 @@ public class RequestPoller extends Thread
 			
 			
 			
-			System.out.println(" /////////////// ----- //////////// got buffer byte : ");
 			byteBuffer = queue.poll();
 			
 			RequestWorker worker = new RequestWorker(byteBuffer);
@@ -57,7 +56,7 @@ public class RequestPoller extends Thread
 			{
 				System.out.println(text);
 				sync.intern().wait(50000);
-				System.out.println("waited : "+(System.currentTimeMillis() - t0));
+				System.out.println("client lib server waited : "+(System.currentTimeMillis() - t0));
 			}
 		} 
 		catch (Exception e)
