@@ -56,11 +56,12 @@ public class UserSession
 
 	public void setUserName(String userName)
 	{
+		//Baltoro.setUserToSession(userName);
 		this.userName = userName;
 		sendSession();
 	}
 	
-	private void sendSession()
+	void sendSession()
 	{
 		WSTO to = new WSTO();
 		to.appUuid = Baltoro.appUuid;

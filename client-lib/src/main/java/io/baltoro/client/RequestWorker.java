@@ -211,7 +211,11 @@ public class RequestWorker extends Thread
 			
 			if (returnObj != null)
 			{
-				if (returnObj instanceof byte[])
+				if(returnObj instanceof String)
+				{
+					to.responseContext.setData(((String) returnObj).getBytes());
+				}
+				else if (returnObj instanceof byte[])
 				{
 					to.responseContext.setData((byte[]) returnObj);
 				} 
@@ -236,6 +240,12 @@ public class RequestWorker extends Thread
 			} 
 			else if (e instanceof AuthException)
 			{
+				System.out.println("___________________________________");
+				System.out.println("___________________________________");
+				System.out.println("______________["+e.getMessage()+"]_____________________");
+				System.out.println("___________________________________");
+				System.out.println("___________________________________");
+				
 				res.setError(e.getMessage());
 			}
 			else

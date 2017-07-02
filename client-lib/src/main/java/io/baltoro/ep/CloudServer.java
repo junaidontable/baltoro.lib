@@ -24,6 +24,9 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
@@ -34,10 +37,12 @@ public class CloudServer
 	
 	static ExecutorService executor = Executors.newWorkStealingPool();
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
-	
+	static ObjectMapper mapper = new ObjectMapper();
 	Client client;
 	String host;// = "http://127.0.0.1:8080";
-	Map<String, NewCookie> cookieMap = new HashMap<String, NewCookie>(100);
+	static Map<String, Map<String, NewCookie>> cookieMap = new HashMap<>();
+	static Map<String, Client> cientMap = new HashMap<>();
+	String appName;
 	
 	boolean online = false;
 	
@@ -45,14 +50,39 @@ public class CloudServer
 	
 	public CloudServer(String appName)
 	{
-		CheckResponseFilter responseFilter = new CheckResponseFilter(cookieMap);
+		this.appName = appName;
+		
+		Map<String, NewCookie> map = cookieMap.get(appName);
+		if(map == null)
+		{
+			map = new HashMap<>(50);
+			cookieMap.put(appName, map);
+		}
+		
+		CheckResponseFilter responseFilter = new CheckResponseFilter(map);
 	
-		this.host = "http://"+appName+".baltoro.io/app";
-		client = ClientBuilder.newBuilder()
-				.register(JacksonFeature.class)
-				.register(CheckRequestFilter.class)
-				.register(responseFilter)
-				.build();
+		if(Baltoro.debug == true)
+		{
+			this.host = "http://"+appName+".baltoro.io:8080";
+		}
+		else
+		{
+			this.host = "http://"+appName+".baltoro.io";
+		}
+		
+		client = cientMap.get(appName);
+		if(client == null)
+		{
+			client = ClientBuilder.newBuilder()
+					.register(JacksonFeature.class)
+					.register(CheckRequestFilter.class)
+					.register(responseFilter)
+					.build();
+			
+			cientMap.put(appName, client);
+		}
+		
+		
 		
 
 	
@@ -73,36 +103,29 @@ public class CloudServer
 	{
 		log.info("... Are you There ...");
 	
-		WebTarget target = client.target(host).path("/api/areyouthere");	
+		WebTarget target = client.target(host).path("/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
-		handleCookie(response);
+		
 		//String sessionId = response.readEntity(String.class);
 		//this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
 		//handleSessionCookie(response);
 	}
 	
 
-	void handleCookie(Response response)
-	{
-		Map<String, NewCookie> map = response.getCookies();
-		for (String key : map.keySet())
-		{
-			NewCookie cookie = map.get(key);
-			log.info("received ============= >>>>>>>>>>> "+key+" : "+cookie);
-			cookieMap.put(key, cookie);
-		}	
-	}
 
 	
 	
 	Builder getIB(WebTarget target)
 	{
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		Set<String> cookieNames = cookieMap.keySet();
+		Map<String, NewCookie> map = cookieMap.get(appName);
+		
+		Set<String> cookieNames = map.keySet();
+		
 		for (String cookieName : cookieNames)
 		{
-			Cookie cookie = cookieMap.get(cookieName);
+			Cookie cookie = map.get(cookieName);
 			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
 			ib.cookie(cookie);
 		}
@@ -115,7 +138,7 @@ public class CloudServer
 	{
 		WebTarget target = client.target(host).path(path);	
 	
-		//log.info("url --> "+target);
+		log.info("url --> "+target);
 		
 		Form form = new Form();
 		
@@ -131,7 +154,6 @@ public class CloudServer
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		
-		handleCookie(response);
 		
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
@@ -141,10 +163,35 @@ public class CloudServer
 		//WSTO wsto = response.readEntity(WSTO.class);
 		//Object obj = ObjectUtil.toObject(returnType, wsto.data);
 		String str = response.readEntity(String.class);
+			
 		
-		Object obj = ObjectUtil.toObject(returnType, str.getBytes());
-				
-		return (T)obj;
+		
+		if(returnType == List.class)
+		{
+			
+			List<?> _list = null;
+			try
+			{
+				_list = mapper.readValue(str, List.class);
+			} 
+			catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//Collection<?> col = response.readEntity(new GenericType<Collection<?>>(){});
+			
+			//mapper.readValue(str.getBytes(), returnType);
+			return returnType.cast(_list);
+		}
+		else
+		{
+			Object obj = ObjectUtil.toObject(returnType, str.getBytes());
+			return returnType.cast(obj);
+		}
+		
+	
 	}
 	
 	public Response execute(Form form, WebTarget target)

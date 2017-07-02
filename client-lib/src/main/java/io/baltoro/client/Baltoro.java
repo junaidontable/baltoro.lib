@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,21 +46,20 @@ public class Baltoro
 	boolean logedin = false;
 	static private String email;
 	static private String password;
-	static String sessionId;
 	UserTO user;
 	static String instanceUuid;
-	boolean debug = false;
+	public static boolean debug = false;
 	Properties props = null;
 	static String appUuid;
 	static String appPrivateKey;
 	static String appName;
 	static String userUuid;
-	File propFile = new File(".baltoro.props");
+	File propFile;
 	BaltoroWSHeartbeat mgntThread;
 	RequestPoller requestPoller;
 	ResponsePoller responsePoller;
 	static String clusterPath = "/*";
-	 
+	private static AdminEP adminEP;	 
 	
 	private Baltoro()
 	{
@@ -71,24 +69,30 @@ public class Baltoro
 	
 	private Session startClient() throws Exception
 	{
-		this.sessionId = UUID.randomUUID().toString();
-		
+			
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
 		
 		AnnotationProcessor p = new AnnotationProcessor();
 		for (String _package : this.packages.split(","))
 		{
-			Map<String, WebMethod> pMap = p.processAnnotation(_package);
+			Map<String, WebMethod> pMap = p.processAnnotation(_package.trim());
 			pathMap.putAll(pMap);
 		}
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		
+		int count = cs.getRemainingInsanceThreadsCount(appName, instanceUuid);
 	
+		System.out.println(" ++++++++Allowed count +++++++++++++ "+count);
+		
+		if(count < 1)
+		{
+			System.out.println("Exceed allowed count , exiting");
+			System.exit(1);
+		}
 		
 		ExecutorService executor = Executors.newFixedThreadPool(5);
-		for (int i = 0; i <5; i++)
+		for (int i = 0; i <count; i++)
 		{
 			Future<Session> future = executor.submit(new WSClient(this));
 			Session session = future.get();
@@ -112,7 +116,14 @@ public class Baltoro
 		
 	}
 	
-	
+	public static String getMainClassName() 
+	{ 
+        StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+        StackTraceElement ste = stElements[stElements.length-1];
+    
+   
+        return ste.getClassName();
+     }
 	
 	public static <T> T EndPointFactory(Class<T> _class)
 	{
@@ -127,7 +138,7 @@ public class Baltoro
 			}
 			
 			Object obj = implClass.newInstance();
-			return (T)obj;
+			return _class.cast(obj);
 			
 		} 
 		catch (Exception e)
@@ -164,11 +175,13 @@ public class Baltoro
 	public static void startDebug(String _package, String clusterPath)
 	{
 		Session session = _start(_package, clusterPath, true);
+		System.out.println(session);
 	}
 	
 	public static void start(String _package, String clusterPath)
 	{
 		Session session = _start(_package, clusterPath, false);
+		System.out.println(session);
 	}
 	
 	private static Session _start(String _package, String clusterPath, boolean debug)
@@ -176,15 +189,16 @@ public class Baltoro
 		try
 		{
 			Baltoro baltoro = new Baltoro();
-			baltoro.debug = debug;
+			Baltoro.debug = debug;
 			Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
 			
 			boolean useLocal = baltoro.init();
 			if(!useLocal)
 			{
+				
 				FileOutputStream output = new FileOutputStream(baltoro.propFile);
 				AppTO selectedApp = baltoro.getMyApp();
-				PrivateDataTO to = baltoro.cs.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
+				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid);
 				baltoro.props.put("app.key", to.privateKey);
 				baltoro.props.store(output, "updated on "+new Date());
 			}
@@ -259,8 +273,16 @@ public class Baltoro
     
     private boolean init() throws Exception
     {
+    	  
     	cs = new BOAPIClient(this);
 		props = new Properties();
+		adminEP = EndPointFactory(AdminEP.class);
+		
+		String propName = getMainClassName();
+		String fileName = "."+propName+".props";
+		
+		System.out.println(fileName);
+		propFile = new File(fileName);
 		
     	if(propFile.exists())
     	{
@@ -296,15 +318,21 @@ public class Baltoro
 			{
 				if(option.toLowerCase().equals("n"))
 				{
-					user = cs.createUser(email, password);
+					user = adminEP.createUser(email, password);
 				}
-				user = cs.login(email, password);
-				logedin = true;
 				
-				props.put("user.email", this.email);
+				
+				
+				//String result = ep.login(email, password);
+				user = adminEP.adminLogin(email, password);
+				//user = cs.login(email, password);
+				logedin = true;
+			
+				
+				props.put("user.email", Baltoro.email);
 				props.put("user.uuid", user.uuid);
-				this.instanceUuid = UUIDGenerator.uuid("INST");
-				props.put("app.instance.uuid",this.instanceUuid);
+				Baltoro.instanceUuid = UUIDGenerator.uuid("INST");
+				props.put("app.instance.uuid",Baltoro.instanceUuid);
 				
 				return false;
 			} 
@@ -349,7 +377,7 @@ public class Baltoro
     	
     	AppTO selectApp = null;
     	
-		List<AppTO> apps = cs.getMyApps();
+		List<AppTO> apps = adminEP.getMyApps();
 		
 		if(apps.size() > 0)
 		{
@@ -381,7 +409,7 @@ public class Baltoro
 		if(newApp)
 		{
 			String name = systemIn("enter name of your new app : ");
-			AppTO to = cs.createApp(name);
+			AppTO to = adminEP.createApp(name);
 			selectApp = to;
 			
 		}

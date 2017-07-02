@@ -38,13 +38,13 @@ class WSClient implements Callable<Session>
 	 	    
 	 	  
 	 	  String url = null;
-	 	  if(baltoro.debug)
+	 	  if(Baltoro.debug)
 	 	  {
-	 		 url = "ws://"+baltoro.appUuid+".baltoro.io:8080/ws";
+	 		 url = "ws://"+Baltoro.appUuid+".baltoro.io:8080/ws";
 	 	  }
 	 	  else
 	 	  {
-	 		 url = "ws://"+baltoro.appUuid+".baltoro.io/ws";
+	 		 url = "ws://"+Baltoro.appUuid+".baltoro.io/ws";
 	 	  }
 	 	  
 	 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(baltoro.appUuid, clientManager, config, url);

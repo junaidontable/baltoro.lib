@@ -35,11 +35,13 @@ public class EPMethod
 		buffer.append("	public "+returnType+" "+name+"(");
 	
 		boolean found=false;
+		int count = 0;
 		for (EPMethodArg arg : args)
 		{
+			count++;
 			found = true;
-			buffer.append(arg.type+" "+arg.name+", ");
-			epData.append("		data.add(\""+arg.name+"\","+arg.name+");\r\n");
+			buffer.append(arg.type+" arg"+ count +", ");
+			epData.append("		data.add(\""+arg.name+"\", arg"+count+");\r\n");
 		}
 		if(found)
 			buffer.delete(buffer.length()-2, buffer.length());
