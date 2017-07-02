@@ -11,4 +11,5 @@ public @interface Endpoint
 {
 	public String appName();
 	public String path();
+	public Class<?> collectionReturnType() default StringBuffer.class;
 }

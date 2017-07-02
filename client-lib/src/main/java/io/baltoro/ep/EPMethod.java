@@ -10,8 +10,9 @@ public class EPMethod
 	public List<EPMethodArg> args = new ArrayList<EPMethodArg>();
 	public String appName;
 	public String path;
+	Class<?> collectionReturnType = String.class;
 	
-	public EPMethod(String returnType, String name, String appId, String path)
+	public EPMethod(String returnType, String name, String appId, String path, Class<?> collectionReturnType)
 	{
 		if(returnType != null && returnType.length() > 0)
 		{
@@ -20,7 +21,10 @@ public class EPMethod
 		this.name = name;
 		this.appName = appId;
 		this.path = path;
+		this.collectionReturnType = collectionReturnType;
 	}
+	
+	
 	
 	public void addArg(String argType, String argName)
 	{
@@ -57,7 +61,7 @@ public class EPMethod
 		
 		buffer.append("		CloudServer server = new CloudServer(appName);\r\n");
 		//buffer.append("		Class rType = Class.forName("+returnType+");\r\n");
-		buffer.append("		"+returnType+" obj = server.execute(path, data, "+returnType+".class);\r\n");
+		buffer.append("		"+returnType+" obj = server.execute(path, data, "+returnType+".class, "+collectionReturnType.getName()+".class);\r\n");
 		
 		
 		buffer.append("		return obj;\r\n");

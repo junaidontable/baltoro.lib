@@ -44,7 +44,9 @@ public class ClassBuilder
 				String returnType = method.getReturnType().getName();
 				Endpoint ep = method.getAnnotation(Endpoint.class);
 				
-				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path());
+				//System.out.println(ep.path()+" >>>>>>>>>>> "+ep.collectionReturnType());
+				
+				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path(), ep.collectionReturnType());
 				
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				Parameter[] params = method.getParameters();
@@ -53,6 +55,7 @@ public class ClassBuilder
 				{
 					Annotation[] paramAnnos = param.getAnnotations();
 					String name = null;
+					
 					for (Annotation paramAnno : paramAnnos)
 					{
 						

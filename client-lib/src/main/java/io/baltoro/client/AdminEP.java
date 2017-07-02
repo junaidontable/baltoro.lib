@@ -24,7 +24,7 @@ public interface AdminEP
 	@Endpoint(appName="admin", path="/api/app/get")
 	<T extends BaseTO> T getBO(@Param("base-uuid") String baseUuid) throws Exception;
 	
-	@Endpoint(appName="admin", path="/api/app/getMyApps")
+	@Endpoint(appName="admin", path="/api/app/getMyApps", collectionReturnType=AppTO.class)
 	List<AppTO> getMyApps() throws Exception;
 	
 }

@@ -17,6 +17,7 @@ import io.baltoro.client.util.StringUtil;
 import io.baltoro.exception.AuthException;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
+import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 import io.baltoro.to.UserSessionContext;
@@ -40,45 +41,95 @@ public class RequestWorker extends Thread
 	public void run()
 	{
 
+		WSTO to = getWSTO();
+		if(to == null)
+		{
+			System.out.println("ERROR PARSING WSTO !!!!!!! CHECK ");
+			return;
+		}
+		
+		
+		RequestContext req = to.requestContext;
+		requestCtx.set(req);
+		
+		ResponseContext res = new ResponseContext();
+		to.responseContext = res;
+	
 		
 		try
 		{
 			
-			WSTO to = process();
-			to.requestContext = null;
-			
-			
-			byte[] bytes = ObjectUtil.toJason(to);
-			ByteBuffer buffer = ByteBuffer.wrap(bytes);
-
-			WSSessions.get().addToResponseQueue(buffer);
-
+			process(to);
+		
 		} 
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			if (e instanceof SendRedirect)
+			{
+				SendRedirect sd = (SendRedirect) e;
+				res.setRedirect(sd.getUrl());
+			}
+			else if (e.getCause() instanceof SendRedirect)
+			{
+				SendRedirect sd = (SendRedirect) e.getCause();
+				res.setRedirect(sd.getUrl());
+			} 
+			else if (e instanceof APIError)
+			{
+				APIError er = (APIError) e;
+				res.setError(er.getMessage());
+			}
+			else if (e.getCause() instanceof APIError)
+			{
+				APIError er = (APIError) e.getCause();
+				res.setRedirect(er.getMessage());
+			} 
+			else if (e instanceof AuthException)
+			{
+				res.setError(e.getMessage());
+			}
+			else
+			{
+				res.setError(e.getMessage()+"---"+e.getCause().getMessage());
+				e.printStackTrace();
+			}
+
 		}
 		finally 
 		{
+			to.requestContext = null;
+			byte[] bytes = null;
+			try
+			{
+				bytes = ObjectUtil.toJason(to);
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
+				return;
+			}
+			ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+			WSSessions.get().addToResponseQueue(buffer);
+			
 			requestCtx.set(null);
 		}
 
 		String sync = "response-queue";
 		synchronized (sync.intern())
 		{
-			sync.intern().notifyAll();
+			sync.intern().notify();
 		}
 
 	
 
 	}
-
-	private WSTO process()
+	
+	
+	private WSTO getWSTO()
 	{
-
 		byte[] jsonBytes = byteBuffer.array();
-
-		
 
 		WSTO to = null;
 		try
@@ -91,13 +142,17 @@ public class RequestWorker extends Thread
 			return null;
 		}
 
-		RequestContext req = to.requestContext;
+		
+		return to;
+	}
 	
-		
-		requestCtx.set(to.requestContext);
-		
-		ResponseContext res = new ResponseContext();
-		to.responseContext = res;
+
+
+	private void process(WSTO to) throws Exception
+	{
+
+		RequestContext req = to.requestContext;
+		ResponseContext res = to.responseContext;
 		
 		if (StringUtil.isNotNullAndNotEmpty(req.getSessionId()))
 		{
@@ -147,18 +202,18 @@ public class RequestWorker extends Thread
 				{
 					SendRedirect sd = (SendRedirect) e;
 					res.setRedirect(sd.getUrl());
-					return to;
+					return;
 				} 
 				else if (e.getCause() instanceof SendRedirect)
 				{
 					SendRedirect sd = (SendRedirect) e.getCause();
 					res.setRedirect(sd.getUrl());
-					return to;
+					return;
 				} 
 				else if (e instanceof AuthException)
 				{
 					res.setError(e.getMessage());
-					return to;
+					return;
 				} 
 				else
 				{
@@ -228,36 +283,9 @@ public class RequestWorker extends Thread
 		} 
 		catch (Exception e)
 		{
-			if (e instanceof SendRedirect)
-			{
-				SendRedirect sd = (SendRedirect) e;
-				res.setRedirect(sd.getUrl());
-			}
-			else if (e.getCause() instanceof SendRedirect)
-			{
-				SendRedirect sd = (SendRedirect) e.getCause();
-				res.setRedirect(sd.getUrl());
-			} 
-			else if (e instanceof AuthException)
-			{
-				System.out.println("___________________________________");
-				System.out.println("___________________________________");
-				System.out.println("______________["+e.getMessage()+"]_____________________");
-				System.out.println("___________________________________");
-				System.out.println("___________________________________");
-				
-				res.setError(e.getMessage());
-			}
-			else
-			{
-				e.printStackTrace();
-			}
-
+			throw e;
 		}
 
-		
-		
-		return to;
 
 	}
 

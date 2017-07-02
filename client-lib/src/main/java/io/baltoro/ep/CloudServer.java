@@ -1,5 +1,6 @@
 package io.baltoro.ep;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +25,18 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
+import io.baltoro.to.APIError;
+import io.baltoro.to.AppTO;
 
 public class CloudServer
 {
@@ -134,7 +140,7 @@ public class CloudServer
 	}
 	
 
-	public <T> T execute(String path, EPData data, Class<T> returnType)
+	public <T> T execute(String path, EPData data, Class<T> returnType, Class<?> collectionReturnType)
 	{
 		WebTarget target = client.target(host).path(path);	
 	
@@ -158,40 +164,39 @@ public class CloudServer
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
 		{
-			return (T)error;
+			throw new APIError(error);
 		}
 		//WSTO wsto = response.readEntity(WSTO.class);
 		//Object obj = ObjectUtil.toObject(returnType, wsto.data);
-		String str = response.readEntity(String.class);
+		
 			
+		String json = response.readEntity(String.class);
 		
 		
-		if(returnType == List.class)
+		if(returnType != List.class)
 		{
 			
-			List<?> _list = null;
-			try
-			{
-				_list = mapper.readValue(str, List.class);
-			} 
-			catch (Exception e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			//Collection<?> col = response.readEntity(new GenericType<Collection<?>>(){});
-			
-			//mapper.readValue(str.getBytes(), returnType);
-			return returnType.cast(_list);
-		}
-		else
-		{
-			Object obj = ObjectUtil.toObject(returnType, str.getBytes());
+			Object obj = ObjectUtil.toObject(returnType, json.getBytes());
 			return returnType.cast(obj);
+		
 		}
 		
-	
+		try
+		{
+			
+			JavaType type = mapper.getTypeFactory().constructArrayType(collectionReturnType);
+			Object[] pojos = mapper.readValue(json, type);
+			List<?> pojoList = Arrays.asList(pojos);
+			return returnType.cast(pojoList);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+		
 	}
 	
 	public Response execute(Form form, WebTarget target)
