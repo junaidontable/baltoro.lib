@@ -20,6 +20,7 @@ import javax.ws.rs.core.NewCookie;
 
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
+import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.RequestContext;
@@ -91,7 +92,7 @@ public class Baltoro
 			System.exit(1);
 		}
 		
-		ExecutorService executor = Executors.newFixedThreadPool(5);
+		ExecutorService executor = Executors.newFixedThreadPool(count);
 		for (int i = 0; i <count; i++)
 		{
 			Future<Session> future = executor.submit(new WSClient(this));
@@ -198,7 +199,8 @@ public class Baltoro
 				
 				FileOutputStream output = new FileOutputStream(baltoro.propFile);
 				AppTO selectedApp = baltoro.getMyApp();
-				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid);
+				
+				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
 				baltoro.props.put("app.key", to.privateKey);
 				baltoro.props.store(output, "updated on "+new Date());
 			}
@@ -377,9 +379,9 @@ public class Baltoro
     	
     	AppTO selectApp = null;
     	
-		List<AppTO> apps = adminEP.getMyApps();
+		AppTO[] apps = adminEP.getMyApps();
 		
-		if(apps.size() > 0)
+		if(apps.length > 0)
 		{
 			newApp = false;
 			System.out.println(" ========  apps ========= ");
@@ -400,7 +402,7 @@ public class Baltoro
 			else
 			{
 				int opt = Integer.parseInt(option);
-				selectApp = apps.get(opt-1);
+				selectApp = apps[opt-1];
 				System.out.println("selected app : "+selectApp.name);
 			}
 			
@@ -408,8 +410,31 @@ public class Baltoro
 		
 		if(newApp)
 		{
-			String name = systemIn("enter name of your new app : ");
-			AppTO to = adminEP.createApp(name);
+			
+			AppTO to = null;
+			
+			for (int i = 0; i < 5; i++)
+			{
+				try
+				{
+					String name = systemIn("enter name of your new app : ");
+					to = adminEP.createApp(name);
+					break;
+				} 
+				catch (APIError e)
+				{
+					System.out.println("************************");
+					System.out.println(e.getMessage());
+					System.out.println("************************");
+				}
+			}
+			
+			if(to == null)
+			{
+				System.out.println("5 tries, restart the app agaon");
+				System.exit(1);
+			}
+			
 			selectApp = to;
 			
 		}

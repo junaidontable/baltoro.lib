@@ -25,10 +25,8 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
@@ -36,7 +34,6 @@ import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
-import io.baltoro.to.AppTO;
 
 public class CloudServer
 {
@@ -140,7 +137,7 @@ public class CloudServer
 	}
 	
 
-	public <T> T execute(String path, EPData data, Class<T> returnType, Class<?> collectionReturnType)
+	public <T> T execute(String path, EPData data, Class<T> returnType, Class<?> returnSubType)
 	{
 		WebTarget target = client.target(host).path(path);	
 	
@@ -173,14 +170,20 @@ public class CloudServer
 		String json = response.readEntity(String.class);
 		
 		
-		if(returnType != List.class)
+		if(returnSubType != null)
 		{
 			
-			Object obj = ObjectUtil.toObject(returnType, json.getBytes());
+			Object obj = ObjectUtil.toObject(returnSubType, json.getBytes());
 			return returnType.cast(obj);
 		
 		}
+		else
+		{
+			Object obj = ObjectUtil.toObject(returnType, json.getBytes());
+			return returnType.cast(obj);
+		}
 		
+		/*
 		try
 		{
 			
@@ -193,8 +196,8 @@ public class CloudServer
 		{
 			e.printStackTrace();
 		}
-		
-		return null;
+		*/
+		//return null;
 		
 		
 	}

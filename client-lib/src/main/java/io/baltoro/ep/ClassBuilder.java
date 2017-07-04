@@ -1,9 +1,11 @@
 package io.baltoro.ep;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import io.baltoro.features.EPReturnType;
 import io.baltoro.features.Endpoint;
 import io.baltoro.features.Param;
 
@@ -40,13 +42,26 @@ public class ClassBuilder
 			boolean isEPMethod = method.isAnnotationPresent(Endpoint.class);
 			if(isEPMethod)
 			{
+				
 				String methodName = method.getName();
-				String returnType = method.getReturnType().getName();
+				Class<?> _returnType = method.getReturnType();
+				String returnType = null;
+				if(_returnType.isArray())
+				{
+					Class _c = _returnType.getComponentType();
+					returnType = _c.getName()+"[]";
+					
+				}
+				else
+				{
+					 returnType =_returnType.getName();
+				}
+				
 				Endpoint ep = method.getAnnotation(Endpoint.class);
 				
-				//System.out.println(ep.path()+" >>>>>>>>>>> "+ep.collectionReturnType());
 				
-				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path(), ep.collectionReturnType());
+				
+				EPMethod epmethod = new EPMethod(returnType, methodName, ep.appName(), ep.path());
 				
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				Parameter[] params = method.getParameters();
@@ -55,15 +70,18 @@ public class ClassBuilder
 				{
 					Annotation[] paramAnnos = param.getAnnotations();
 					String name = null;
-					
+					boolean isEPReturnType = false;
 					for (Annotation paramAnno : paramAnnos)
 					{
+						if(paramAnno instanceof EPReturnType)
+						{
+							isEPReturnType = true;
+						}
 						
 						if(paramAnno instanceof Param)
 						{
 							name = ((Param)paramAnno).value();	
 						}
-						
 						
 						if(name != null)
 						{
@@ -72,7 +90,7 @@ public class ClassBuilder
 					}
 					
 					String paramTytpe = parameterTypes[i++].getName();
-					epmethod.addArg(paramTytpe, name);
+					epmethod.addArg(paramTytpe, name, isEPReturnType);
 				}
 				
 				String methodSrc = epmethod.getCode();

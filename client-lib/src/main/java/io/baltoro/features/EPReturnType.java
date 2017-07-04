@@ -6,9 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Endpoint
+@Target(ElementType.PARAMETER)
+public @interface EPReturnType
 {
-	public String appName();
-	public String path();
+
 }

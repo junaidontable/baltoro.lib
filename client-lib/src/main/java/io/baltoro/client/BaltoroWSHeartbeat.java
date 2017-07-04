@@ -92,12 +92,13 @@ public class BaltoroWSHeartbeat extends Thread
 				
 				WSSessions.get().addToResponseQueue(msg);
 				
+				/*
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("sending monitoring "+count);
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				
+				*/
 				
 				
 				Thread.sleep(30000);

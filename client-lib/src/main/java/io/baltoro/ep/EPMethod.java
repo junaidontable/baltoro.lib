@@ -5,30 +5,28 @@ import java.util.List;
 
 public class EPMethod
 {
-	public String returnType = "void";
+	public String returnObj = "void";
 	public String name;
 	public List<EPMethodArg> args = new ArrayList<EPMethodArg>();
 	public String appName;
 	public String path;
-	Class<?> collectionReturnType = String.class;
 	
-	public EPMethod(String returnType, String name, String appId, String path, Class<?> collectionReturnType)
+	
+	public EPMethod(String returnObj, String name, String appId, String path)
 	{
-		if(returnType != null && returnType.length() > 0)
+		if(returnObj != null && returnObj.length() > 0)
 		{
-			this.returnType = returnType;
+			this.returnObj = returnObj;
 		}
 		this.name = name;
 		this.appName = appId;
 		this.path = path;
-		this.collectionReturnType = collectionReturnType;
 	}
 	
 	
-	
-	public void addArg(String argType, String argName)
+	public void addArg(String argType, String argName, boolean epReturnType)
 	{
-		args.add(new EPMethodArg(argType, argName));
+		args.add(new EPMethodArg(argType, argName, epReturnType));
 	}
 	
 	public String getCode()
@@ -36,7 +34,8 @@ public class EPMethod
 		StringBuffer buffer = new StringBuffer();
 		StringBuffer epData = new StringBuffer();
 		
-		buffer.append("	public "+returnType+" "+name+"(");
+		String retunSubType = null;
+		buffer.append("	public "+returnObj+" "+name+"(");
 	
 		boolean found=false;
 		int count = 0;
@@ -45,7 +44,17 @@ public class EPMethod
 			count++;
 			found = true;
 			buffer.append(arg.type+" arg"+ count +", ");
-			epData.append("		data.add(\""+arg.name+"\", arg"+count+");\r\n");
+			
+			if(!arg.epReturnType)
+			{ 
+				epData.append("		data.add(\""+arg.name+"\", arg"+count+");\r\n");
+			}
+			else
+			{
+				retunSubType = "arg"+count;
+			}
+			
+			
 		}
 		if(found)
 			buffer.delete(buffer.length()-2, buffer.length());
@@ -61,7 +70,15 @@ public class EPMethod
 		
 		buffer.append("		CloudServer server = new CloudServer(appName);\r\n");
 		//buffer.append("		Class rType = Class.forName("+returnType+");\r\n");
-		buffer.append("		"+returnType+" obj = server.execute(path, data, "+returnType+".class, "+collectionReturnType.getName()+".class);\r\n");
+	
+		if(retunSubType == null)
+		{
+			buffer.append("		"+returnObj+" obj = server.execute(path, data, "+returnObj+".class, null);\r\n");
+		}
+		else
+		{
+			buffer.append("		"+returnObj+" obj = server.execute(path, data, "+returnObj+".class, "+retunSubType+");\r\n");
+		}
 		
 		
 		buffer.append("		return obj;\r\n");
