@@ -6,12 +6,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class RequestPoller extends Thread
 {
 	
-	Baltoro baltoro;
 	boolean run = true;
 	
-	public RequestPoller(Baltoro baltoro)
+	public RequestPoller()
 	{
-		this.baltoro = baltoro;
 	}
 
 	@Override

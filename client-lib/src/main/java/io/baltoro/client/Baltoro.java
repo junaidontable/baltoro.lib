@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -40,25 +39,25 @@ public class Baltoro
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
 	
 	
-	Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
+	static Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
-	private String packages;
-	private BOAPIClient cs;
-	boolean logedin = false;
+	static String packages;
+	private static BOAPIClient cs;
+	private static boolean logedin = false;
 	static private String email;
 	static private String password;
-	UserTO user;
+	private static UserTO user;
 	static String instanceUuid;
 	public static boolean debug = false;
-	Properties props = null;
+	static Properties props = null;
 	static String appUuid;
 	static String appPrivateKey;
 	static String appName;
 	static String userUuid;
-	File propFile;
-	BaltoroWSHeartbeat mgntThread;
-	RequestPoller requestPoller;
-	ResponsePoller responsePoller;
+	static File propFile;
+	private static BaltoroWSHeartbeat mgntThread;
+	static RequestPoller requestPoller;
+	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
 	private static AdminEP adminEP;	 
 	
@@ -68,13 +67,13 @@ public class Baltoro
 	}
 	
 	
-	private Session startClient() throws Exception
+	private static Session startClient() throws Exception
 	{
 			
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
 		
 		AnnotationProcessor p = new AnnotationProcessor();
-		for (String _package : this.packages.split(","))
+		for (String _package : packages.split(","))
 		{
 			Map<String, WebMethod> pMap = p.processAnnotation(_package.trim());
 			pathMap.putAll(pMap);
@@ -95,7 +94,7 @@ public class Baltoro
 		ExecutorService executor = Executors.newFixedThreadPool(count);
 		for (int i = 0; i <count; i++)
 		{
-			Future<Session> future = executor.submit(new WSClient(this));
+			Future<Session> future = executor.submit(new WSClient());
 			Session session = future.get();
 
 			ClientWSSession csession = new ClientWSSession(session);
@@ -107,10 +106,10 @@ public class Baltoro
 		mgntThread.start();
 	
 		
-		requestPoller = new RequestPoller(this);
+		requestPoller = new RequestPoller();
 		requestPoller.start();
 		
-		responsePoller = new ResponsePoller(this);
+		responsePoller = new ResponsePoller();
 		responsePoller.start();
 	 	
 		return null;
@@ -172,41 +171,53 @@ public class Baltoro
 		return userSession;
 	}
 	
-	
+	/*
 	public static void startDebug(String _package, String clusterPath)
 	{
-		Session session = _start(_package, clusterPath, true);
+		packages = _package;
+		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
+		Baltoro.debug = true;
+		Session session = _start();
 		System.out.println(session);
 	}
+	*/
 	
 	public static void start(String _package, String clusterPath)
 	{
-		Session session = _start(_package, clusterPath, false);
+	
+		String _debug = System.getProperty("baltoro.debug");
+		
+		System.out.println("running mod : "+_debug);
+		if(_debug != null && _debug.equals("true"))
+		{
+			Baltoro.debug = true;
+		}
+		
+		packages = _package;
+		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
+		Session session = _start();
 		System.out.println(session);
 	}
 	
-	private static Session _start(String _package, String clusterPath, boolean debug)
+	private static Session _start()
 	{
 		try
 		{
-			Baltoro baltoro = new Baltoro();
-			Baltoro.debug = debug;
-			Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
 			
-			boolean useLocal = baltoro.init();
+			boolean useLocal = init();
 			if(!useLocal)
 			{
 				
-				FileOutputStream output = new FileOutputStream(baltoro.propFile);
-				AppTO selectedApp = baltoro.getMyApp();
+				FileOutputStream output = new FileOutputStream(propFile);
+				AppTO selectedApp = getMyApp();
 				
 				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
-				baltoro.props.put("app.key", to.privateKey);
-				baltoro.props.store(output, "updated on "+new Date());
+				props.put("app.key", to.privateKey);
+				props.store(output, "updated on "+new Date());
 			}
 			
-			baltoro.packages = _package;
-			Session session = baltoro.startClient();
+			
+			Session session = startClient();
 			return session;
 		} 
 		catch (Exception e)
@@ -220,7 +231,7 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.startDebug("io", "/*");
+    	Baltoro.start("io", "/*");
     	
     	//Baltoro.start("io");
     }
@@ -273,10 +284,10 @@ public class Baltoro
 	}
     */
     
-    private boolean init() throws Exception
+    private static boolean init() throws Exception
     {
     	  
-    	cs = new BOAPIClient(this);
+    	cs = new BOAPIClient();
 		props = new Properties();
 		adminEP = EndPointFactory(AdminEP.class);
 		
@@ -296,7 +307,8 @@ public class Baltoro
     		userUuid = props.getProperty("user.uuid");
     		email = props.getProperty("user.email");
     		instanceUuid = props.getProperty("app.instance.uuid");
-    		
+    		packages = props.getProperty("packages", Baltoro.packages);
+    		clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
     		
     		String option = systemIn("Start "+appName+" ? [y/n] : ");
@@ -335,6 +347,9 @@ public class Baltoro
 				props.put("user.uuid", user.uuid);
 				Baltoro.instanceUuid = UUIDGenerator.uuid("INST");
 				props.put("app.instance.uuid",Baltoro.instanceUuid);
+				props.put("packages", Baltoro.packages);
+	    		props.put("cluster.path", Baltoro.clusterPath);
+	    	
 				
 				return false;
 			} 
@@ -352,7 +367,7 @@ public class Baltoro
 		
     }
     
-    AppTO getMyApp() throws Exception
+    private static AppTO getMyApp() throws Exception
     {
     	if(!logedin)
     		return null;
@@ -457,7 +472,7 @@ public class Baltoro
 				
     }
 	
-	String systemIn(String msg)
+	static String systemIn(String msg)
 	{
 		try
 		{

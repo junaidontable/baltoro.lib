@@ -11,11 +11,10 @@ import org.glassfish.tyrus.client.ClientManager;
 class WSClient implements Callable<Session>
 {
 	
-	private Baltoro baltoro;
 	 
-	WSClient(Baltoro baltoro)
+	WSClient()
 	{
-		this.baltoro = baltoro;
+		
 	}
 	
 	
@@ -25,12 +24,12 @@ class WSClient implements Callable<Session>
 		try 
 	    {
 			
-			String token = System.currentTimeMillis()+"|"+baltoro.appUuid;
+			String token = System.currentTimeMillis()+"|"+Baltoro.appUuid;
 			String eToken = token;//CryptoUtil.encrypt(this.appPrivateKey, token.getBytes());
 		
 			
 	    	ClientManager clientManager = ClientManager.createClient();
-	 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(baltoro.agentCookieMap, baltoro.appUuid, baltoro.instanceUuid, eToken);
+	 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(Baltoro.agentCookieMap, Baltoro.appUuid, Baltoro.instanceUuid, eToken);
 	 	    
 	 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
 	                 .configurator(clientConfigurator)
@@ -47,7 +46,7 @@ class WSClient implements Callable<Session>
 	 		 url = "ws://"+Baltoro.appUuid+".baltoro.io/ws";
 	 	  }
 	 	  
-	 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(baltoro.appUuid, clientManager, config, url);
+	 	  BaltoroClientEndpoint instance = new BaltoroClientEndpoint(Baltoro.appUuid, clientManager, config, url);
 	 	 
 	 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
 	 	  

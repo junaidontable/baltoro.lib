@@ -25,10 +25,10 @@ public class BOAPIClient
 	String blHost = "http://admin.baltoro.io";
 	String host = "http://admin.baltoro.io";
 	
-	Baltoro baltoro;
+	
 	boolean online = false;
 	
-	BOAPIClient(Baltoro baltoro)
+	BOAPIClient()
 	{
 		if(Baltoro.debug)
 		{
@@ -36,7 +36,7 @@ public class BOAPIClient
 			host = "http://admin.baltoro.io:8080";
 		}
 		
-		CheckResponseFilter responseFilter = new CheckResponseFilter(baltoro.agentCookieMap);
+		CheckResponseFilter responseFilter = new CheckResponseFilter(Baltoro.agentCookieMap);
 		
 		webClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
@@ -44,7 +44,6 @@ public class BOAPIClient
 				.register(responseFilter)
 				.build();
 		
-		this.baltoro = baltoro;
 	
 		try
 		{
@@ -90,11 +89,11 @@ public class BOAPIClient
 	Builder getIB(WebTarget target)
 	{
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		Set<String> cookieNames = baltoro.agentCookieMap.keySet();
+		Set<String> cookieNames = Baltoro.agentCookieMap.keySet();
 		
 		for (String cookieName : cookieNames)
 		{
-			Cookie cookie = baltoro.agentCookieMap.get(cookieName);
+			Cookie cookie = Baltoro.agentCookieMap.get(cookieName);
 			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
 			ib.cookie(cookie);
 		}	

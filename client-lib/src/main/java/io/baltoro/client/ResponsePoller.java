@@ -6,12 +6,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ResponsePoller extends Thread
 {
 	
-	private Baltoro baltoro;
+	
 	boolean run = true;
 	
-	public ResponsePoller(Baltoro baltoro)
+	public ResponsePoller()
 	{
-		this.baltoro = baltoro;
 	}
 
 	@Override
