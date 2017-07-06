@@ -59,7 +59,8 @@ public class Baltoro
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
-	private static AdminEP adminEP;	 
+	private static AdminEP adminEP;	
+	private static int instanceNumber = 1;
 	
 	private Baltoro()
 	{
@@ -182,7 +183,7 @@ public class Baltoro
 	}
 	*/
 	
-	public static void start(String _package, String clusterPath)
+	public static void start(String _package, String clusterPath, int instanceNumber)
 	{
 	
 		String _debug = System.getProperty("baltoro.debug");
@@ -194,6 +195,7 @@ public class Baltoro
 		}
 		
 		packages = _package;
+		Baltoro.instanceNumber = instanceNumber;
 		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
 		Session session = _start();
 		System.out.println(session);
@@ -231,7 +233,7 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.start("io", "/*");
+    	Baltoro.start("io", "/*", 1);
     	
     	//Baltoro.start("io");
     }
@@ -292,7 +294,7 @@ public class Baltoro
 		adminEP = EndPointFactory(AdminEP.class);
 		
 		String propName = getMainClassName();
-		String fileName = "."+propName+".props";
+		String fileName = "."+propName+"-"+Baltoro.instanceNumber+".props";
 		
 		System.out.println(fileName);
 		propFile = new File(fileName);
