@@ -19,10 +19,12 @@ public class CheckResponseFilter implements ClientResponseFilter
 	
 	
 	protected Map<String, NewCookie> cookieMap;
+	private String appName;
 	
-	public CheckResponseFilter(Map<String, NewCookie> cookieMap)
+	public CheckResponseFilter(String appName, Map<String, NewCookie> cookieMap)
 	{
 		this.cookieMap = cookieMap;
+		this.appName = appName;
 	}
 	
 	public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) 
@@ -51,7 +53,7 @@ public class CheckResponseFilter implements ClientResponseFilter
 		for (String key : map.keySet())
 		{
 			NewCookie cookie = map.get(key);
-			log.info("received ============= >>>>> 111 >>>>>> "+key+" : "+cookie);
+			log.info("received ======<"+this.appName+">======= >>>["+map.hashCode()+"]>> 111 >>>>>> "+key+" : "+cookie);
 			cookieMap.put(key, cookie);
 		}	
 	}

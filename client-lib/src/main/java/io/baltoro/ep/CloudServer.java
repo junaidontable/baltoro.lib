@@ -1,6 +1,5 @@
 package io.baltoro.ep;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.Baltoro;
@@ -62,7 +60,7 @@ public class CloudServer
 			cookieMap.put(appName, map);
 		}
 		
-		CheckResponseFilter responseFilter = new CheckResponseFilter(map);
+		CheckResponseFilter responseFilter = new CheckResponseFilter(appName,map);
 	
 		if(Baltoro.debug == true)
 		{
@@ -121,18 +119,23 @@ public class CloudServer
 	
 	Builder getIB(WebTarget target)
 	{
+	
+		
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
 		Map<String, NewCookie> map = cookieMap.get(appName);
 		
 		Set<String> cookieNames = map.keySet();
-		
+		StringBuffer buffer = new StringBuffer();
 		for (String cookieName : cookieNames)
 		{
-			Cookie cookie = map.get(cookieName);
-			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
-			ib.cookie(cookie);
+			NewCookie cookie = map.get(cookieName);
+			log.info("sending ============= >>>>>> ["+map.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
+			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
+			buffer.append(_cookie);
 		}
 		
+		ib.header("Cookie", buffer.toString());
+	
 		return ib;
 	}
 	

@@ -12,6 +12,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -36,7 +37,7 @@ public class BOAPIClient
 			host = "http://admin.baltoro.io:8080";
 		}
 		
-		CheckResponseFilter responseFilter = new CheckResponseFilter(Baltoro.agentCookieMap);
+		CheckResponseFilter responseFilter = new CheckResponseFilter("admin",Baltoro.agentCookieMap);
 		
 		webClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
@@ -91,12 +92,17 @@ public class BOAPIClient
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
 		Set<String> cookieNames = Baltoro.agentCookieMap.keySet();
 		
+		StringBuffer buffer = new StringBuffer();
 		for (String cookieName : cookieNames)
 		{
-			Cookie cookie = Baltoro.agentCookieMap.get(cookieName);
-			log.info("sending ============= >>>>>>>>>>> "+cookieName+" : "+cookie);
-			ib.cookie(cookie);
-		}	
+			NewCookie cookie = Baltoro.agentCookieMap.get(cookieName);
+			log.info("sending ============= >>>>>> ["+Baltoro.agentCookieMap.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
+			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
+			buffer.append(_cookie);
+		}
+		
+		ib.header("Cookie", buffer.toString());
+	
 		return ib;
 	}
 	
