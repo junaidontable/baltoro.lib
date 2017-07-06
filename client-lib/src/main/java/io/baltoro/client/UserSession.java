@@ -56,9 +56,10 @@ public class UserSession
 
 	public void setUserName(String userName)
 	{
-		//Baltoro.setUserToSession(userName);
 		this.userName = userName;
-		sendSession();
+		Baltoro.setUserToSession(userName);
+		//this.userName = userName;
+		//sendSession();
 	}
 	
 	void sendSession()

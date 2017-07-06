@@ -160,7 +160,8 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(rc.getSessionId());
-		userSession.setUserName(name);
+		userSession.userName = name;
+		userSession.sendSession();
 		
 	}
 	
