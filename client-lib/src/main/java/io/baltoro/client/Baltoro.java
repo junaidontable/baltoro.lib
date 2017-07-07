@@ -173,6 +173,17 @@ public class Baltoro
 		return userSession;
 	}
 	
+	public static void invalidateSession()
+	{
+		RequestContext rc = RequestWorker.requestCtx.get();
+		UserSession userSession = SessionManager.getSession(rc.getSessionId());
+		userSession.userName = null;
+		userSession.invlaidateSession = true;
+		
+		SessionManager.removeUserSession(rc.getSessionId());
+		userSession.sendSession();
+	}
+	
 	/*
 	public static void startDebug(String _package, String clusterPath)
 	{

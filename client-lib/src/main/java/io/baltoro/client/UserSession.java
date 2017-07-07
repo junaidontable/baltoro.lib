@@ -20,6 +20,7 @@ public class UserSession
 	Map<String, String> attMap = new HashMap<String, String>(200);
 	Set<String> roles = new HashSet<>();
 	String userName;
+	boolean invlaidateSession;
 	
 	UserSession(String sessionId)
 	{
@@ -53,6 +54,15 @@ public class UserSession
 	{
 		return userName;
 	}
+	
+	
+
+	public boolean isInvlaidateSession()
+	{
+		return invlaidateSession;
+	}
+
+
 
 	public void setUserName(String userName)
 	{
@@ -71,6 +81,7 @@ public class UserSession
 		UserSessionContext uctx = new UserSessionContext();
 		uctx.setSessionUuid(getSessionId());
 		uctx.setPrincipalName(getUserName());
+		uctx.setInvalidateSession(invlaidateSession);
 		
 		ObjectMapper mapper = new ObjectMapper();
 		String json = null;
