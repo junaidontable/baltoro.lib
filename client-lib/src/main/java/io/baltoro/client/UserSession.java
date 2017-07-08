@@ -9,8 +9,8 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.to.UserSessionContext;
-import io.baltoro.to.WSTO;
+import io.baltoro.bto.UserSessionContext;
+import io.baltoro.bto.WSTO;
 
 public class UserSession
 {

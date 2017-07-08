@@ -1,6 +1,6 @@
 package io.baltoro.exception;
 
-public class AuthException extends BaltoroException
+public class AuthException extends BException
 {
 	
 	

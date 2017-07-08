@@ -1,6 +1,6 @@
 package io.baltoro.exception;
 
-public class BaltoroException extends Exception
+public class BException extends Exception
 {
 	
 	
@@ -9,7 +9,7 @@ public class BaltoroException extends Exception
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public BaltoroException(String message) 
+	public BException(String message) 
 	{
 		super(message);
 		

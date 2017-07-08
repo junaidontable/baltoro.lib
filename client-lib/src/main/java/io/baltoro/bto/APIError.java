@@ -1,4 +1,4 @@
-package io.baltoro.to;
+package io.baltoro.bto;
 
 import javax.ws.rs.WebApplicationException;
 

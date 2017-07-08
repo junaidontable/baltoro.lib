@@ -10,7 +10,7 @@ import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response.StatusType;
 
-import io.baltoro.to.APIError;
+import io.baltoro.bto.APIError;
 
 public class CheckResponseFilter implements ClientResponseFilter
 {

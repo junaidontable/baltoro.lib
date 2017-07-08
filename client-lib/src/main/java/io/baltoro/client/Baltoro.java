@@ -17,13 +17,13 @@ import java.util.logging.Logger;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
 
+import io.baltoro.bto.APIError;
+import io.baltoro.bto.AppTO;
+import io.baltoro.bto.PrivateDataTO;
+import io.baltoro.bto.RequestContext;
+import io.baltoro.bto.UserTO;
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
-import io.baltoro.to.APIError;
-import io.baltoro.to.AppTO;
-import io.baltoro.to.PrivateDataTO;
-import io.baltoro.to.RequestContext;
-import io.baltoro.to.UserTO;
 
 
 public class Baltoro 

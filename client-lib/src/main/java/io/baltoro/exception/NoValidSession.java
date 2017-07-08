@@ -1,6 +1,6 @@
 package io.baltoro.exception;
 
-public class NoValidSession extends BaltoroException
+public class NoValidSession extends BException
 {
 	
 	

@@ -26,12 +26,12 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.bto.APIError;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
-import io.baltoro.to.APIError;
 
 public class CloudServer
 {

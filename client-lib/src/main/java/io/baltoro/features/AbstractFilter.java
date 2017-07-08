@@ -1,7 +1,7 @@
 package io.baltoro.features;
 
+import io.baltoro.bto.WSTO;
 import io.baltoro.client.UserSession;
-import io.baltoro.to.WSTO;
 
 public abstract class AbstractFilter
 {

@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.baltoro.bto.MgntContext;
+import io.baltoro.bto.PathTO;
+import io.baltoro.bto.WSTO;
 import io.baltoro.client.util.ObjectUtil;
-import io.baltoro.to.MgntContext;
-import io.baltoro.to.PathTO;
-import io.baltoro.to.WSTO;
 
 public class BaltoroWSHeartbeat extends Thread
 {
