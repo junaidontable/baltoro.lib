@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.baltoro.bto.MgntContext;
 import io.baltoro.bto.PathTO;
@@ -43,7 +42,7 @@ public class BaltoroWSHeartbeat extends Thread
 				to.appUuid = Baltoro.appUuid;
 				to.appName = Baltoro.appName;
 				
-				String localName = null;
+				
 				MgntContext ctx = new MgntContext();
 				if(count == 1)
 				{
@@ -67,13 +66,14 @@ public class BaltoroWSHeartbeat extends Thread
 					ctx.setPathTOs(pathList);
 					
 				
-					localName =  new String(InetAddress.getLocalHost().getAddress());
+					
 				}
 				
 				
+				ctx.setThreadCount(Baltoro.instanceThreadCount);
 				ctx.setClusterPath(Baltoro.clusterPath);
-				ctx.setHostName(localName);
 				ctx.setCpuPercent((int)os.getSystemLoadAverage());
+				
 				
 				long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
 				long usedMem = (int) mem.getHeapMemoryUsage().getUsed();

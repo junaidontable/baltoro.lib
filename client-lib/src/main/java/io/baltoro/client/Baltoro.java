@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
 
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignatureSpi;
+
 import io.baltoro.bto.APIError;
 import io.baltoro.bto.AppTO;
 import io.baltoro.bto.PrivateDataTO;
@@ -48,6 +50,7 @@ public class Baltoro
 	static private String password;
 	private static UserTO user;
 	static String instanceUuid;
+	static int instanceThreadCount = 3;
 	public static boolean debug = false;
 	static Properties props = null;
 	static String appUuid;
@@ -60,7 +63,7 @@ public class Baltoro
 	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
 	private static AdminEP adminEP;	
-	private static int instanceNumber = 1;
+
 	
 	private Baltoro()
 	{
@@ -82,9 +85,19 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		int count = cs.getRemainingInsanceThreadsCount(appName, instanceUuid);
+		String instUuid = cs.getInstanceUuid(appUuid);
+		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
+		{
+			System.out.println("can't find or create an instance exiting");
+			System.exit(1);
+		}
+		
+		Baltoro.instanceUuid = instUuid;
+		
+		int count = cs.getRemainingInsanceThreadsCount(appUuid, instanceUuid);
 	
 		System.out.println(" ++++++++Allowed count +++++++++++++ "+count);
+		Baltoro.instanceThreadCount = count;
 		
 		if(count < 1)
 		{
@@ -195,7 +208,13 @@ public class Baltoro
 	}
 	*/
 	
-	public static void start(String _package, String clusterPath, int instanceNumber)
+	public static void startDebug(String _package, String clusterPath)
+	{
+		System.setProperty("baltoro.debug", "true");
+		start(_package, clusterPath);
+	}
+	
+	public static void start(String _package, String clusterPath)
 	{
 	
 		String _debug = System.getProperty("baltoro.debug");
@@ -207,7 +226,6 @@ public class Baltoro
 		}
 		
 		packages = _package;
-		Baltoro.instanceNumber = instanceNumber;
 		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
 		Session session = _start();
 		System.out.println(session);
@@ -245,7 +263,7 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.start("io", "/*", 1);
+    	Baltoro.start("io", "/*");
     	
     	//Baltoro.start("io");
     }
@@ -306,7 +324,7 @@ public class Baltoro
 		adminEP = EndPointFactory(AdminEP.class);
 		
 		String propName = getMainClassName();
-		String fileName = "."+propName+"-"+Baltoro.instanceNumber+".props";
+		String fileName = "."+propName+".props";
 		
 		System.out.println(fileName);
 		propFile = new File(fileName);
@@ -320,7 +338,7 @@ public class Baltoro
     		appName = props.getProperty("app.name");
     		userUuid = props.getProperty("user.uuid");
     		email = props.getProperty("user.email");
-    		instanceUuid = props.getProperty("app.instance.uuid");
+    		//instanceUuid = props.getProperty("app.instance.uuid");
     		packages = props.getProperty("packages", Baltoro.packages);
     		clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
@@ -359,8 +377,6 @@ public class Baltoro
 				
 				props.put("user.email", Baltoro.email);
 				props.put("user.uuid", user.uuid);
-				Baltoro.instanceUuid = UUIDGenerator.uuid("INST");
-				props.put("app.instance.uuid",Baltoro.instanceUuid);
 				props.put("packages", Baltoro.packages);
 	    		props.put("cluster.path", Baltoro.clusterPath);
 	    	

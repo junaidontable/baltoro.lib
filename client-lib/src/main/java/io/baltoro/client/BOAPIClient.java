@@ -70,14 +70,14 @@ public class BOAPIClient
 		log.info("response ==>"+str);
 	}
 	
-	int getRemainingInsanceThreadsCount(String appName, String instanceUuid) throws Exception
+	int getRemainingInsanceThreadsCount(String appUuid, String instanceUuid) throws Exception
 	{
 		log.info("... getInsanceThreadsCount ...");
 	
 		WebTarget target = webClient.target(blHost).path("/getRemainingInsanceThreadsCount");
 		
 		Form form = new Form();
-		form.param("appName", appName);
+		form.param("appUuid", appUuid);
 		form.param("instanceUuid", instanceUuid);
 		
 		
@@ -85,6 +85,22 @@ public class BOAPIClient
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		String count = response.readEntity(String.class);
 		return Integer.parseInt(count);
+	}
+	
+	String getInstanceUuid(String appUuid) throws Exception
+	{
+		log.info("... getting instance uuid from server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/getinstanceuuid");
+		
+		Form form = new Form();
+		form.param("appUuid", appUuid);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		String instUuid = response.readEntity(String.class);
+		return instUuid;
 	}
 	
 	Builder getIB(WebTarget target)

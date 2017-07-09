@@ -2,15 +2,18 @@ package io.baltoro.bto;
 
 import java.util.List;
 
+import io.baltoro.bto.PathTO;
+
 public class MgntContext
 {
-	private String hostName;
+	
 	private int cpuPercent;
 	private int memoryGB;
 	private int heartBeatCount;
 	private long localTimestamp;
 	private String clusterPath;
 	private List<PathTO> pathTOs;
+	private int threadCount;
 	
 	public int getCpuPercent()
 	{
@@ -28,14 +31,7 @@ public class MgntContext
 	{
 		this.memoryGB = memoryGB;
 	}
-	public String getHostName()
-	{
-		return hostName;
-	}
-	public void setHostName(String hostName)
-	{
-		this.hostName = hostName;
-	}
+	
 	public int getHeartBeatCount()
 	{
 		return heartBeatCount;
@@ -67,6 +63,14 @@ public class MgntContext
 	public void setClusterPath(String clusterPath)
 	{
 		this.clusterPath = clusterPath;
+	}
+	public int getThreadCount()
+	{
+		return threadCount;
+	}
+	public void setThreadCount(int threadCount)
+	{
+		this.threadCount = threadCount;
 	}
 	
 	
