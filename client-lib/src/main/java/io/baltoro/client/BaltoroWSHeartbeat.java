@@ -3,7 +3,6 @@ package io.baltoro.client;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +72,7 @@ public class BaltoroWSHeartbeat extends Thread
 				ctx.setThreadCount(Baltoro.instanceThreadCount);
 				ctx.setClusterPath(Baltoro.clusterPath);
 				ctx.setCpuPercent((int)os.getSystemLoadAverage());
-				
+				ctx.setClusterPath(Baltoro.clusterPath);
 				
 				long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
 				long usedMem = (int) mem.getHeapMemoryUsage().getUsed();
