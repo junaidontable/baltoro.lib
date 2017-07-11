@@ -9,7 +9,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -61,7 +60,7 @@ public class BOAPIClient
 	
 	void areYouThere() throws Exception
 	{
-		log.info("... Are you There ...");
+		log.info("... Are you There ..."+blHost);
 	
 		WebTarget target = webClient.target(blHost).path("/areyouthere");	
 		Invocation.Builder ib =	getIB(target);

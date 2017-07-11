@@ -1,4 +1,4 @@
-package io.baltoro.bto;
+package io.baltoro.xto;
 
 import java.util.HashMap;
 import java.util.Map;

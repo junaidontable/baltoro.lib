@@ -1,4 +1,4 @@
-package io.baltoro.exception;
+package io.baltoro.exp;
 
 public class BException extends Exception
 {

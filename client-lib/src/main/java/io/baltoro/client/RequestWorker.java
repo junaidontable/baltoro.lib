@@ -12,14 +12,14 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.bto.APIError;
-import io.baltoro.bto.RequestContext;
-import io.baltoro.bto.ResponseContext;
-import io.baltoro.bto.UserSessionContext;
-import io.baltoro.bto.WSTO;
+import io.baltoro.to.APIError;
+import io.baltoro.to.RequestContext;
+import io.baltoro.to.ResponseContext;
+import io.baltoro.to.UserSessionContext;
+import io.baltoro.to.WSTO;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
-import io.baltoro.exception.AuthException;
+import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
 
@@ -54,6 +54,7 @@ public class RequestWorker extends Thread
 		
 		ResponseContext res = new ResponseContext();
 		to.responseContext = res;
+		res.setSessionId(req.getSessionId());
 	
 		
 		try
@@ -114,6 +115,7 @@ public class RequestWorker extends Thread
 			WSSessions.get().addToResponseQueue(buffer);
 			
 			requestCtx.set(null);
+			
 		}
 
 		String sync = "response-queue";
@@ -156,7 +158,8 @@ public class RequestWorker extends Thread
 		
 		if (StringUtil.isNotNullAndNotEmpty(req.getSessionId()))
 		{
-			userSession = SessionManager.getSession(req.getSessionId());
+			String reqSessionId = req.getSessionId();
+			userSession = SessionManager.getSession(reqSessionId);
 			UserSessionContext uctx = to.userSessionContext;
 			if(uctx != null)
 			{
@@ -321,7 +324,11 @@ public class RequestWorker extends Thread
 		
 		
 		
-		
+		String path = ctx.getApiPath();
+		if(path.equals("/api/app/getmyapps"))
+		{
+			System.out.println("))))))))))>"+ctx.getApiPath());
+		}
 		
 		
 		Map<String, String[]> requestParam = ctx.getRequestParams();
@@ -362,13 +369,16 @@ public class RequestWorker extends Thread
 			if (paramClass == String.class)
 			{
 				methodInputData[i] = requestValue[0];
-			} else if (paramClass == String[].class)
+			} 
+			else if (paramClass == String[].class)
 			{
 				methodInputData[i] = requestValue;
-			} else if (paramClass == RequestContext.class)
+			} 
+			else if (paramClass == RequestContext.class)
 			{
 				methodInputData[i] = ctx;
-			} else if (paramClass == UserSession.class)
+			} 
+			else if (paramClass == UserSession.class)
 			{
 				methodInputData[i] = userSession;
 			}

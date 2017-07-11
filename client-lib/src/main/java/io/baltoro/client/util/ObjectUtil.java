@@ -23,6 +23,7 @@ public class ObjectUtil
 		} 
 		catch (Exception e)
 		{
+			System.out.println(new String(bytes));
 			e.printStackTrace();
 		}
 		

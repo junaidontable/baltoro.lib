@@ -1,4 +1,4 @@
-package io.baltoro.exception;
+package io.baltoro.exp;
 
 import java.io.IOException;
 

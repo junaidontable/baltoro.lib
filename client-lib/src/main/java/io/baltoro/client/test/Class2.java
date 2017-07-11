@@ -2,7 +2,7 @@ package io.baltoro.client.test;
 
 
 
-import io.baltoro.bto.RequestContext;
+import io.baltoro.to.RequestContext;
 import io.baltoro.features.Path;
 
 @Path("/")

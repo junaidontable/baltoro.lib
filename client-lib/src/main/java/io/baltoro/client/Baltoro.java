@@ -19,11 +19,11 @@ import javax.ws.rs.core.NewCookie;
 
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignatureSpi;
 
-import io.baltoro.bto.APIError;
-import io.baltoro.bto.AppTO;
-import io.baltoro.bto.PrivateDataTO;
-import io.baltoro.bto.RequestContext;
-import io.baltoro.bto.UserTO;
+import io.baltoro.to.APIError;
+import io.baltoro.to.AppTO;
+import io.baltoro.to.PrivateDataTO;
+import io.baltoro.to.RequestContext;
+import io.baltoro.to.UserTO;
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.ep.ClassBuilder;
 
@@ -153,6 +153,22 @@ public class Baltoro
 			
 			Object obj = implClass.newInstance();
 			return _class.cast(obj);
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
+	
+	public static <T> T endpoint(String appName, String[] nameValues, Class<T>  returnType)
+	{
+		try
+		{
+			return null;
 			
 		} 
 		catch (Exception e)
@@ -343,6 +359,9 @@ public class Baltoro
     		clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
     		
+    		//return true;
+    		
+    		///*
     		String option = systemIn("Start "+appName+" ? [y/n] : ");
     		if(option.equals("n"))
     		{
@@ -352,6 +371,7 @@ public class Baltoro
     		{
     			return true;
     		}
+    		//*/
     	}
     		
     	String option = systemIn("Do you have an account ? [y/n] : ");

@@ -26,7 +26,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.bto.APIError;
+import io.baltoro.to.APIError;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
@@ -125,6 +125,8 @@ public class CloudServer
 		Map<String, NewCookie> map = cookieMap.get(appName);
 		
 		Set<String> cookieNames = map.keySet();
+		
+		log.info("sending ============= >>>>>> Cookie count ["+cookieNames.size()+"]");
 		StringBuffer buffer = new StringBuffer();
 		for (String cookieName : cookieNames)
 		{
@@ -164,6 +166,9 @@ public class CloudServer
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
 		{
+			System.out.println("////////////////////////");
+			System.out.println(error);
+			System.out.println("////////////////////////");
 			throw new APIError(error);
 		}
 		//WSTO wsto = response.readEntity(WSTO.class);

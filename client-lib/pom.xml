@@ -132,6 +132,26 @@
   <build>
     <finalName>baltoro-lib</finalName>
 	<plugins>
+	
+	
+	<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <executions>
+        <execution>
+        <id>add-source-server</id>
+        <phase>generate-sources</phase>
+               <goals>
+                   <goal>add-source</goal>
+               </goals>
+            <configuration>
+                <sources>
+                    <source>/baltoro/baltoro.server/src/main/java</source>
+                </sources>
+            </configuration>
+        </execution>
+   	 </executions>
+ 	</plugin>
 
 
 		<plugin>
@@ -140,6 +160,13 @@
 		    <configuration>
 		    <source>1.8</source>
 		    <target>1.8</target>
+		    <includes>
+		   		<include>**/client/**/*.java</include>
+		    	<include>**/features/**/*.java</include>
+		    	<include>**/ep/**/*.java</include>
+		    	<include>**/to/**/*.java</include>
+		    	<include>**/exp/**/*.java</include>
+		    </includes>
 		    </configuration>
 		</plugin>
 

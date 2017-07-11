@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.baltoro.bto.MgntContext;
-import io.baltoro.bto.PathTO;
-import io.baltoro.bto.WSTO;
+import io.baltoro.to.MgntContext;
+import io.baltoro.to.PathTO;
+import io.baltoro.to.WSTO;
 import io.baltoro.client.util.ObjectUtil;
 
 public class BaltoroWSHeartbeat extends Thread

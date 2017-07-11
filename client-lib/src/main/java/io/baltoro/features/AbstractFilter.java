@@ -1,6 +1,6 @@
 package io.baltoro.features;
 
-import io.baltoro.bto.WSTO;
+import io.baltoro.to.WSTO;
 import io.baltoro.client.UserSession;
 
 public abstract class AbstractFilter
