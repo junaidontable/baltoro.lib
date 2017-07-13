@@ -13,4 +13,5 @@ public @interface Path
 {
 	String value();
 	boolean authRequired() default true;
+	boolean discaoverable() default true;
 }

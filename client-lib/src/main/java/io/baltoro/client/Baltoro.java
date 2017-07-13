@@ -359,9 +359,9 @@ public class Baltoro
     		clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
     		
-    		//return true;
+    		return true;
     		
-    		///*
+    		/*
     		String option = systemIn("Start "+appName+" ? [y/n] : ");
     		if(option.equals("n"))
     		{

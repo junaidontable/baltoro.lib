@@ -9,6 +9,8 @@ public class WebMethod
 	boolean authRequired = true;
 	private Class<?> _class;
 	private Method method;
+	boolean discoverable = true;
+	String propJson;
 	
 	public WebMethod(String webPath, Class<?> _class, Method method)
 	{

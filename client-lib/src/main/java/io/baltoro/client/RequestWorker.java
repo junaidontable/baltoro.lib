@@ -325,10 +325,6 @@ public class RequestWorker extends Thread
 		
 		
 		String path = ctx.getApiPath();
-		if(path.equals("/api/app/getmyapps"))
-		{
-			System.out.println("))))))))))>"+ctx.getApiPath());
-		}
 		
 		
 		Map<String, String[]> requestParam = ctx.getRequestParams();
