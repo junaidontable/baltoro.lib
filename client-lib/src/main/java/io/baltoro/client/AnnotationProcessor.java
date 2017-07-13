@@ -97,11 +97,11 @@ public class AnnotationProcessor
 							Class<?> returnType = method.getReturnType();
 							
 							String rType = returnType == null ? "void" : returnType.getSimpleName();
-							mPropsJson.append("\"output:\""+rType+"\",");
+							mPropsJson.append("\"output\":\""+rType+"\",");
 							
 							Parameter[] methodParms = method.getParameters();
 							
-							mPropsJson.append("input:{");
+							mPropsJson.append("\"input\":{");
 							boolean inputFound = false;
 							for (int i = 0; i < methodParms.length; i++)
 							{
@@ -119,9 +119,9 @@ public class AnnotationProcessor
 										Param annoPraram = (Param) paramAnno;
 										annoName = annoPraram.value();
 										inputFound = true;
-										mPropsJson.append("param:{");
-										mPropsJson.append("\"parma-name:\""+annoName+",");
-										mPropsJson.append("\"data-type:\""+paramClass.getSimpleName()+"\"");
+										mPropsJson.append("\"param\":{");
+										mPropsJson.append("\"parma-name\":\""+annoName+"\",");
+										mPropsJson.append("\"data-type\":\""+paramClass.getSimpleName()+"\"");
 										mPropsJson.append("},");
 									}
 
