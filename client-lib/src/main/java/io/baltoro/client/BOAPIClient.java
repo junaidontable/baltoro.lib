@@ -94,7 +94,7 @@ public class BOAPIClient
 		
 		Form form = new Form();
 		form.param("appUuid", appUuid);
-		
+		form.param("clusterPath", Baltoro.clusterPath);
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));

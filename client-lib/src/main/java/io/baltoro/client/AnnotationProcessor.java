@@ -1,6 +1,7 @@
 package io.baltoro.client;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
@@ -96,8 +97,20 @@ public class AnnotationProcessor
 							
 							Class<?> returnType = method.getReturnType();
 							
+							
+							
 							String rType = returnType == null ? "void" : returnType.getSimpleName();
 							mPropsJson.append("\"output\":\""+rType+"\",");
+							
+							if(returnType != null && !returnType.isPrimitive())
+							{
+								
+								Field[] fields = returnType.getFields();
+								for (int i = 0; i < fields.length; i++)
+								{
+									
+								}
+							}
 							
 							Parameter[] methodParms = method.getParameters();
 							

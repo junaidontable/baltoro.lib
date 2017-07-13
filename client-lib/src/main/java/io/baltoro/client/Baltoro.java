@@ -17,15 +17,12 @@ import java.util.logging.Logger;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
 
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignatureSpi;
-
+import io.baltoro.ep.ClassBuilder;
 import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
-import io.baltoro.client.util.UUIDGenerator;
-import io.baltoro.ep.ClassBuilder;
 
 
 public class Baltoro 
@@ -242,7 +239,23 @@ public class Baltoro
 		}
 		
 		packages = _package;
+		String _packages = System.getProperty("baltoro.packages");
+		System.out.println("-D.baltoro.packages= "+_packages);
+		if(_packages != null)
+		{
+			Baltoro.packages = _packages;
+		}
+		System.out.println("packages= "+Baltoro.packages);
+		
 		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
+		String _clusterPath = System.getProperty("baltoro.clusterPath");
+		System.out.println("-D.baltoro.clusterPath="+_clusterPath);
+		if(_clusterPath != null)
+		{
+			Baltoro.clusterPath = _clusterPath;
+		}
+		System.out.println("clusterPathh="+Baltoro.clusterPath);
+		
 		Session session = _start();
 		System.out.println(session);
 	}
@@ -355,8 +368,8 @@ public class Baltoro
     		userUuid = props.getProperty("user.uuid");
     		email = props.getProperty("user.email");
     		//instanceUuid = props.getProperty("app.instance.uuid");
-    		packages = props.getProperty("packages", Baltoro.packages);
-    		clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
+    		//packages = props.getProperty("packages", Baltoro.packages);
+    		//clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
     		
     		return true;
@@ -397,8 +410,8 @@ public class Baltoro
 				
 				props.put("user.email", Baltoro.email);
 				props.put("user.uuid", user.uuid);
-				props.put("packages", Baltoro.packages);
-	    		props.put("cluster.path", Baltoro.clusterPath);
+				//props.put("packages", Baltoro.packages);
+	    		//props.put("cluster.path", Baltoro.clusterPath);
 	    	
 				
 				return false;
