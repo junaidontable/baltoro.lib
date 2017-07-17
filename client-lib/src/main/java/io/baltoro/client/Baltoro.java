@@ -23,6 +23,7 @@ import io.baltoro.to.AppTO;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
+import io.baltoro.util.StringUtil;
 
 
 public class Baltoro 
@@ -85,7 +86,7 @@ public class Baltoro
 		String instUuid = cs.getInstanceUuid(appUuid);
 		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
 		{
-			System.out.println("can't find or create an instance exiting");
+			System.out.println("can't find or create an instance exiting "+appUuid);
 			System.exit(1);
 		}
 		
@@ -134,7 +135,55 @@ public class Baltoro
     
    
         return ste.getClassName();
+    }
+	
+	
+	public static String getMainClassPackageName() 
+	{ 
+        StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+        StackTraceElement ste = stElements[stElements.length-1];
+    
+        String className = ste.getClassName();
+        System.out.println(" ---- > "+className);
+        
+       // ste.getClass().getClassLoader().
+        
+//        Package _pack = ste.getClass().getPackage();
+//        if(_pack == null)
+//        {
+//        	return null;
+//        }
+      //  _pack.
+        
+        /*
+        Package[] packages = Package.getPackages();
+        for (Package pack : packages)
+		{
+        	String vendor = pack.getImplementationVendor();
+        	if(vendor != null)
+        	{
+        		continue;
+        	}
+        	
+			System.out.println(pack+"-"+pack.getImplementationVendor());
+		}
+        
+        return packages[0].getName();
+        */
+        
+        //String pack = _pack.getName();
+        
+        String[] packs = className.split("\\.");
+        if(packs.length > 1)
+        {
+        	return packs[0]+"."+packs[1];
+        }
+        else
+        {
+        	return packs[0];
+        }
      }
+	
 	
 	public static <T> T EndPointFactory(Class<T> _class)
 	{
@@ -220,6 +269,32 @@ public class Baltoro
 		System.out.println(session);
 	}
 	*/
+	
+	public static void start()
+	{
+		String _package = getMainClassPackageName();
+		start(_package, clusterPath);
+	}
+	
+	public static void start(String clusterPath)
+	{
+		String _package = getMainClassPackageName();
+		start(_package, clusterPath);
+	}
+	
+	public static void startDebug()
+	{
+		System.setProperty("baltoro.debug", "true");
+		String _package = getMainClassPackageName();
+		start(_package, clusterPath);
+	}
+	
+	public static void startDebug(String clusterPath)
+	{
+		System.setProperty("baltoro.debug", "true");
+		String _package = getMainClassPackageName();
+		start(_package, clusterPath);
+	}
 	
 	public static void startDebug(String _package, String clusterPath)
 	{
