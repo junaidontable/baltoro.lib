@@ -91,8 +91,9 @@ public class RequestWorker extends Thread
 			}
 			else
 			{
-				res.setError(e.getMessage()+"---"+e.getCause().getMessage());
 				e.printStackTrace();
+				res.setError(e.getMessage()+"---"+(e.getCause() !=null ? e.getCause().getMessage() : ""));
+				
 			}
 
 		}
@@ -116,6 +117,7 @@ public class RequestWorker extends Thread
 			
 			requestCtx.set(null);
 			
+		
 		}
 
 		String sync = "response-queue";
@@ -336,18 +338,19 @@ public class RequestWorker extends Thread
 		Class<?> _class = wMethod.get_class();
 		Method method = wMethod.getMethod();
 
-		boolean noParam = true;
+		//boolean noParam = true;
 		Parameter[] methodParms = method.getParameters();
 		Object[] methodInputData = new Object[methodParms.length];
 
 		for (int i = 0; i < methodParms.length; i++)
 		{
-			noParam = true;
+			//noParam = true;
 			Parameter param = methodParms[i];
 			Class<?> paramClass = param.getType();
 
 			String annoName = null;
 			Annotation[] annos = param.getAnnotations();
+			
 			for (int j = 0; j < annos.length; j++)
 			{
 				Annotation anno = annos[j];
@@ -361,6 +364,15 @@ public class RequestWorker extends Thread
 			}
 
 			String[] requestValue = requestParam.get(annoName);
+			if(annoName != null && requestValue == null)
+			{
+				StringBuffer buffer = new StringBuffer();
+				for (String paramName : requestParam.keySet())
+				{
+					buffer.append(paramName+",");
+				}
+				throw new Exception(annoName+" is not submitted as a parameter. incoming params ["+buffer.toString()+"] ");
+			}
 
 			if (paramClass == String.class)
 			{
