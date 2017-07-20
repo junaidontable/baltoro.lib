@@ -5,16 +5,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.activation.MimetypesFileTypeMap;
-
 import io.baltoro.to.RequestContext;
+import io.baltoro.to.ResponseContext;
 
 public class FileServer
 {
 		
-	public static WebFile getFile(String dirPath, RequestContext req)
+	public static WebFile getFile(String dirPath)
 	{
 		String path = null;
+		
+		ResponseContext res = RequestWorker.responseCtx.get();
+		RequestContext req = RequestWorker.requestCtx.get();
 		
 		if(req.getRelativePath() == null)
 		{
@@ -49,11 +51,26 @@ public class FileServer
 			    extension = fileName.substring(i+1);
 			}
 			
+			
+			
 			String contentType = MimeType.getMimeType(extension);
 			webFile.contentType = contentType;
-			RequestWorker.responseCtx.get().setMimeType(contentType);
+			res.setMimeType(contentType);
+			res.setLastModifiedOn(file.lastModified());
 			
-			
+			long browerTime = req.getIfModifiedSince();
+			long fileTime = file.lastModified();
+		
+			if(browerTime >= fileTime)
+			{
+				res.setModifiedSince(false);
+				return webFile;
+			}
+			else
+			{
+				res.setModifiedSince(true);
+			}
+				
 			Path filePath = Paths.get(path);
 			byte[] data = Files.readAllBytes(filePath);
 			webFile.data = data;
