@@ -9,7 +9,7 @@ public class EndPointTest
 	{
 		try
 		{
-			TestEndpointCall1 impl = Baltoro.EndPointFactory(TestEndpointCall1.class);
+			TestEndpointCall1 impl = Baltoro.endPointFactory(TestEndpointCall1.class);
 			
 			System.out.println("implClass === > "+impl);
 			

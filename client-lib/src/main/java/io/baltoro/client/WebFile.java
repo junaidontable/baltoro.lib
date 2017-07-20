@@ -4,6 +4,7 @@ import java.io.File;
 
 public class WebFile
 {
+	public String contentType;
 	public File file;
 	public byte[] data;
 }

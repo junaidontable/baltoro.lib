@@ -31,7 +31,7 @@ public class RequestWorker extends Thread
 	static ObjectMapper mapper = new ObjectMapper();
 	
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
-	//static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
+	static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
 
 	public RequestWorker(ByteBuffer byteBuffer)
 	{
@@ -55,6 +55,8 @@ public class RequestWorker extends Thread
 		ResponseContext res = new ResponseContext();
 		to.responseContext = res;
 		res.setSessionId(req.getSessionId());
+		
+		responseCtx.set(res);
 	
 		
 		try

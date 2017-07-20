@@ -18,12 +18,14 @@ import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
 
 import io.baltoro.ep.ClassBuilder;
+import io.baltoro.ep.CloudServer;
+import io.baltoro.ep.EPData;
+import io.baltoro.ep.ParamInput;
 import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
-import io.baltoro.util.StringUtil;
 
 
 public class Baltoro 
@@ -185,7 +187,7 @@ public class Baltoro
      }
 	
 	
-	public static <T> T EndPointFactory(Class<T> _class)
+	public static <T> T endPointFactory(Class<T> _class)
 	{
 		try
 		{
@@ -210,11 +212,16 @@ public class Baltoro
 	}
 	
 	
-	public static <T> T endpoint(String appName, String[] nameValues, Class<T>  returnType)
+	public static <T> T call(String appName, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
-			return null;
+			CloudServer cServer = new CloudServer(appName);
+			EPData epData = input.epData;
+			
+			
+			T t = cServer.call(path, epData, returnType);
+			return t;
 			
 		} 
 		catch (Exception e)
@@ -347,6 +354,10 @@ public class Baltoro
 				FileOutputStream output = new FileOutputStream(propFile);
 				AppTO selectedApp = getMyApp();
 				
+				appUuid = selectedApp.uuid;
+	    		appName = selectedApp.name;
+	    		
+				
 				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
 				props.put("app.key", to.privateKey);
 				props.store(output, "updated on "+new Date());
@@ -425,7 +436,7 @@ public class Baltoro
     	  
     	cs = new BOAPIClient();
 		props = new Properties();
-		adminEP = EndPointFactory(AdminEP.class);
+		//adminEP = endPointFactory(AdminEP.class);
 		
 		String propName = getMainClassName();
 		String fileName = "."+propName+".props";
@@ -459,9 +470,11 @@ public class Baltoro
     		{
     			return true;
     		}
-    		//*/
+    		*/
+    	
     	}
-    		
+    	
+		
     	String option = systemIn("Do you have an account ? [y/n] : ");
     	for (int i = 0; i < 3; i++)
 		{
@@ -477,9 +490,26 @@ public class Baltoro
 				
 				
 				
-				//String result = ep.login(email, password);
-				user = adminEP.adminLogin(email, password);
-				//user = cs.login(email, password);
+				//user = adminEP.adminLogin(email, password);
+				
+				/*
+				user = call("admin", "/api/adminlogin",UserTO.class, new ParamInput()
+				{	
+					@Override
+					public void input()
+					{
+						add("email", email);
+						add("password", password);
+						
+					}
+				});
+				*/
+				
+				ParamInput input = new ParamInput(){}.add("email", email).add("password", password);
+					
+				user = call("admin", "/api/adminlogin",UserTO.class, input);
+				
+				userUuid = user.uuid;
 				logedin = true;
 			
 				
@@ -584,7 +614,7 @@ public class Baltoro
 			
 			if(to == null)
 			{
-				System.out.println("5 tries, restart the app agaon");
+				System.out.println("5 tries, restart the app again");
 				System.exit(1);
 			}
 			

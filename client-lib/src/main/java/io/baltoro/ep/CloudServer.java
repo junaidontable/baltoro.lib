@@ -16,7 +16,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -26,12 +25,12 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.to.APIError;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
+import io.baltoro.to.APIError;
 
 public class CloudServer
 {
@@ -208,6 +207,46 @@ public class CloudServer
 		//return null;
 		
 		
+	}
+	
+	
+	public <T> T call(String path, EPData data, Class<T> returnType)
+	{
+		WebTarget target = client.target(host).path(path);	
+	
+		log.info("url --> "+target);
+		
+		Form form = new Form();
+		
+		List<Object[]> list = data.list;
+		for (Object[] objects : list)
+		{
+			String name = (String) objects[0];
+			String value = (String) objects[1];
+			form.param(name, value);
+		}
+		
+		Invocation.Builder ib =	getIB(target);
+		
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		
+		String error = response.getHeaderString("BALTORO-ERROR");
+		if(StringUtil.isNotNullAndNotEmpty(error))
+		{
+			System.out.println("////////////////////////");
+			System.out.println(error);
+			System.out.println("////////////////////////");
+			throw new APIError(error);
+		}
+		
+			
+		String json = response.readEntity(String.class);
+		
+	
+		Object obj = ObjectUtil.toObject(returnType, json.getBytes());
+		return returnType.cast(obj);
+	
 	}
 	
 	public Response execute(Form form, WebTarget target)
