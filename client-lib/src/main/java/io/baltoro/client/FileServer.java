@@ -63,13 +63,10 @@ public class FileServer
 		
 			if(browerTime >= fileTime)
 			{
-				res.setModifiedSince(false);
+				res.setSendNotModified(true);
 				return webFile;
 			}
-			else
-			{
-				res.setModifiedSince(true);
-			}
+		
 				
 			Path filePath = Paths.get(path);
 			byte[] data = Files.readAllBytes(filePath);
