@@ -448,7 +448,7 @@ public class Baltoro
 		System.out.println(fileName);
 		propFile = new File(fileName);
 		
-    	if(false)//propFile.exists())
+    	if(propFile.exists())
     	{
     		
     		props.load(new FileInputStream(propFile));
