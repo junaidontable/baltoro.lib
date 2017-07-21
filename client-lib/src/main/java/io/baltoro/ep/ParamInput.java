@@ -1,16 +1,23 @@
 package io.baltoro.ep;
 
-
+@FunctionalInterface
 public interface ParamInput
 {
 
-	public EPData epData = new EPData();
+	EPData epData = new EPData();
 	
-	default public ParamInput add(String name, String value)
+	ParamInput get(ParamInput input);
+	
+	
+	default ParamInput add(String name, String value)
 	{
-		System.out.println();
 		epData.add(name, value);
 		return this;
+	}
+	
+	default EPData getEPData()
+	{
+		return epData;
 	}
 	
 	

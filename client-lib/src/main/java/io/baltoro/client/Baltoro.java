@@ -62,7 +62,7 @@ public class Baltoro
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
-	private static AdminEP adminEP;	
+	//private static AdminEP adminEP;	
 
 	
 	private Baltoro()
@@ -217,7 +217,9 @@ public class Baltoro
 		try
 		{
 			CloudServer cServer = new CloudServer(appName);
-			EPData epData = input.epData;
+			ParamInput _input = input.get(input);
+			
+			EPData epData = _input.getEPData();
 			
 			
 			T t = cServer.call(path, epData, returnType);
@@ -358,7 +360,9 @@ public class Baltoro
 	    		appName = selectedApp.name;
 	    		
 				
-				PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
+				//PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
+	    		
+	    		PrivateDataTO to = call("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
 				props.put("app.key", to.privateKey);
 				props.store(output, "updated on "+new Date());
 			}
@@ -444,7 +448,7 @@ public class Baltoro
 		System.out.println(fileName);
 		propFile = new File(fileName);
 		
-    	if(propFile.exists())
+    	if(false)//propFile.exists())
     	{
     		
     		props.load(new FileInputStream(propFile));
@@ -453,6 +457,7 @@ public class Baltoro
     		appName = props.getProperty("app.name");
     		userUuid = props.getProperty("user.uuid");
     		email = props.getProperty("user.email");
+    		
     		//instanceUuid = props.getProperty("app.instance.uuid");
     		//packages = props.getProperty("packages", Baltoro.packages);
     		//clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
@@ -485,7 +490,9 @@ public class Baltoro
 			{
 				if(option.toLowerCase().equals("n"))
 				{
-					user = adminEP.createUser(email, password);
+					//user = adminEP.createUser(email, password);
+					
+					user = call("admin","/api/app/createUser", UserTO.class, a -> a.add("email", email).add("password", password));
 				}
 				
 				
@@ -505,8 +512,11 @@ public class Baltoro
 				});
 				*/
 				
-				ParamInput input = new ParamInput(){}.add("email", email).add("password", password);
+				//ParamInput input = new ParamInput(){}.add("email", email).add("password", password);
+				
 					
+				ParamInput input = a -> a.add("email", email).add("password", password);
+			
 				user = call("admin", "/api/adminlogin",UserTO.class, input);
 				
 				userUuid = user.uuid;
@@ -562,7 +572,8 @@ public class Baltoro
     	
     	AppTO selectApp = null;
     	
-		AppTO[] apps = adminEP.getMyApps();
+		//AppTO[] apps = adminEP.getMyApps();
+    	AppTO[] apps = call("admin", "/api/app/getMyApps", AppTO[].class, a -> a);
 		
 		if(apps.length > 0)
 		{
@@ -601,7 +612,9 @@ public class Baltoro
 				try
 				{
 					String name = systemIn("enter name of your new app : ");
-					to = adminEP.createApp(name);
+					//to = adminEP.createApp(name);
+					
+					to = call("admin","/api/app/createApp", AppTO.class, a -> a.add("name", name));
 					break;
 				} 
 				catch (APIError e)
