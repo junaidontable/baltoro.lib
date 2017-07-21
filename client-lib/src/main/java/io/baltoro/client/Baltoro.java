@@ -74,6 +74,7 @@ public class Baltoro
 	private static Session startClient() throws Exception
 	{
 			
+		
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
 		
 		AnnotationProcessor p = new AnnotationProcessor();
@@ -217,9 +218,7 @@ public class Baltoro
 		try
 		{
 			CloudServer cServer = new CloudServer(appName);
-			ParamInput _input = input.get(input);
-			
-			EPData epData = _input.getEPData();
+			EPData epData = input.getEPData();
 			
 			
 			T t = cServer.call(path, epData, returnType);

@@ -17,6 +17,7 @@ public interface ParamInput
 	
 	default EPData getEPData()
 	{
+		get(this);
 		return epData;
 	}
 	
