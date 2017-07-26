@@ -59,6 +59,7 @@ public class BaltoroWSHeartbeat extends Thread
 						pto.authRequired = wm.authRequired;
 						pto.discoverable = wm.discoverable;
 						pto.propsJson = wm.propJson;
+						pto.timeoutSec = wm.timeoutSec;
 						
 						pathList.add(pto);
 						System.out.println("PATH ADDING TO LIST -> "+key+" --> "+map.get(key));

@@ -11,6 +11,7 @@ public class WebMethod
 	private Method method;
 	boolean discoverable = true;
 	String propJson;
+	int timeoutSec = 20;
 	
 	public WebMethod(String webPath, Class<?> _class, Method method)
 	{
