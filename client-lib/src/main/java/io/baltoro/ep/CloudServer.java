@@ -242,7 +242,10 @@ public class CloudServer
 		
 			
 		String json = response.readEntity(String.class);
-		
+		if(returnType == String.class)
+		{
+			return returnType.cast(json);
+		}
 	
 		Object obj = ObjectUtil.toObject(returnType, json.getBytes());
 		return returnType.cast(obj);
