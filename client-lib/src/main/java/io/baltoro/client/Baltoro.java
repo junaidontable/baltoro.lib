@@ -234,6 +234,29 @@ public class Baltoro
 	}
 	
 	
+	public static Future<?> callAsync(String appName, String path, Class<?> returnType, ParamInput input)
+	{
+		try
+		{
+			CloudServer cServer = new CloudServer(appName);
+			EPData epData = input.getEPData();
+			
+			
+			Future<?> f = cServer.callAsyn(path, epData, returnType);
+			
+			
+			return f;
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
+	
 	public static void setUserToSession(String name)
 	{
 		RequestContext rc = RequestWorker.requestCtx.get();
