@@ -53,7 +53,7 @@ public class CheckResponseFilter implements ClientResponseFilter
 		for (String key : map.keySet())
 		{
 			NewCookie cookie = map.get(key);
-			log.info("received ======<"+this.appName+">======= >>>["+map.hashCode()+"]>> 111 >>>>>> "+key+" : "+cookie);
+			//log.info("received ======<"+this.appName+">======= >>>["+map.hashCode()+"]>> 111 >>>>>> "+key+" : "+cookie);
 			cookieMap.put(key, cookie);
 		}	
 	}

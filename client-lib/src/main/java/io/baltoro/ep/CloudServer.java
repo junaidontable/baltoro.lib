@@ -125,12 +125,12 @@ public class CloudServer
 		
 		Set<String> cookieNames = map.keySet();
 		
-		log.info("sending ============= >>>>>> Cookie count ["+cookieNames.size()+"]");
+		//log.info("sending ============= >>>>>> Cookie count ["+cookieNames.size()+"]");
 		StringBuffer buffer = new StringBuffer();
 		for (String cookieName : cookieNames)
 		{
 			NewCookie cookie = map.get(cookieName);
-			log.info("sending ============= >>>>>> ["+map.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
+			//log.info("sending ============= >>>>>> ["+map.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
 			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
 			buffer.append(_cookie);
 		}
