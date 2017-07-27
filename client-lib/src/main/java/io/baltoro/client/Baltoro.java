@@ -241,6 +241,7 @@ public class Baltoro
 			CloudServer cServer = new CloudServer(appName);
 			EPData epData = input.getEPData();
 			
+			System.out.println(" ------ > "+epData);
 			
 			Future<?> f = cServer.callAsyn(path, epData, returnType);
 			

@@ -1,5 +1,8 @@
 package io.baltoro.ep;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @FunctionalInterface
 public interface ParamInput
 {
@@ -18,7 +21,11 @@ public interface ParamInput
 	default EPData getEPData()
 	{
 		get(this);
-		return epData;
+		List<Object[]> list = epData.list;
+		EPData data = new EPData();
+		data.list = list;
+		epData.list = new ArrayList<>();
+		return data;
 	}
 	
 	
