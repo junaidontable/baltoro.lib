@@ -62,8 +62,7 @@ public class Baltoro
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
-	//private static AdminEP adminEP;	
-
+	
 	
 	private Baltoro()
 	{
@@ -86,14 +85,6 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		String instUuid = cs.getInstanceUuid(appUuid);
-		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
-		{
-			System.out.println("can't find or create an instance exiting "+appUuid);
-			System.exit(1);
-		}
-		
-		Baltoro.instanceUuid = instUuid;
 		
 		int count = cs.getRemainingInsanceThreadsCount(appUuid, instanceUuid);
 	
@@ -129,6 +120,11 @@ public class Baltoro
 	 	
 		return null;
 		
+	}
+	
+	public static LocalDB getDB()
+	{
+		return LocalDB.instance();
 	}
 	
 	public static String getMainClassName() 
@@ -289,16 +285,7 @@ public class Baltoro
 		userSession.sendSession();
 	}
 	
-	/*
-	public static void startDebug(String _package, String clusterPath)
-	{
-		packages = _package;
-		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
-		Baltoro.debug = true;
-		Session session = _start();
-		System.out.println(session);
-	}
-	*/
+	
 	
 	public static void start()
 	{
@@ -380,12 +367,21 @@ public class Baltoro
 				appUuid = selectedApp.uuid;
 	    		appName = selectedApp.name;
 	    		
-				
-				//PrivateDataTO to = adminEP.getBO(selectedApp.privateDataUuid, PrivateDataTO.class);
 	    		
-	    		PrivateDataTO to = call("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
+	    		String instUuid = cs.createInstance(appUuid);
+	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
+	    		{
+	    			System.out.println("can't find or create an instance exiting "+appUuid);
+	    			System.exit(1);
+	    		}
+	    		
+	    		Baltoro.instanceUuid = instUuid;
+	    		props.put("app.instance.uuid", instUuid);
+	    		
+				PrivateDataTO to = call("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
 				props.put("app.key", to.privateKey);
 				props.store(output, "updated on "+new Date());
+				
 			}
 			
 			
@@ -478,8 +474,7 @@ public class Baltoro
     		appName = props.getProperty("app.name");
     		userUuid = props.getProperty("user.uuid");
     		email = props.getProperty("user.email");
-    		
-    		//instanceUuid = props.getProperty("app.instance.uuid");
+    		instanceUuid = props.getProperty("app.instance.uuid");
     		//packages = props.getProperty("packages", Baltoro.packages);
     		//clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
     		
@@ -496,7 +491,7 @@ public class Baltoro
     		{
     			return true;
     		}
-    		*/
+    		//*/
     	
     	}
     	
@@ -511,30 +506,8 @@ public class Baltoro
 			{
 				if(option.toLowerCase().equals("n"))
 				{
-					//user = adminEP.createUser(email, password);
-					
 					user = call("admin","/api/app/createUser", UserTO.class, a -> a.add("email", email).add("password", password));
 				}
-				
-				
-				
-				//user = adminEP.adminLogin(email, password);
-				
-				/*
-				user = call("admin", "/api/adminlogin",UserTO.class, new ParamInput()
-				{	
-					@Override
-					public void input()
-					{
-						add("email", email);
-						add("password", password);
-						
-					}
-				});
-				*/
-				
-				//ParamInput input = new ParamInput(){}.add("email", email).add("password", password);
-				
 					
 				ParamInput input = a -> a.add("email", email).add("password", password);
 			

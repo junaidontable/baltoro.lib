@@ -114,18 +114,18 @@
 	</dependency>
 	
 		<!-- https://mvnrepository.com/artifact/org.apache.derby/derby -->
-	<!--   dependency>
+	<dependency>
 	    <groupId>org.apache.derby</groupId>
 	    <artifactId>derby</artifactId>
 	    <version>10.12.1.1</version>
-	</dependency -->
+	</dependency>
 
 	<!-- https://mvnrepository.com/artifact/org.apache.derby/derbyclient -->
-	<!--  -dependency>
+	<dependency>
 	    <groupId>org.apache.derby</groupId>
 	    <artifactId>derbyclient</artifactId>
 	    <version>10.12.1.1</version>
-	</dependency -->
+	</dependency>
     
   </dependencies>
   
@@ -166,6 +166,8 @@
 		    	<include>**/ep/**/*.java</include>
 		    	<include>**/to/**/*.java</include>
 		    	<include>**/exp/**/*.java</include>
+		    	<include>**/db/**/*.java</include>
+		    	<include>**/obj/**/*.java</include>
 		    </includes>
 		    </configuration>
 		</plugin>

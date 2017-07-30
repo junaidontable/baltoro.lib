@@ -83,14 +83,17 @@ public class BOAPIClient
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		String count = response.readEntity(String.class);
+		
+		System.out.println(" ----> count "+count);
 		return Integer.parseInt(count);
 	}
 	
-	String getInstanceUuid(String appUuid) throws Exception
-	{
-		log.info("... getting instance uuid from server ...");
 	
-		WebTarget target = webClient.target(blHost).path("/getinstanceuuid");
+	String createInstance(String appUuid) throws Exception
+	{
+		log.info("... creating new instance -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/createinstance");
 		
 		Form form = new Form();
 		form.param("appUuid", appUuid);
@@ -101,6 +104,7 @@ public class BOAPIClient
 		String instUuid = response.readEntity(String.class);
 		return instUuid;
 	}
+	
 	
 	Builder getIB(WebTarget target)
 	{
