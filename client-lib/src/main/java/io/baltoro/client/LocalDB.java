@@ -3,22 +3,24 @@ package io.baltoro.client;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.derby.impl.jdbc.EmbedConnection;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
+import io.baltoro.db.Connection;
+import io.baltoro.db.PreparedStatement;
+import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
@@ -64,19 +66,22 @@ public class LocalDB
 	private void initLocalDB()
 	throws Exception
 	{
-		con = DriverManager.getConnection(protocol + instUuid + ";create=true");
-		con.setAutoCommit(true);
+		EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
+		_con.setAutoCommit(true);
+		con = new Connection(_con);
 		
 		try
 		{
 			cleanUp();
-			con.createStatement().executeQuery("select uuid from object_base WHERE uuid='1'");
+			_con.createStatement().executeQuery("select uuid from object_base WHERE uuid='1'");
 		} 
 		catch (SQLException e)
 		{
 			System.out.println("setting up local database.... "+e);
 			setupTables();
 		}
+		
+		
 		
 	}
 	
@@ -250,6 +255,25 @@ public class LocalDB
 		
 		System.out.println("type Table Created");
 		
+		/*
+		sql = new StringBuffer();
+		sql.append("CREATE TABLE replicator (");
+		sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("millis bigint NOT NULL,");
+		sql.append("text varchar(32672) NOT NULL,");
+		sql.append("pushed smallint NOT NULL default 0,");
+		sql.append("PRIMARY KEY (uuid))");
+		System.out.println(sql.toString());
+		st = con.createStatement();
+		st.execute(sql.toString());
+		st.close();
+		
+		createIndex("replicator", "millis");
+		createIndex("replicator", "pushed");
+		
+		System.out.println("replicator Table Created");
+		*/
+		
 	}
 	
 	
@@ -378,6 +402,8 @@ public class LocalDB
 			st.setString(4, obj.getName());
 			st.setString(5, obj.getCreatedBy());
 			st.setTimestamp(6, obj.getCreatedOn());
+			
+		
 			
 			st.execute();
 			st.close();
@@ -591,6 +617,8 @@ public class LocalDB
 		
 		return value;
 	}
+	
+	
 
 
 }
