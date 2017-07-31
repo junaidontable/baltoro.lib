@@ -1,19 +1,26 @@
 package io.baltoro.client;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.domain.BODefaults;
+import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
 
 
@@ -21,7 +28,7 @@ public class LocalDB
 {
 
 	//private String framework = "embedded";
-	
+	private ObjectMapper mapper = new ObjectMapper();
 	private static LocalDB db;
 	private String protocol = "jdbc:derby:";
 
@@ -163,14 +170,13 @@ public class LocalDB
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE metadata (");
-		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("base_uuid varchar(42) NOT NULL,");
 		sql.append("version_uuid varchar(42) NOT NULL,");
 		sql.append("name varchar(256) NOT NULL,");
 		sql.append("value varchar(32672) NOT NULL,");
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("created_on timestamp NOT NULL,");
-		sql.append("PRIMARY KEY (uuid))");
+		sql.append("PRIMARY KEY (base_uuid,version_uuid,name))");
 		System.out.println(sql.toString());
 		st = con.createStatement();
 		st.execute(sql.toString());
@@ -274,6 +280,7 @@ public class LocalDB
 			
 			insertBase(obj);
 			insertVersion(obj);
+			insertMetadata(obj);
 		}
 		else
 		{
@@ -285,6 +292,7 @@ public class LocalDB
 			obj.setLatestVersionUuid(versionUuid);
 			updateBase(obj);
 			insertVersion(obj);
+			insertMetadata(obj);
 		}
 	}
 	
@@ -373,6 +381,116 @@ public class LocalDB
 			
 			st.execute();
 			st.close();
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void insertMetadata(Base obj)
+	{
+		
+		
+		PreparedStatement st = null;
+		try
+		{
+			/*
+			sql.append("CREATE TABLE metadata (");
+			sql.append("base_uuid varchar(42) NOT NULL,");
+			sql.append("version_uuid varchar(42) NOT NULL,");
+			sql.append("name varchar(256) NOT NULL,");
+			sql.append("value varchar(32672) NOT NULL,");
+			sql.append("created_by varchar(42) NOT NULL, ");
+			sql.append("created_on timestamp NOT NULL,");
+			*/
+			
+			Map<String, String> mdMap = new HashMap<>();
+			
+			
+			List<Class<?>> classes = new ArrayList<>();
+			Class<?> clazz = obj.getClass();
+			classes.add(obj.getClass());
+			
+			for (int i = 0; i < 10; i++)
+			{
+				clazz = clazz.getSuperclass();
+				if(clazz == Base.class)
+				{
+					break;
+				}
+				else
+				{
+					classes.add(clazz);
+				}
+				
+			}
+		
+			for (int i = classes.size()-1; i >= 0; i--)
+			{
+				System.out.println(" ================= > "+classes.get(i));
+				Class<?> _class = classes.get(i);
+			
+				Field[] fields = _class.getDeclaredFields();
+				for (Field field : fields)
+				{
+					Annotation storeAnno = field.getAnnotation(Store.class);
+					if(storeAnno != null)
+					{
+						Class fieldType = field.getType();
+						System.out.println(" ---- > "+field.getName());
+						String fieldName = field.getName();
+						
+						String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+						Method method = _class.getMethod(getMethodName);
+						//System.out.println(" ---- > "+getMethodName);
+						
+						Object mdObj = method.invoke(obj, null);
+						String value = null;
+						if(mdObj == null)
+						{
+							value = "";
+						}
+						else if(fieldType.isPrimitive())
+						{
+							value = mdObj.toString();
+						}
+						else if(fieldType == String.class || fieldType == StringBuffer.class || fieldType == StringBuilder.class)
+						{
+							value = mdObj.toString();
+						}
+						else
+						{
+							value = mapper.writeValueAsString(mdObj);
+						}
+						
+						mdMap.put(fieldName, value);
+						System.out.println(mdObj);
+					}
+				}
+			}
+			
+			for(String mdName : mdMap.keySet())
+			{
+				
+				String value = mdMap.get(mdName);
+				
+				st = con.prepareStatement("insert into metadata(base_uuid, version_uuid, name, value,created_by, created_on) "
+						+ "values(?,?,?,?,?,?)");
+				
+				st.setString(1, obj.getBaseUuid());
+				st.setString(2, obj.getLatestVersionUuid());
+				st.setString(3, mdName);
+				st.setString(4, value);
+				st.setString(5, obj.getCreatedBy());
+				st.setTimestamp(6, obj.getCreatedOn());
+				
+				st.execute();
+				st.close();
+			}
+			
+			
 		} 
 		catch (Exception e)
 		{
