@@ -23,6 +23,16 @@ public class PreparedStatement
 		return stmt.execute();
 	}
 	
+	public int executeUpdateNoReplication() throws SQLException
+	{
+		return stmt.executeUpdate();
+	}
+	
+	public boolean executeNoReplication() throws SQLException
+	{
+		return stmt.execute();
+	}
+	
 	public int executeUpdate() throws SQLException
 	{
 		Replicator.push(stmt);

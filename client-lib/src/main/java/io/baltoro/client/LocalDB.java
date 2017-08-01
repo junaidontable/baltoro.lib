@@ -24,6 +24,7 @@ import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
+import io.baltoro.to.ReplicationContext;
 import io.baltoro.to.ReplicationTO;
 
 
@@ -67,14 +68,24 @@ public class LocalDB
 	private void initLocalDB()
 	throws Exception
 	{
-		EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
-		_con.setAutoCommit(true);
-		con = new Connection(_con);
 		
 		try
 		{
-			cleanUp();
-			_con.createStatement().executeQuery("select uuid from object_base WHERE uuid='1'");
+			EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
+			_con.setAutoCommit(true);
+			con = new Connection(_con);
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		
+		try
+		{
+			//cleanUp();
+			con.createStatement().executeQuery("select uuid from base WHERE uuid='1'");
 		} 
 		catch (SQLException e)
 		{
@@ -82,6 +93,17 @@ public class LocalDB
 			Replicator.REPLICATION_ON = false;
 			setupTables();
 			Replicator.REPLICATION_ON = true;
+		}
+		
+		try
+		{
+			sync();
+			//System.exit(1);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.exit(1);
 		}
 		
 		
@@ -637,6 +659,7 @@ public class LocalDB
 		st.setLong(2, lcp.lcpMillis);
 		st.setTimestamp(3, lcp.initSyncOn);
 		st.setTimestamp(4, lcp.lastSyncOn);
+		st.executeNoReplication();
 		st.close();
 		
 	}
@@ -649,7 +672,7 @@ public class LocalDB
 		if(rs.next())
 		{
 			String lcpUuid = rs.getString("lcp_uuid");
-			long lcpMillis = rs.getLong("lcp_uuid");
+			long lcpMillis = rs.getLong("lcp_millis");
 			Timestamp initSyncOn = rs.getTimestamp("init_sync_on");
 			Timestamp lastSyncOn = rs.getTimestamp("last_sync_on");
 			
@@ -669,8 +692,47 @@ public class LocalDB
 	{
 		LCP lcp = getLCP();
 		boolean reset = lcp.initSyncOn == null ? true : false;
-		
 		ReplicationTO to = Baltoro.cs.getReplication(Baltoro.appUuid, Baltoro.instanceUuid, lcp.lcpUuid, lcp.lcpMillis, reset);
+		int syncCount = to.totalCount;
+		
+		List<ReplicationContext> list = to.list;
+		if(list == null)
+		{
+			lcp.lcpUuid = "";
+			lcp.lcpMillis = System.currentTimeMillis()-2000;
+			lcp.lastSyncOn = new Timestamp(System.currentTimeMillis());
+			lcp.initSyncOn = new Timestamp(System.currentTimeMillis());
+			
+			updateLCP(lcp);
+			return;
+		}
+		
+		System.out.print("[");
+		ReplicationContext lastCtx = null;
+		for (ReplicationContext ctx : list)
+		{
+			Statement st = con.createStatement();
+			//System.out.println(ctx.getCmd());
+			//System.out.println(" --- ");
+			st.executeNoReplication(ctx.getCmd());
+			st.close();
+			lastCtx = ctx;
+			System.out.print("-");
+		}
+		System.out.println("]");
+		
+		lcp.lcpUuid = lastCtx.getUuid();
+		lcp.lcpMillis = lastCtx.getMillis();
+		lcp.lastSyncOn = new Timestamp(System.currentTimeMillis());
+		
+		if(reset)
+		{
+			lcp.initSyncOn = new Timestamp(System.currentTimeMillis());
+		}
+		
+		updateLCP(lcp);
+		
+		
 	}
 	
 	

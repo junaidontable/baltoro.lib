@@ -1,5 +1,6 @@
 package io.baltoro.db;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.baltoro.client.Replicator;
@@ -17,6 +18,16 @@ public class Statement
 	public boolean execute(String sql) throws SQLException
 	{
 		Replicator.push(sql);
+		return stmt.execute(sql);
+	}
+	
+	public ResultSet executeQuery(String sql) throws SQLException
+	{
+		return stmt.executeQuery(sql);
+	}
+	
+	public boolean executeNoReplication(String sql) throws SQLException
+	{
 		return stmt.execute(sql);
 	}
 	

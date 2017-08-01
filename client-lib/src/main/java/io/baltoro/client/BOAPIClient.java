@@ -142,7 +142,7 @@ public class BOAPIClient
 		form.param("appUuid", appUuid);
 		form.param("instUuid", instUuid);
 		form.param("lcpUuid", lcpUuid);
-		form.param("lcpMilis", ""+lcpMillis);
+		form.param("lcpMillis", ""+lcpMillis);
 		form.param("reset", reset == true ? "true":"false");
 		
 		

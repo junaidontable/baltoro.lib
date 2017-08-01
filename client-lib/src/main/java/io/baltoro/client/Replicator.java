@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 
 import io.baltoro.client.util.ObjectUtil;
@@ -23,13 +24,18 @@ public class Replicator
 		
 		EmbedPreparedStatement42 stmt = (EmbedPreparedStatement42) st;
 		ParameterValueSet params = stmt.getParms();
-	
-		ParameterValueSet sparams = params;
-		int quote, dblquote, question, current, length;
-		String thesql = stmt.getSQLText();
 
+		//ParameterValueSet sparams = params;
+		
+		int quote, dblquote, question, current, length;
+		
+		String thesql = stmt.getSQLText();
 		StringBuffer postsql = new StringBuffer();
-		String theparam = new String();
+		
+		String theparam = null;
+		
+		
+		
 		int i = 0;
 		current = 0;
 		length = thesql.length();
@@ -54,27 +60,46 @@ public class Replicator
 			{
 				try
 				{
-					theparam = sparams.getParameter(i++).getString();
-				} catch (StandardException se)
+					DataValueDescriptor ds = params.getParameter(i++);
+					String type = ds.getTypeName();
+					System.out.println(" type >>>>>>>>>>>>> "+type);
+					
+					if(type.contains("INT"))
+					{
+						theparam = ds.getString();
+					}
+					else
+					{
+						theparam = "'" + ds.getString() + "'";
+					}
+					
+					//theparam = params.getParameter(i++).getString();
+				} 
+				catch (StandardException se)
 				{
 					/* non-string parameter */
 				}
+				
 				postsql.append(thesql.substring(current, question));
+				
 				if (theparam == null)
 				{
 					postsql.append("null");
-				} else
+				} 
+				else
 				{
-					postsql.append("'" + theparam + "'");
+					postsql.append(theparam);
 				}
+				
 				current = question + 1;
+				
 			} 
 			else if (quote < dblquote)
 			{
 				quote = thesql.indexOf("'", quote + 1);
 				postsql.append(thesql.substring(current, quote + 1));
 				current = quote + 1;
-			} 
+			}
 			else if (dblquote < length)
 			{
 				dblquote = thesql.indexOf("\"", dblquote + 1);
@@ -88,6 +113,7 @@ public class Replicator
 			}
 		}
 		return postsql.toString();
+		
 	}
 	
 	public static void push(PreparedStatement st)
@@ -105,6 +131,9 @@ public class Replicator
 	
 	public static void push(String sql)
 	{
+		
+		System.out.println(sql);
+		
 		if(!REPLICATION_ON)
 		{
 			return;
