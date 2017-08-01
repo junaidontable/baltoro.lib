@@ -78,7 +78,9 @@ public class LocalDB
 		catch (SQLException e)
 		{
 			System.out.println("setting up local database.... "+e);
+			Replicator.REPLICATION_ON = false;
 			setupTables();
+			Replicator.REPLICATION_ON = true;
 		}
 		
 		

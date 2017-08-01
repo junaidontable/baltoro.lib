@@ -2,12 +2,10 @@ package io.baltoro.client;
 
 import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
-import org.apache.derby.impl.jdbc.EmbedStatement;
 
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.ReplicationContext;
@@ -16,11 +14,9 @@ import io.baltoro.to.WSTO;
 public class Replicator
 {
 
-	private static String getSQL(Statement st)
-	{
-		EmbedStatement stmt = (EmbedStatement) st;
-		return stmt.getSQLText();
-	}
+	static boolean REPLICATION_ON = false;
+	
+
 	
 	private static String getSQL(PreparedStatement st)
 	{
@@ -96,6 +92,11 @@ public class Replicator
 	
 	public static void push(PreparedStatement st)
 	{
+		if(!REPLICATION_ON)
+		{
+			return;
+		}
+		
 		String sql = getSQL(st);
 		push(sql);
 	}
@@ -104,6 +105,10 @@ public class Replicator
 	
 	public static void push(String sql)
 	{
+		if(!REPLICATION_ON)
+		{
+			return;
+		}
 		
 		WSTO to = new WSTO();
 	
