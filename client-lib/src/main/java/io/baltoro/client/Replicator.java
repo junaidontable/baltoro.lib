@@ -15,7 +15,7 @@ public class Replicator
 {
 
 	static boolean REPLICATION_ON = false;
-	
+	static boolean INT_SYNC = false;
 
 	
 	private static String getSQL(PreparedStatement st)
@@ -119,7 +119,7 @@ public class Replicator
 		
 		ReplicationContext ctx = new ReplicationContext();
 		ctx.setMillis(System.currentTimeMillis());
-		ctx.setSql(sql);
+		ctx.setCmd(sql);
 		
 		to.replicationContext = ctx;
 		
@@ -138,5 +138,7 @@ public class Replicator
 		WSSessions.get().addToResponseQueue(msg);
 		
 	}
+	
+	
 
 }

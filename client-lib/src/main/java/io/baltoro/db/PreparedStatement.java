@@ -51,6 +51,11 @@ public class PreparedStatement
 		stmt.setInt(parameterIndex, x);
 	}
 	
+	public void setLong(int parameterIndex, long x) throws SQLException
+	{
+		stmt.setLong(parameterIndex, x);
+	}
+	
 	public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException
 	{
 		stmt.setTimestamp(parameterIndex, x);

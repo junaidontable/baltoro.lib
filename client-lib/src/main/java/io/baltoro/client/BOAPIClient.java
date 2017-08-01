@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -10,11 +11,15 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
+
+import io.baltoro.to.ReplicationContext;
+import io.baltoro.to.ReplicationTO;
 
 public class BOAPIClient
 {
@@ -125,118 +130,29 @@ public class BOAPIClient
 		return ib;
 	}
 	
-	/*
-	UserTO login(String email, String password) throws Exception
-	{
-		WebTarget target = webClient.target(host).path("/api/adminlogin");	
 	
+	
+	ReplicationTO getReplication(String appUuid, String instUuid, String lcpUuid, long lcpMillis, boolean reset) throws Exception
+	{
+		log.info("... creating new instance -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/getreplication");
+		
 		Form form = new Form();
-		form.param("email", email);
-		form.param("password", password);
+		form.param("appUuid", appUuid);
+		form.param("instUuid", instUuid);
+		form.param("lcpUuid", lcpUuid);
+		form.param("lcpMilis", ""+lcpMillis);
+		form.param("reset", reset == true ? "true":"false");
+		
 		
 		Invocation.Builder ib =	getIB(target);
-		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		
-		String json = response.readEntity(String.class);
-		
-		System.out.println(json);
-		
-		UserTO to = response.readEntity(UserTO.class);
-	
-		UserSession userSession = Baltoro.getUserSession();
-		userSession.setUserName(to.uuid);
-		
-			
+		ReplicationTO to = response.readEntity(ReplicationTO.class);
 		return to;
 	}
 	
-
-	
-	
-	ContainerTO createContainer() throws Exception
-	{
-		//log.info("... create container ...");
-		
-		WebTarget target = webClient.target(host).path("/api/app/createContainer");
-		 
-		Form form = new Form();
-		form.param("name", "customer 1");
-		
-		Invocation.Builder ib =	getIB(target);
-		
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		ContainerTO container = response.readEntity(ContainerTO.class);
-		
-		//log.info("container : ... "+container.getBaseUuid());
-		
-		return container;
-		
-	}
-	
-
-	
-	<T extends BaseTO> T getBO(String baseUuid, Class<T> type) throws Exception
-	{
-	
-		String url = "/api/app/get";
-	
-		WebTarget target = webClient.target(host).path(url);
-		target = target.queryParam("base-uuid", baseUuid);
-		 
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.get();
-		BaseTO bo = response.readEntity(type);
-		
-		return type.cast(bo);
-		
-	}
-	
-	
-	
-	UserTO createUser(String email, String password) throws Exception
-	{
-		
-		WebTarget target = webClient.target(host).path("/api/app/createUser");
-		 
-		Form form = new Form();
-		form.param("email", email);
-		form.param("password", password);
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		UserTO user = response.readEntity(UserTO.class);
-		return user;
-		
-	}
-	
-	AppTO createApp(String name) throws Exception
-	{
-		
-		WebTarget target = webClient.target(host).path("/api/app/createApp");
-		 
-		Form form = new Form();
-		form.param("name", name);
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		AppTO app = response.readEntity(AppTO.class);
-		return app;
-		
-	}
-	
-	List<AppTO> getMyApps() throws Exception
-	{
-		WebTarget target = webClient.target(host).path("/api/app/getMyApps");
-		Form form = new Form();
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		List<AppTO> list = response.readEntity(new GenericType<List<AppTO>>(){});
-		return list;
-		
-	}
-	*/
-
-	
-
 	
 
 }

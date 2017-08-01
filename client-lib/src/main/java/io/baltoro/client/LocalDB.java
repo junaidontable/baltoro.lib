@@ -24,6 +24,7 @@ import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
+import io.baltoro.to.ReplicationTO;
 
 
 public class LocalDB
@@ -120,6 +121,10 @@ public class LocalDB
 		
 		st = con.createStatement();
 		st.execute("drop table type");
+		st.close();
+		
+		st = con.createStatement();
+		st.execute("drop table lcp");
 		st.close();
 	}
 	
@@ -257,24 +262,29 @@ public class LocalDB
 		
 		System.out.println("type Table Created");
 		
-		/*
+		
 		sql = new StringBuffer();
-		sql.append("CREATE TABLE replicator (");
-		sql.append("uuid varchar(42) NOT NULL,");
-		sql.append("millis bigint NOT NULL,");
-		sql.append("text varchar(32672) NOT NULL,");
-		sql.append("pushed smallint NOT NULL default 0,");
+		sql.append("CREATE TABLE lcp (");
+		sql.append("uuid smallint NOT NULL,");
+		sql.append("lcp_uuid varchar(42),");
+		sql.append("lcp_millis bigint,");
+		sql.append("init_sync_on timestamp,");
+		sql.append("last_sync_on timestamp,");
 		sql.append("PRIMARY KEY (uuid))");
 		System.out.println(sql.toString());
 		st = con.createStatement();
 		st.execute(sql.toString());
 		st.close();
 		
-		createIndex("replicator", "millis");
-		createIndex("replicator", "pushed");
 		
-		System.out.println("replicator Table Created");
-		*/
+		System.out.println(sql.toString());
+		st = con.createStatement();
+		st.execute("insert into lcp(uuid) values(1)");
+		st.close();
+		
+		
+		System.out.println("lcp Table Created");
+		
 		
 	}
 	
@@ -620,7 +630,57 @@ public class LocalDB
 		return value;
 	}
 	
+	private void updateLCP(LCP lcp) throws Exception
+	{
+		PreparedStatement st = con.prepareStatement("update lcp set lcp_uuid=?, lcp_millis=?, init_sync_on=?, last_sync_on=? where uuid=1");
+		st.setString(1, lcp.lcpUuid);
+		st.setLong(2, lcp.lcpMillis);
+		st.setTimestamp(3, lcp.initSyncOn);
+		st.setTimestamp(4, lcp.lastSyncOn);
+		st.close();
+		
+	}
 	
+	private LCP getLCP() throws Exception
+	{
+		PreparedStatement st = con.prepareStatement("select * from lcp where uuid=1");
+		ResultSet rs = st.executeQuery();
+		LCP lcp = new LCP();
+		if(rs.next())
+		{
+			String lcpUuid = rs.getString("lcp_uuid");
+			long lcpMillis = rs.getLong("lcp_uuid");
+			Timestamp initSyncOn = rs.getTimestamp("init_sync_on");
+			Timestamp lastSyncOn = rs.getTimestamp("last_sync_on");
+			
+			lcp.lcpUuid = lcpUuid;
+			lcp.lcpMillis = lcpMillis;
+			lcp.initSyncOn = initSyncOn;
+			lcp.lastSyncOn = lastSyncOn;
+			
+		}
+		rs.close();
+		st.close();
+		
+		return lcp;
+	}
+	
+	private void sync() throws Exception
+	{
+		LCP lcp = getLCP();
+		boolean reset = lcp.initSyncOn == null ? true : false;
+		
+		ReplicationTO to = Baltoro.cs.getReplication(Baltoro.appUuid, Baltoro.instanceUuid, lcp.lcpUuid, lcp.lcpMillis, reset);
+	}
+	
+	
+	private class LCP
+	{
+		String lcpUuid;
+		long lcpMillis;
+		Timestamp initSyncOn;
+		Timestamp lastSyncOn;
+	}
 
 
 }

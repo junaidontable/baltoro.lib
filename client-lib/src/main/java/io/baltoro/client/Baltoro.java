@@ -44,7 +44,7 @@ public class Baltoro
 	static Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
 	static String packages;
-	private static BOAPIClient cs;
+	static BOAPIClient cs;
 	private static boolean logedin = false;
 	static private String email;
 	static private String password;
@@ -62,6 +62,8 @@ public class Baltoro
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	static String clusterPath = "/*";
+	static String lcp;
+	static long repMillis;
 	
 	
 	private Baltoro()
