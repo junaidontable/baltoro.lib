@@ -305,8 +305,6 @@ public class LocalDB
 		st.execute(sql.toString());
 		st.close();
 		
-		
-		System.out.println(sql.toString());
 		st = con.createStatement();
 		st.execute("insert into lcp(uuid) values(1)");
 		st.close();
@@ -428,7 +426,7 @@ public class LocalDB
 			
 			ResultSet rs = st.executeQuery("select * from metadata where version_uuid in ("+inClause+")");
 			
-			if(rs.next())
+			while(rs.next())
 			{
 				//String versionUuid = rs.getString("version_uuid");
 				String baseUuid = rs.getString("base_uuid");
@@ -461,9 +459,24 @@ public class LocalDB
 					long v = Long.parseLong(value);
 					setMethod.invoke(obj, new Object[]{v});
 				}
-				else
+				else if(fieldType == boolean.class)
+				{
+					boolean v = false;
+					if(value != null && value.equals("true"))
+					{
+						v = true;
+					}
+					
+					setMethod.invoke(obj, new Object[]{v});
+				}
+				else if(fieldType == String.class || fieldType == StringBuffer.class)
 				{
 					setMethod.invoke(obj, new Object[]{value});
+				}
+				else
+				{
+					Object paramObj = mapper.readValue(value.getBytes(),fieldType );
+					setMethod.invoke(obj, new Object[]{paramObj});
 				}
 				
 				
@@ -508,6 +521,11 @@ public class LocalDB
 			obj.setVersionNumber(1);
 			obj.setLatestVersionUuid(versionUuid);
 			obj.setCreatedOn(new Timestamp(System.currentTimeMillis()));
+			
+			if(StringUtil.isNullOrEmpty(obj.getName()))
+			{
+				obj.setName(obj.getClass().getSimpleName()+"-"+obj.hashCode());
+			}
 			
 			insertBase(obj);
 			insertVersion(obj);

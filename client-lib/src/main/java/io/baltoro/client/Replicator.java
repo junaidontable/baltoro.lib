@@ -132,12 +132,14 @@ public class Replicator
 	public static void push(String sql)
 	{
 		
-		System.out.println(sql);
+		
 		
 		if(!REPLICATION_ON)
 		{
 			return;
 		}
+		
+		System.out.println("pushing ... "+sql);
 		
 		WSTO to = new WSTO();
 	
