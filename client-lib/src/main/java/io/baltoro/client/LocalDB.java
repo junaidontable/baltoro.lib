@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
 
@@ -38,7 +39,10 @@ public class LocalDB
 
 	private String instUuid;
 	private Connection con;
+	Map<String, String> typeClassMap = new HashMap<>(100);
+	Map<String, String> classTypeMap = new HashMap<>(100);
 	
+	Map<String, MDFieldMap> classFieldMap = new HashMap<>(1000);
 	
 	public static LocalDB instance()
 	{
@@ -84,7 +88,7 @@ public class LocalDB
 		
 		try
 		{
-			//cleanUp();
+			cleanUp();
 			con.createStatement().executeQuery("select uuid from base WHERE uuid='1'");
 		} 
 		catch (SQLException e)
@@ -141,9 +145,11 @@ public class LocalDB
 		st.execute("drop table permission");
 		st.close();
 		
+		
 		st = con.createStatement();
 		st.execute("drop table type");
 		st.close();
+		
 		
 		st = con.createStatement();
 		st.execute("drop table lcp");
@@ -268,6 +274,7 @@ public class LocalDB
 		
 		System.out.println("Permission Table Created");
 		
+		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE type (");
 		sql.append("class varchar(2000) NOT NULL,");
@@ -321,6 +328,172 @@ public class LocalDB
 		System.out.println(sql);
 		st.execute(sql);
 		st.close();
+	}
+	
+	
+	public <T extends Base> T get(String baseUuid, Class<T> _class)
+	{
+		Base obj = null;
+		try
+		{
+			obj = _class.newInstance();
+			selectBase(baseUuid, obj);
+			Map<String, Base> map = new HashMap<String, Base>();
+			map.put(obj.getBaseUuid(), obj);
+			
+			addtMetadata(map);
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		return _class.cast(obj);
+	}
+	
+	
+		
+	public List<Base> find(String[] baseUuids)
+	{
+		
+		List<Base> objList = new ArrayList<>(200);
+		try
+		{
+			
+			
+			String uuids = StringUtil.toInClause(baseUuids);
+			String query = ("select * from base where uuid in ("+uuids+")");
+			Statement st = con.createStatement();
+			
+			ResultSet rs = st.executeQuery(query);
+			if(rs.next())
+			{
+				String type = rs.getString("type");
+				String objClass = getObjClass(type);
+				Base obj = (Base) Class.forName(objClass).newInstance();
+				buildBO(rs, obj);
+				objList.add(obj);
+			}
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return objList;
+	}
+	
+	private Base selectBase(String baseUuid, Base obj)
+	throws Exception
+	{
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try
+		{
+			st = con.prepareStatement("select * from base where uuid = ?");
+			st.setString(1, baseUuid);
+			rs = st.executeQuery();
+			if(rs.next())
+			{
+				buildBO(rs, obj);
+			}
+			rs.close();
+			st.close();
+			
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		
+		return null;
+		
+	}
+	
+	private void addtMetadata(Map<String, Base> objMap)
+	throws Exception
+	{
+		
+		try
+		{
+			Statement st = con.createStatement();
+			String inClause = StringUtil.toInClauseForMetadata(objMap.values());
+			
+			ResultSet rs = st.executeQuery("select * from metadata where version_uuid in ("+inClause+")");
+			
+			if(rs.next())
+			{
+				//String versionUuid = rs.getString("version_uuid");
+				String baseUuid = rs.getString("base_uuid");
+				String name = rs.getString("name");
+				String value = rs.getString("value");
+				
+				Base obj = objMap.get(baseUuid);
+				
+				MDFieldMap fieldMap = classFieldMap.get(obj.getClass().getName());
+				if(fieldMap == null)
+				{
+					setupMetadataFields(obj);
+					fieldMap = classFieldMap.get(obj.getClass().getName());
+				}
+				
+				Methods methods = fieldMap.get(name);
+				Method setMethod = methods.set;
+				
+				
+				Class<?> fieldType = methods.field.getType();
+				
+				
+				if(fieldType == int.class)
+				{
+					int v = Integer.parseInt(value);
+					setMethod.invoke(obj, new Object[]{v});
+				}
+				else if(fieldType == long.class)
+				{
+					long v = Long.parseLong(value);
+					setMethod.invoke(obj, new Object[]{v});
+				}
+				else
+				{
+					setMethod.invoke(obj, new Object[]{value});
+				}
+				
+				
+				
+			}
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	
+		
+	}
+	
+	private void buildBO(ResultSet rs, Base obj) throws Exception
+	{
+		
+		obj.setBaseUuid(rs.getString("uuid"));
+		obj.setName(rs.getString("name"));
+		obj.setState(rs.getString("state"));
+		obj.setType(rs.getString("type"));
+		obj.setContainerUuid(rs.getString("container_uuid"));
+		obj.setLatestVersionUuid(rs.getString("latest_version_uuid"));
+		obj.setVersionNumber(rs.getInt("latest_version_number"));
+		obj.setPermissionType(rs.getString("permission_type"));
+		obj.setCreatedBy(rs.getString("created_by"));
+		obj.setCreatedOn(rs.getTimestamp("created_on"));
+		
 	}
 	
 	public void save(Base obj)
@@ -449,6 +622,71 @@ public class LocalDB
 		
 	}
 	
+	
+	private void setupMetadataFields(Base obj) throws Exception
+	{
+		
+		List<Class<?>> classes = new ArrayList<>();
+		Class<?> clazz = obj.getClass();
+		classes.add(obj.getClass());
+		
+		for (int i = 0; i < 10; i++)
+		{
+			clazz = clazz.getSuperclass();
+			if(clazz == Base.class)
+			{
+				break;
+			}
+			else
+			{
+				classes.add(clazz);
+			}
+			
+		}
+	
+		for (int i = classes.size()-1; i >= 0; i--)
+		{
+			System.out.println(" ================= > "+classes.get(i));
+			Class<?> _class = classes.get(i);
+		
+			Field[] fields = _class.getDeclaredFields();
+			for (Field field : fields)
+			{
+				Annotation storeAnno = field.getAnnotation(Store.class);
+				if(storeAnno != null)
+				{
+					Class fieldType = field.getType();
+					System.out.println(" ---- > "+field.getName());
+					String fieldName = field.getName();
+					
+					MDFieldMap mdFieldMap = classFieldMap.get(obj.getClass().getName());
+					if(mdFieldMap == null)
+					{
+						mdFieldMap = new MDFieldMap();
+						classFieldMap.put(obj.getClass().getName(), mdFieldMap);
+					}
+					
+					
+					
+					String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+					Method getMethod = _class.getMethod(getMethodName);
+					
+					String setMethodName = "set"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+					Method setMethod = _class.getMethod(setMethodName, fieldType);
+					
+					Methods methods = new Methods();
+					methods.get = getMethod;
+					methods.set = setMethod;
+					methods.field = field;
+					
+					mdFieldMap.put(field.getName(), methods);
+					
+				}
+			}
+		}
+	}
+	
+	
 	private void insertMetadata(Base obj)
 	{
 		
@@ -468,68 +706,53 @@ public class LocalDB
 			
 			Map<String, String> mdMap = new HashMap<>();
 			
-			
-			List<Class<?>> classes = new ArrayList<>();
-			Class<?> clazz = obj.getClass();
-			classes.add(obj.getClass());
-			
-			for (int i = 0; i < 10; i++)
+			Map<String, Methods> fieldMap = classFieldMap.get(obj.getClass().getName());
+			if(fieldMap == null)
 			{
-				clazz = clazz.getSuperclass();
-				if(clazz == Base.class)
+				setupMetadataFields(obj);
+				fieldMap = classFieldMap.get(obj.getClass().getName());
+			}
+		
+		
+			
+		
+			Set<String> fieldNames = fieldMap.keySet();
+			
+			for (String fieldName : fieldNames)
+			{
+					
+				System.out.println(" ---- > "+fieldName);
+				
+				
+				String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+				Methods methods = fieldMap.get(fieldName);
+				Method method = methods.get;
+				Class<?> fieldType = methods.field.getType();
+				
+				Object mdObj = method.invoke(obj, null);
+				String value = null;
+				if(mdObj == null)
 				{
-					break;
+					continue;
+				}
+				else if(fieldType.isPrimitive())
+				{
+					value = mdObj.toString();
+				}
+				else if(fieldType == String.class || fieldType == StringBuffer.class || fieldType == StringBuilder.class)
+				{
+					value = mdObj.toString();
 				}
 				else
 				{
-					classes.add(clazz);
+					value = mapper.writeValueAsString(mdObj);
 				}
 				
+				mdMap.put(fieldName, value);
+				System.out.println(mdObj);
+				
 			}
-		
-			for (int i = classes.size()-1; i >= 0; i--)
-			{
-				System.out.println(" ================= > "+classes.get(i));
-				Class<?> _class = classes.get(i);
 			
-				Field[] fields = _class.getDeclaredFields();
-				for (Field field : fields)
-				{
-					Annotation storeAnno = field.getAnnotation(Store.class);
-					if(storeAnno != null)
-					{
-						Class fieldType = field.getType();
-						System.out.println(" ---- > "+field.getName());
-						String fieldName = field.getName();
-						
-						String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
-						Method method = _class.getMethod(getMethodName);
-						//System.out.println(" ---- > "+getMethodName);
-						
-						Object mdObj = method.invoke(obj, null);
-						String value = null;
-						if(mdObj == null)
-						{
-							value = "";
-						}
-						else if(fieldType.isPrimitive())
-						{
-							value = mdObj.toString();
-						}
-						else if(fieldType == String.class || fieldType == StringBuffer.class || fieldType == StringBuilder.class)
-						{
-							value = mdObj.toString();
-						}
-						else
-						{
-							value = mapper.writeValueAsString(mdObj);
-						}
-						
-						mdMap.put(fieldName, value);
-						System.out.println(mdObj);
-					}
-				}
-			}
 			
 			for(String mdName : mdMap.keySet())
 			{
@@ -559,9 +782,16 @@ public class LocalDB
 		
 	}
 	
+	
 	private String getType(Base obj)
 	{
-		String type = null;
+		
+	
+		String type = classTypeMap.get(obj.getClass().getName());
+		if(type != null)
+		{
+			return type;
+		}
 		
 		
 		PreparedStatement st = null;
@@ -578,6 +808,8 @@ public class LocalDB
 			
 			if(type != null)
 			{
+				classTypeMap.put(obj.getClass().getName(), type);
+				typeClassMap.put(type, obj.getClass().getName());
 				return type;
 			}
 			
@@ -592,6 +824,9 @@ public class LocalDB
 			rs.close();
 			st.close();
 			
+			classTypeMap.put(obj.getClass().getName(), type);
+			typeClassMap.put(type, obj.getClass().getName());
+			
 		} 
 		catch (Exception e)
 		{
@@ -601,55 +836,76 @@ public class LocalDB
 		return type;
 	}
 	
-	void update(OName name, String value)
-	throws Exception
-	{
-		PreparedStatement st = con.prepareStatement("update base set value = ? where type=? and name=?");
-		st.setString(1, value);
-		st.setString(2, OTypes.USER.toString());
-		st.setString(3, name.toString());
-		st.executeUpdate();
-		st.close();
-	}
 	
-	
-	private Map<OName, String> get(OTypes type) throws Exception
+	private String getObjClass(String type)
 	{
-		PreparedStatement st = con.prepareStatement("select name,value from base where type=?");
-		st.setString(1, type.toString());
 		
-		Map<OName, String> map = new HashMap<OName,String>();
-		
-		ResultSet rs = st.executeQuery();
-		while(rs.next())
+	
+		String objClass = typeClassMap.get(type);
+		if(objClass != null)
 		{
-			String name = rs.getString("name");
-			String value = rs.getString("value");
+			return objClass;
+		}
+		
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try
+		{
+			st = con.prepareStatement("select * from type where type = ?");
+			st.setString(1, type);
+			rs = st.executeQuery();
+			if(rs.next())
+			{
+				objClass = rs.getString("class");
+			}
 			
-			map.put(OName.valueOf(name), value);		
-		}
-		rs.close();
-		st.close();
-		
-		return map;
-	}
-	
-	String get(OName name) throws Exception
-	{
-		PreparedStatement st = con.prepareStatement("select value from base where type=? and name=?");
-		st.setString(1, OTypes.USER.toString());
-		st.setString(2, name.toString());
-		
-		ResultSet rs = st.executeQuery();
-		String value = null;
-		if(rs.next())
+			if(objClass != null)
+			{
+				classTypeMap.put(objClass, type);
+				typeClassMap.put(type, objClass);
+				return type;
+			}
+			
+		} 
+		catch (Exception e)
 		{
-			value = rs.getString(1);
+			e.printStackTrace();
 		}
-		rs.close();
+		
+		return objClass;
+	}
+
+	
+
+	
+	public String link(Base parent, Base child, Base context, int sortOrder) throws Exception
+	{
+		/*
+		 * sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("p_uuid varchar(42) NOT NULL,");
+		sql.append("c_uuid varchar(42) NOT NULL,");
+		sql.append("ctx_uuid varchar(42) NOT NULL,");
+		sql.append("sort smallint NOT NULL DEFAULT 1,");
+		sql.append("created_by varchar(42) NOT NULL, ");
+		sql.append("created_on timestamp NOT NULL,");
+		
+		 */
+		PreparedStatement st = con.prepareStatement("insert into link(uuid, p_uuid, c_uuid, ctx_uuid, sort, created_by, created_on) "
+				+ "value(?,?,?,?,?,?,?) ");
+	
+		String uuid = io.baltoro.util.UUIDGenerator.uuid("LINK");
+		st.setString(1, uuid);
+		st.setString(2, parent.getBaseUuid());
+		st.setString(3, child.getBaseUuid());
+		st.setString(4, context == null ? "" : context.getBaseUuid());
+		st.setInt(5, sortOrder);
+		st.setString(2, BODefaults.BASE_USER);
+		st.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+		st.execute();
 		st.close();
 		
-		return value;
+		return uuid;
 	}
 	
 	private void updateLCP(LCP lcp) throws Exception
@@ -742,6 +998,18 @@ public class LocalDB
 		long lcpMillis;
 		Timestamp initSyncOn;
 		Timestamp lastSyncOn;
+	}
+	
+	private class MDFieldMap extends HashMap<String, Methods>
+	{
+	
+	}
+	
+	private class Methods
+	{
+		Field field;
+		Method get;
+		Method set;	
 	}
 
 

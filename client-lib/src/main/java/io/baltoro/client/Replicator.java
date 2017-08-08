@@ -62,7 +62,7 @@ public class Replicator
 				{
 					DataValueDescriptor ds = params.getParameter(i++);
 					String type = ds.getTypeName();
-					System.out.println(" type >>>>>>>>>>>>> "+type);
+					//System.out.println(" type >>>>>>>>>>>>> "+type);
 					
 					if(type.contains("INT"))
 					{

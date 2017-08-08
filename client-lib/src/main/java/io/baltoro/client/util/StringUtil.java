@@ -2,6 +2,10 @@ package io.baltoro.client.util;
 
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Iterator;
+
+import io.baltoro.domain.BO;
+import io.baltoro.obj.Base;
 
 public class StringUtil 
 {
@@ -64,5 +68,76 @@ public class StringUtil
 	public static byte[] decode(String str)
 	{
 		return Base64.getDecoder().decode(str);
+	}
+	
+	
+	public static String toInClause(String[] array)
+	{
+		StringBuilder buffer = new StringBuilder(array.length * 10); 
+		for (String val : array) 
+		{
+			buffer.append("'"+val+"',");
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
+	}
+
+	
+	public static String toInClause(Collection<String> col)
+	{
+		if(col==null || col.isEmpty())
+		{
+			return "";
+		}
+		
+		StringBuilder buffer = new StringBuilder(col.size() * 10); 
+		Iterator<String> it = col.iterator();
+		while(it.hasNext())
+		{
+			String val = it.next();
+			buffer.append("'"+val+"',");
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
+	}
+	
+	public static String toInClauseForMetadata(Collection<Base> col)
+	{
+		if(col==null || col.isEmpty())
+		{
+			return "";
+		}
+		
+		StringBuilder buffer = new StringBuilder(col.size() * 10); 
+		Iterator<Base> it = col.iterator();
+		while(it.hasNext())
+		{
+			Base val = it.next();
+			buffer.append("'"+val.getLatestVersionUuid()+"',");
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
+	}
+	
+	public static String toInClauseFromBO(Collection<BO> col)
+	{
+		if(col==null || col.isEmpty())
+		{
+			return "";
+		}
+		
+		StringBuilder buffer = new StringBuilder(col.size() * 10); 
+		Iterator<BO> it = col.iterator();
+		while(it.hasNext())
+		{
+			BO val = it.next();
+			buffer.append("'"+val.getBaseUuid()+"',");
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
 	}
 }
