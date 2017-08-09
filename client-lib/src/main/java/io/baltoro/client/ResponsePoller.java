@@ -28,14 +28,14 @@ public class ResponsePoller extends Thread
 				}
 				else
 				{
-					System.out.println("total valid connections ["+count+"] ");
+					//System.out.println("total valid connections ["+count+"] ");
 				}
 			}
 			
 			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getResponseQueue();
 			if(queue == null || queue.size() == 0)
 			{
-				sleep("response queue is empty !");
+				//sleep("response queue is empty !");
 				continue;
 			}
 			
@@ -75,7 +75,7 @@ public class ResponsePoller extends Thread
 			{
 				System.out.println(text);
 				sync.intern().wait(50000);
-				System.out.println("client lib response waited : "+(System.currentTimeMillis() - t0));
+				//System.out.println("client lib response waited : "+(System.currentTimeMillis() - t0));
 			}
 		} 
 		catch (Exception e)

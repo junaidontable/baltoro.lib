@@ -82,6 +82,18 @@ public class StringUtil
 		
 		return buffer.toString();
 	}
+	
+	public static String toInClause(Base... bases)
+	{
+		StringBuilder buffer = new StringBuilder(bases.length * 10); 
+		for (Base base : bases) 
+		{
+			buffer.append("'"+base.getBaseUuid()+"',");
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
+	}
 
 	
 	public static String toInClause(Collection<String> col)

@@ -31,6 +31,10 @@ public class Statement
 		return stmt.execute(sql);
 	}
 	
+	public void addbatch(String sql) throws SQLException
+	{
+		stmt.addBatch(sql);
+	}
 
 	public void close() throws SQLException
 	{

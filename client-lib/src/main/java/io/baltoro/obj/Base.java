@@ -1,6 +1,7 @@
 package io.baltoro.obj;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import io.baltoro.domain.BODefaults;
 
@@ -119,5 +120,21 @@ public class Base
 	{
 		this.permissionType = permissionType;
 	}
+	
+	@Override
+	public int hashCode()
+	{
+
+       // return baseUuid.hashCode() ^ session.getId().hashCode();
+		return baseUuid.hashCode();
+    }
+	
+	@Override
+	public String toString()
+	{
+		return baseUuid+", "+name;
+	}
+	
+	
 	
 }

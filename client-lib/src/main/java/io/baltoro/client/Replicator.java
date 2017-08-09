@@ -19,7 +19,7 @@ public class Replicator
 	static boolean INT_SYNC = false;
 
 	
-	private static String getSQL(PreparedStatement st)
+	public static String getSQL(PreparedStatement st)
 	{
 		
 		EmbedPreparedStatement42 stmt = (EmbedPreparedStatement42) st;
@@ -139,7 +139,7 @@ public class Replicator
 			return;
 		}
 		
-		System.out.println("pushing ... "+sql);
+		//System.out.println("pushing ... "+sql);
 		
 		WSTO to = new WSTO();
 	
