@@ -163,7 +163,7 @@ public class LocalDB
 		StringBuffer sql = new StringBuffer();
 		sql.append("CREATE TABLE base (");
 		sql.append("uuid varchar(42) NOT NULL,");
-		sql.append("name varchar(256) NOT NULL,");
+		sql.append("name varchar(32672) NOT NULL,");
 		sql.append("state varchar(8) NOT NULL,");
 		sql.append("type varchar(5) NOT NULL,");
 		sql.append("container_uuid varchar(42) NOT NULL,");
@@ -192,7 +192,7 @@ public class LocalDB
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("base_uuid varchar(42) NOT NULL,");
 		sql.append("version_number smallint NOT NULL,");
-		sql.append("name varchar(256) NOT NULL,");
+		sql.append("name varchar(32672) NOT NULL,");
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid))");
@@ -384,6 +384,51 @@ public class LocalDB
 		return objList;
 	}
 	
+	
+	public <T extends Base> T findOne(String name, Class<T> _class)
+	{
+		String type = getType(_class.getName());
+		List<T> objList = find(name, _class);
+		if(objList == null || objList.isEmpty())
+		{
+			return null;
+		}
+		
+		return objList.get(0);
+		
+	}
+		
+	
+	public <T extends Base> List<T> find(String name, Class<T> _class)
+	{
+		String type = getType(_class.getName());
+		List<T> objList = new ArrayList<>(200);
+		try
+		{
+			
+			PreparedStatement st = con.prepareStatement("select * from base where name like ? and type=?");
+			st.setString(1, name);
+			st.setString(2, type);
+			
+			ResultSet rs = st.executeQuery();
+			if(rs.next())
+			{
+				String objClass = getObjClass(type);
+				Base obj = (Base) Class.forName(objClass).newInstance();
+				buildBO(rs, obj);
+				objList.add((T) obj);
+			}
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return objList;
+	}
+	
 	private Base selectBase(String baseUuid, Base obj)
 	throws Exception
 	{
@@ -513,7 +558,7 @@ public class LocalDB
 	{
 		if(StringUtil.isNullOrEmpty(obj.getBaseUuid()))
 		{
-			String type = getType(obj);
+			String type = getType(obj.getClass().getName());
 			obj.setType(type);
 			String uuid = UUIDGenerator.uuid(type);
 			String versionUuid = UUIDGenerator.uuid(type);
@@ -545,7 +590,105 @@ public class LocalDB
 		}
 	}
 	
+	public String createLink(Base parent, Base child, Base ctx, int sortOrder)
+	{
+		String uuid = null;
+		try
+		{
+			uuid = insertLink(parent, child, ctx, sortOrder);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return uuid;
+	}
 	
+	public String createLink(Base parent, Base child, int sortOrder)
+	{
+		String uuid = null;
+		try
+		{
+			uuid = insertLink(parent, child, null, sortOrder);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return uuid;
+	}
+	
+	public void removeLink(String uuid)
+	{
+		try
+		{
+			deleteLink(uuid);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private String insertLink(Base parent, Base child, Base ctx, int sortOrder)
+	throws Exception
+	{
+		/*
+		 * sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("p_uuid varchar(42) NOT NULL,");
+		sql.append("c_uuid varchar(42) NOT NULL,");
+		sql.append("ctx_uuid varchar(42) NOT NULL,");
+		sql.append("sort smallint NOT NULL DEFAULT 1,");
+		sql.append("created_by varchar(42) NOT NULL, ");
+		sql.append("created_on timestamp NOT NULL,");
+	
+		 */
+		PreparedStatement st = null;
+		try
+		{
+			st = con.prepareStatement("insert into link(uuid, p_uuid, c_uuid, ctx_uuid, sort, created_by, created_on) "
+					+ "values(?,?,?,?,?,?,?)");
+			
+			String uuid = UUIDGenerator.uuid("LINK");
+			st.setString(1, uuid);
+			st.setString(2, parent.getBaseUuid());
+			st.setString(3, child.getBaseUuid());
+			st.setString(4, ctx == null ? "" : ctx.getBaseUuid());
+			st.setInt(5, sortOrder);
+			st.setString(6, parent.getCreatedBy());
+			st.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+			
+			//System.out.println(st.get);
+			st.execute();
+			st.close();
+			
+			return uuid;
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private void deleteLink(String uuid)
+	throws Exception
+	{
+		
+		PreparedStatement st = null;
+		try
+		{
+			st = con.prepareStatement("delete from link where uuid = ?");
+			st.setString(1, uuid);
+			st.execute();
+			st.close();
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 	private void insertBase(Base obj)
 	{
@@ -684,10 +827,19 @@ public class LocalDB
 						classFieldMap.put(obj.getClass().getName(), mdFieldMap);
 					}
 					
-					
-					
-					String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
-					Method getMethod = _class.getMethod(getMethodName);
+					Method getMethod = null;
+					if(fieldType == boolean.class)
+					{
+						String getMethodName = "is"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+						getMethod = _class.getMethod(getMethodName);
+						
+					}
+					else
+					{
+						String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
+						getMethod = _class.getMethod(getMethodName);
+						
+					}
 					
 					String setMethodName = "set"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
 					Method setMethod = _class.getMethod(setMethodName, fieldType);
@@ -731,7 +883,11 @@ public class LocalDB
 				fieldMap = classFieldMap.get(obj.getClass().getName());
 			}
 		
-		
+			if(fieldMap == null)
+			{
+				System.out.println("no metadata to save");
+				return;
+			}
 			
 		
 			Set<String> fieldNames = fieldMap.keySet();
@@ -801,11 +957,11 @@ public class LocalDB
 	}
 	
 	
-	private String getType(Base obj)
+	private String getType(String className)
 	{
 		
 	
-		String type = classTypeMap.get(obj.getClass().getName());
+		String type = classTypeMap.get(className);
 		if(type != null)
 		{
 			return type;
@@ -817,7 +973,7 @@ public class LocalDB
 		try
 		{
 			st = con.prepareStatement("select * from type where class = ?");
-			st.setString(1, obj.getClass().getName());
+			st.setString(1, className);
 			rs = st.executeQuery();
 			if(rs.next())
 			{
@@ -826,14 +982,14 @@ public class LocalDB
 			
 			if(type != null)
 			{
-				classTypeMap.put(obj.getClass().getName(), type);
-				typeClassMap.put(type, obj.getClass().getName());
+				classTypeMap.put(className, type);
+				typeClassMap.put(type, className);
 				return type;
 			}
 			
 			st.close();
 			st = con.prepareStatement("insert into type(class,type,created_by, created_on) values (?,?,?,?)");
-			st.setString(1, obj.getClass().getName());
+			st.setString(1, className);
 			type = UUIDGenerator.randomString(4);
 			st.setString(2, type);
 			st.setString(3, BODefaults.BASE_USER);
@@ -842,8 +998,8 @@ public class LocalDB
 			rs.close();
 			st.close();
 			
-			classTypeMap.put(obj.getClass().getName(), type);
-			typeClassMap.put(type, obj.getClass().getName());
+			classTypeMap.put(className, type);
+			typeClassMap.put(type, className);
 			
 		} 
 		catch (Exception e)
@@ -1028,6 +1184,7 @@ public class LocalDB
 		Field field;
 		Method get;
 		Method set;	
+		
 	}
 
 
