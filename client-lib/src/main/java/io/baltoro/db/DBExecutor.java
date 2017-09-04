@@ -53,14 +53,14 @@ public class DBExecutor
 		q.delete(q.length()-1, q.length());
 		q.append(")\n");
 		
-		System.out.println(" **** > "+q.toString());
+		//System.out.println(" **** > "+q.toString());
 		
 		PreparedStatement st = con.prepareStatement(q.toString());
 		for (int i=0;i<list.size();i++)
 		{
 			Fields f = list.get(i);
 			Object value = f.get.invoke(obj, null);
-			System.out.println(value);
+			//System.out.println(value);
 			
 			if(value instanceof Timestamp)
 			{
