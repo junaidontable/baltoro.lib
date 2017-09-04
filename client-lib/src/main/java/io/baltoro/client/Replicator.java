@@ -116,7 +116,7 @@ public class Replicator
 		
 	}
 	
-	public static void push(PreparedStatement st)
+	public static void push(PreparedStatement st, String[] apps)
 	{
 		if(!REPLICATION_ON)
 		{
@@ -124,12 +124,12 @@ public class Replicator
 		}
 		
 		String sql = getSQL(st);
-		push(sql);
+		push(sql, apps);
 	}
 	
 
 	
-	public static void push(String sql)
+	public static void push(String sql, String[] apps)
 	{
 		
 		
@@ -151,6 +151,11 @@ public class Replicator
 		ReplicationContext ctx = new ReplicationContext();
 		ctx.setMillis(System.currentTimeMillis());
 		ctx.setCmd(sql);
+		
+		if(apps != null)
+		{
+			ctx.setApps(apps);
+		}
 		
 		to.replicationContext = ctx;
 		

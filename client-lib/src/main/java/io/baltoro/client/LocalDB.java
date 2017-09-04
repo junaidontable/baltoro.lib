@@ -23,6 +23,7 @@ import io.baltoro.db.Connection;
 import io.baltoro.db.PreparedStatement;
 import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
+import io.baltoro.features.Replicate;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
 import io.baltoro.to.ReplicationContext;
@@ -125,34 +126,34 @@ public class LocalDB
 		Statement st = con.createStatement();
 		
 		st = con.createStatement();
-		st.execute("drop table base");
+		st.execute("drop table base", null);
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table version");
+		st.execute("drop table version", null);
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table metadata");
+		st.execute("drop table metadata", null);
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table link");
-		st.close();
-		
-		
-		st = con.createStatement();
-		st.execute("drop table permission");
+		st.execute("drop table link", null);
 		st.close();
 		
 		
 		st = con.createStatement();
-		st.execute("drop table type");
+		st.execute("drop table permission", null);
 		st.close();
 		
 		
 		st = con.createStatement();
-		st.execute("drop table lcp");
+		st.execute("drop table type", null);
+		st.close();
+		
+		
+		st = con.createStatement();
+		st.execute("drop table lcp", null);
 		st.close();
 	}
 	
@@ -174,7 +175,7 @@ public class LocalDB
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		
@@ -198,7 +199,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		createIndex("version", "name");
@@ -219,7 +220,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (base_uuid,version_uuid,name))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		createIndex("metadata", "name");
@@ -259,16 +260,22 @@ public class LocalDB
 		sql.append("CREATE TABLE link (");
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("ctx_uuid varchar(42) NOT NULL,");
+		sql.append("obj_type varchar(4) NOT NULL,");
 		sql.append("sort smallint NOT NULL DEFAULT 5,");
+		sql.append("seq smallint NOT NULL DEFAULT 5,");
+		sql.append("count smallint NOT NULL DEFAULT 5,");
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid, ctx_uuid))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		createIndex("link", "ctx_uuid");
+		createIndex("link", "obj_type");
+		createIndex("link", "count");
+		createIndex("link", "ctx_uuid,obj_type,count");
 		createIndex("link", "created_on");
 		
 		System.out.println("Link Table Created");
@@ -288,7 +295,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		createIndex("permission", "base_uuid");
@@ -307,7 +314,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (class))");
 		System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		createIndex("type", "type");
@@ -325,11 +332,11 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString());
+		st.execute(sql.toString(), null);
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("insert into lcp(uuid) values(1)");
+		st.execute("insert into lcp(uuid) values(1)", null);
 		st.close();
 		
 		
@@ -347,7 +354,7 @@ public class LocalDB
 	
 		String sql = "CREATE INDEX IDX_"+tableName+"_"+indexName.toUpperCase()+" on "+tableName+"("+cols+")";
 		//System.out.println(sql);
-		st.execute(sql);
+		st.execute(sql, null);
 		st.close();
 	}
 	
@@ -457,7 +464,7 @@ public class LocalDB
 	
 	public <T extends Base> T findFirstLinked(Class<T> _class, Base... objs)
 	{
-		List<T> list = findLinked(_class, objs);
+		List<T> list = findLinked(false, _class, objs);
 		if(list != null && !list.isEmpty())
 		{
 			return list.get(0);
@@ -469,34 +476,68 @@ public class LocalDB
 	}
 	
 	
-	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
+	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, Base... objs)
 	{
 		String type = getType(_class.getName());
-		List<T> objList = new ArrayList<>(200);
+		//List<T> objList = new ArrayList<>(200);
 		try
 		{
 			
 			String baseUuids = StringUtil.toInClause(objs);
-			String query = "select l2.ctx_uuid, b.* from link l1, link l2, base b "+
-					" where l1.uuid = l2.uuid and b.uuid = l1.ctx_uuid "+
-					" and l2.ctx_uuid in ("+baseUuids+") and b.type = ? order by l1.sort";
+//			String query = "select l2.ctx_uuid, b.* from link l1, link l2, base b "+
+//					" where l1.uuid = l2.uuid and b.uuid = l1.ctx_uuid "+
+//					" and l2.ctx_uuid in ("+baseUuids+") and b.type = ? order by l1.sort";
+//			
 			
 			
-			PreparedStatement st = con.prepareStatement(query);
+//			String query = "select l1.ctx_uuid, l1.sort from link l1, link l2 \n"+
+//							" where l1.uuid = l2.uuid and l2.ctx_uuid in ("+baseUuids+") \n"+
+//							" and l2.count = ? and l1.obj_type = ? order by l1.sort, l1.created_on desc";
+//			
+//			
+			StringBuffer query = new StringBuffer();
+			query.append("select ctx_uuid from link \n");
+			query.append(" where ctx_uuid not in ("+baseUuids+") \n");
+			query.append(" and obj_type = ? \n");
+			query.append(" and uuid in ( select distinct uuid from link \n");
+			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
+			query.append(" and count = ? group by uuid having count(*) = ?)");
+			
+			PreparedStatement st = con.prepareStatement(query.toString());
 			st.setString(1, type);
+			st.setInt(2, objs.length+1);
+			st.setInt(3, objs.length);
+			
+			
+			if(debug)
+			{
+				System.out.println(query);
+				System.out.println("type = "+type+" , count = "+objs.length+1);
+			}
+			
+			List<String> uuidList = new ArrayList<>(20);
 			
 			ResultSet rs = st.executeQuery();
 			while(rs.next())
 			{
+				String uuid = rs.getString("ctx_uuid");
+				uuidList.add(uuid);
+				/*
 				String objClass = getObjClass(type);
 				Base _obj = (Base) Class.forName(objClass).newInstance();
 				buildBO(rs, _obj);
 				objList.add((T) _obj);
+				*/
 			}
 			
 			rs.close();
 			st.close();
 			
+			if(!uuidList.isEmpty())
+			{
+				List<Base> foundObjs = find(uuidList.toArray(new String[]{})); 
+				return (List<T>) foundObjs;
+			}
 			
 		}
 		catch(Exception e)
@@ -504,7 +545,7 @@ public class LocalDB
 			e.printStackTrace();
 		}
 		
-		return objList;
+		return new ArrayList<>();
 	}
 	
 	private Base selectBase(String baseUuid, Base obj)
@@ -812,8 +853,17 @@ public class LocalDB
 			st.setString(9, obj.getCreatedBy());
 			st.setTimestamp(10, obj.getCreatedOn());
 			
-			//System.out.println(st.get);
-			st.execute();
+			Replicate repAnno = obj.getClass().getAnnotation(Replicate.class);
+			if(repAnno != null)
+			{
+				String[] apps = repAnno.value();
+				st.execute(apps);
+			}
+			else
+			{
+				st.execute(null);
+			}
+				
 			st.close();
 		} 
 		catch (Exception e)
@@ -837,7 +887,17 @@ public class LocalDB
 			st.setInt(3, obj.getVersionNumber());
 			st.setString(4, obj.getBaseUuid());
 			
-			st.executeUpdate();
+			Replicate repAnno = obj.getClass().getAnnotation(Replicate.class);
+			if(repAnno != null)
+			{
+				String[] apps = repAnno.value();
+				st.execute(apps);
+			}
+			else
+			{
+				st.execute(null);
+			}
+			
 			st.close();
 		} 
 		catch (Exception e)
@@ -873,9 +933,17 @@ public class LocalDB
 			st.setString(5, obj.getCreatedBy());
 			st.setTimestamp(6, obj.getCreatedOn());
 			
-		
+			Replicate repAnno = obj.getClass().getAnnotation(Replicate.class);
+			if(repAnno != null)
+			{
+				String[] apps = repAnno.value();
+				st.execute(apps);
+			}
+			else
+			{
+				st.execute(null);
+			}
 			
-			st.execute();
 			st.close();
 		} 
 		catch (Exception e)
@@ -918,7 +986,7 @@ public class LocalDB
 				Annotation storeAnno = field.getAnnotation(Store.class);
 				if(storeAnno != null)
 				{
-					Class fieldType = field.getType();
+					Class<?> fieldType = field.getType();
 					System.out.println(" ---- > "+field.getName());
 					String fieldName = field.getName();
 					
@@ -966,15 +1034,6 @@ public class LocalDB
 		PreparedStatement st = null;
 		try
 		{
-			/*
-			sql.append("CREATE TABLE metadata (");
-			sql.append("base_uuid varchar(42) NOT NULL,");
-			sql.append("version_uuid varchar(42) NOT NULL,");
-			sql.append("name varchar(256) NOT NULL,");
-			sql.append("value varchar(32672) NOT NULL,");
-			sql.append("created_by varchar(42) NOT NULL, ");
-			sql.append("created_on timestamp NOT NULL,");
-			*/
 			
 			Map<String, String> mdMap = new HashMap<>();
 			
@@ -1029,14 +1088,15 @@ public class LocalDB
 				
 			}
 			
+			st = con.prepareStatement("insert into metadata(base_uuid, version_uuid, name, value,created_by, created_on) "
+					+ "values(?,?,?,?,?,?)");
+			
 			
 			for(String mdName : mdMap.keySet())
 			{
 				
 				String value = mdMap.get(mdName);
 				
-				st = con.prepareStatement("insert into metadata(base_uuid, version_uuid, name, value,created_by, created_on) "
-						+ "values(?,?,?,?,?,?)");
 				
 				st.setString(1, obj.getBaseUuid());
 				st.setString(2, obj.getLatestVersionUuid());
@@ -1045,10 +1105,22 @@ public class LocalDB
 				st.setString(5, obj.getCreatedBy());
 				st.setTimestamp(6, obj.getCreatedOn());
 				
-				st.execute();
-				st.close();
+				st.addbatch();
+				
 			}
 			
+			Replicate repAnno = obj.getClass().getAnnotation(Replicate.class);
+			if(repAnno != null)
+			{
+				String[] apps = repAnno.value();
+				st.executeBatch(apps);
+			}
+			else
+			{
+				st.executeBatch(null);
+			}
+			
+			st.close();
 			
 		} 
 		catch (Exception e)
@@ -1058,7 +1130,14 @@ public class LocalDB
 		
 	}
 	
+	private String getType(String className)
+	{
+		int hash = className.hashCode();
+		System.out.println(" ********************** +"+hash);
+		return ""+hash;
+	}
 	
+	/*
 	private String getType(String className)
 	{
 		
@@ -1096,7 +1175,8 @@ public class LocalDB
 			st.setString(2, type);
 			st.setString(3, BODefaults.BASE_USER);
 			st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-			st.execute();
+			st.execute(null);
+			
 			rs.close();
 			st.close();
 			
@@ -1111,6 +1191,8 @@ public class LocalDB
 		
 		return type;
 	}
+	*/
+	
 	
 	
 	private String getObjClass(String type)
@@ -1184,23 +1266,37 @@ public class LocalDB
 	public String insertLink(int sortOrder, Base... objs) throws Exception
 	{
 		
-		PreparedStatement st = con.prepareStatement("insert into link(uuid, ctx_uuid, sort, created_by, created_on) "
-				+ " values(?,?,?,?,?) ");
+		PreparedStatement st = con.prepareStatement("insert into link(uuid, ctx_uuid, obj_type,sort,seq,count, created_by, created_on) "
+				+ " values(?,?,?,?,?,?,?,?) ");
 	
 		String uuid = io.baltoro.util.UUIDGenerator.uuid("LINK");
 		
-		
+		int seq = 0;
 		for (Base base : objs)
 		{
+			seq++;
 			st.setString(1, uuid);
 			st.setString(2, base.getBaseUuid());
-			st.setInt(3, sortOrder);
-			st.setString(4, BODefaults.BASE_USER);
-			st.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+			st.setString(3, base.getType());
+			st.setInt(4, sortOrder);
+			st.setInt(5, seq);
+			st.setInt(6, objs.length);
+			st.setString(7, BODefaults.BASE_USER);
+			st.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
 			st.addbatch();
 		}
 		
-		st.executeBatch();
+		Replicate repAnno = objs[0].getClass().getAnnotation(Replicate.class);
+		if(repAnno != null)
+		{
+			String[] apps = repAnno.value();
+			st.executeBatch(apps);
+		}
+		else
+		{
+			st.executeBatch(null);
+		}
+		
 		st.close();
 		
 		return uuid;

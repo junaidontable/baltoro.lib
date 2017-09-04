@@ -35,7 +35,7 @@ public class ResponsePoller extends Thread
 			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getResponseQueue();
 			if(queue == null || queue.size() == 0)
 			{
-				//sleep("response queue is empty !");
+				sleep("response queue is empty !");
 				continue;
 			}
 			
@@ -73,7 +73,7 @@ public class ResponsePoller extends Thread
 			String sync = "response-queue";
 			synchronized (sync.intern())
 			{
-				System.out.println(text);
+				//System.out.println(text);
 				sync.intern().wait(50000);
 				//System.out.println("client lib response waited : "+(System.currentTimeMillis() - t0));
 			}

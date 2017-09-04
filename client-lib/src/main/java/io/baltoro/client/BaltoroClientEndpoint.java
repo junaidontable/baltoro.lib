@@ -39,7 +39,7 @@ public class BaltoroClientEndpoint extends Endpoint
 		
 		session.addMessageHandler(new BaltoroTextMessageHandler(this.appUuid, this.instanceUuid,session));
 		session.addMessageHandler(new BaltoroByteBufferMessageHandler(this.appUuid, this.instanceUuid, session));
-		session.addMessageHandler(new BaltoroPingMessageHandler(this.appUuid, this.instanceUuid, session));
+		//session.addMessageHandler(new BaltoroPingMessageHandler(this.appUuid, this.instanceUuid, session));
 	}
 	
 	

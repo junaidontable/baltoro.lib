@@ -89,7 +89,6 @@ public class BaltoroWSHeartbeat extends Thread
 				
 				byte[]  bytes = ObjectUtil.toJason(to);
 					
-				
 				ByteBuffer  msg = ByteBuffer.wrap(bytes);
 				
 				WSSessions.get().addToResponseQueue(msg);

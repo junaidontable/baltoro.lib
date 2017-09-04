@@ -52,9 +52,9 @@ public class RequestPoller extends Thread
 			String sync = "request-queue";
 			synchronized (sync.intern())
 			{
-				System.out.println(text);
+				//System.out.println(text);
 				sync.intern().wait(50000);
-				System.out.println("client lib server waited : "+(System.currentTimeMillis() - t0));
+				//System.out.println("client lib server waited : "+(System.currentTimeMillis() - t0));
 			}
 		} 
 		catch (Exception e)

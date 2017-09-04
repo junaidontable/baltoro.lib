@@ -20,10 +20,10 @@ public class PreparedStatement
 	}
 	
 	
-	public boolean execute() throws SQLException
+	public boolean execute(String[] apps) throws SQLException
 	{
 		boolean x = stmt.execute();
-		Replicator.push(stmt);
+		Replicator.push(stmt, apps);
 		return x;
 	}
 	
@@ -37,11 +37,11 @@ public class PreparedStatement
 		return stmt.execute();
 	}
 	
-	public int executeUpdate() throws SQLException
+	public int executeUpdate(String[] apps) throws SQLException
 	{
 		
 		int x = stmt.executeUpdate();
-		Replicator.push(stmt);
+		Replicator.push(stmt, apps);
 		return x;
 	}
 	
@@ -83,9 +83,9 @@ public class PreparedStatement
 		stmt.addBatch();
 	}
 	
-	public void executeBatch() throws SQLException
+	public void executeBatch(String[] apps) throws SQLException
 	{
-		Replicator.push(stmtBatch.toString());
+		Replicator.push(stmtBatch.toString(), apps);
 		stmt.executeBatch();
 		stmtBatch = new StringBuffer();
 	}

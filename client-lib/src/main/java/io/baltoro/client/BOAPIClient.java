@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -11,14 +10,12 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
-import io.baltoro.to.ReplicationContext;
 import io.baltoro.to.ReplicationTO;
 
 public class BOAPIClient

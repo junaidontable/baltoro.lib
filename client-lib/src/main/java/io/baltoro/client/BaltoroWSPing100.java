@@ -4,18 +4,18 @@ import java.nio.ByteBuffer;
 
 import javax.websocket.Session;
 
-public class BaltoroWSPing extends Thread
+public class BaltoroWSPing100 extends Thread
 {
 
 	Session session;
 	int count=0;
 	Baltoro baltoro;
 	
-	public BaltoroWSPing(Baltoro baltoro, Session session)
+	public BaltoroWSPing100(Baltoro baltoro, Session session)
 	{
 		this.baltoro = baltoro;
 		this.session = session;
-		}
+	}
 	
 	public void run()
 	{
@@ -26,7 +26,7 @@ public class BaltoroWSPing extends Thread
 			try
 			{
 					
-				ByteBuffer  msg = ByteBuffer.wrap((""+count).getBytes());
+				ByteBuffer  msg = ByteBuffer.wrap((" ** 100 * "+count).getBytes());
 				session.getBasicRemote().sendPing(msg);
 				
 				System.out.println("sending ping "+count);

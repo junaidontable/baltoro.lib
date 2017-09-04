@@ -20,7 +20,7 @@ public class BaltoroTextMessageHandler implements MessageHandler.Whole<String>
 	@Override
 	public void onMessage(String message)
 	{
-		System.out.println(" got ping back -> "+message);
+		System.out.println(" *** **** * got ping back -> "+message);
 		
 	}
 }

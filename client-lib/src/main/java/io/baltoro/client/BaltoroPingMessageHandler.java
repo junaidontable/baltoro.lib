@@ -21,7 +21,7 @@ public class BaltoroPingMessageHandler implements MessageHandler.Whole<PongMessa
 	@Override
 	public void onMessage(PongMessage msg)
 	{
-		System.out.println(" got ping back -> "+new String(msg.getApplicationData().array()));
+		System.out.println(" ===> got ping back -> "+new String(msg.getApplicationData().array()));
 		
 	}
 }
