@@ -117,7 +117,7 @@ public class BOAPIClient
 		for (String cookieName : cookieNames)
 		{
 			NewCookie cookie = Baltoro.agentCookieMap.get(cookieName);
-			log.info("sending ============= >>>>>> ["+Baltoro.agentCookieMap.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
+			//log.info("sending ============= >>>>>> ["+Baltoro.agentCookieMap.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
 			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
 			buffer.append(_cookie);
 		}

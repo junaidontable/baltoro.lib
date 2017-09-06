@@ -13,6 +13,7 @@ import java.util.Map;
 
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.features.Column;
+import io.baltoro.features.PK;
 import io.baltoro.features.Table;
 
 public class DBExecutor
@@ -84,6 +85,85 @@ public class DBExecutor
 		
 	}
 	
+	
+	public static void update(java.sql.Connection con, Object obj)
+	throws Exception
+	{
+		String tabelName = getTableName(obj.getClass());
+		List<Fields> list = classTableMap.get(tabelName);
+		if(list == null)
+		{
+			processObject(obj.getClass());
+			list = classTableMap.get(tabelName);
+		}
+		
+		if(list == null || list.isEmpty())
+		{
+			throw new Exception("no columns or table ");
+		}
+		
+		StringBuffer q = new StringBuffer();
+		q.append("update "+tabelName+" set ");
+		for (Fields f : list)
+		{
+			if(!f.pk)
+			{
+				q.append(f.colName+"=?,");
+			}
+		}
+		q.delete(q.length()-1, q.length());
+		
+		q.append(" where ");
+		for (Fields f : list)
+		{
+			if(f.pk)
+			{
+				Object value = f.get.invoke(obj, null);
+				q.append(f.colName+"='"+value.toString()+"' and");
+			}
+			
+		}
+		q.delete(q.length()-3, q.length());
+		
+		
+		System.out.println(" **** > "+q.toString());
+		
+		
+		PreparedStatement st = con.prepareStatement(q.toString());
+		int i = 0;
+		for (Fields f:list)
+		{
+			
+			if(f.pk)
+			{
+				continue;
+			}
+			i++;
+			Object value = f.get.invoke(obj, null);
+			//System.out.println(value);
+			
+			if(value instanceof Timestamp)
+			{
+				st.setTimestamp(i, (Timestamp) value);
+			}
+			else if(value instanceof Boolean)
+			{
+				boolean v = (boolean) value;
+				st.setInt(i, v ? 1 : 0);
+			}
+			else
+			{
+				st.setString(i, value == null ? "" : value.toString());
+			}
+			
+		}
+		
+		boolean e = st.execute();
+				
+		st.close();
+		
+		
+	}
 	
 	public static <T> T selectOne(java.sql.Connection con, Class<T> _class, String query)
 	throws Exception
@@ -200,11 +280,19 @@ public class DBExecutor
 				String setMethodName = "set"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
 				Method setMethod = _class.getMethod(setMethodName, fieldType);
 				
+				
+				
+				
 				Fields f = new Fields();
 				f.get = getMethod;
 				f.set = setMethod;
 				f.field = field;
 				f.colName = StringUtil.isNullOrEmpty(colName) ? field.getName() : colName;
+				PK pk = field.getAnnotation(PK.class);
+				if(pk!= null)
+				{
+					f.pk = true;
+				}
 				
 				fieldList.add(f);
 				
@@ -221,5 +309,5 @@ class Fields
 	Method get;
 	Method set;	
 	String colName;
-	
+	boolean pk;
 }
