@@ -224,6 +224,67 @@ public class DBExecutor
 		
 	}
 	
+	
+	
+	public static <T> List<T> select(java.sql.Connection con, Class<T> _class, String query)
+	throws Exception
+	{
+		
+		String tabelName = getTableName(_class);
+		List<Fields> fList = classTableMap.get(tabelName);
+		if(fList == null)
+		{
+			processObject(_class);
+			fList = classTableMap.get(tabelName);
+		}
+		
+		if(fList == null || fList.isEmpty())
+		{
+			throw new Exception("no columns or table ");
+		}
+		
+		List<T> rList = new ArrayList<>(300);
+		Statement st = con.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		Object obj = null;
+		
+		while(rs.next())
+		{
+			obj = _class.newInstance();
+			for (Fields f : fList)
+			{
+				Object o;
+				if(f.field.getType() == Timestamp.class)
+				{
+					o = rs.getTimestamp(f.colName);
+				}
+				else if(f.field.getType() == int.class)
+				{
+					o = rs.getInt(f.colName);
+				}
+				else if(f.field.getType() == boolean.class)
+				{
+					int a = rs.getInt(f.colName);
+					o = a == 1 ? true : false;
+				}
+				else
+				{
+					o = rs.getString(f.colName);
+				}
+				Method m = f.set;
+				m.invoke(obj, o);
+				
+				rList.add(_class.cast(obj));
+			}
+			
+		}
+		
+		rs.close();
+		st.close();
+	
+		return rList;
+		
+	}
 
 	private static String getTableName(Class<?> _class)
 	throws Exception
