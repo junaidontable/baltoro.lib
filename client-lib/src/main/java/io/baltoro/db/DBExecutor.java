@@ -274,8 +274,10 @@ public class DBExecutor
 				Method m = f.set;
 				m.invoke(obj, o);
 				
-				rList.add(_class.cast(obj));
+				
 			}
+			
+			rList.add(_class.cast(obj));
 			
 		}
 		
