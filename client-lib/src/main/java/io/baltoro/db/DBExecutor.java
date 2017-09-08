@@ -126,7 +126,7 @@ public class DBExecutor
 		q.delete(q.length()-3, q.length());
 		
 		
-		System.out.println(" **** > "+q.toString());
+		//System.out.println(" **** > "+q.toString());
 		
 		
 		PreparedStatement st = con.prepareStatement(q.toString());
