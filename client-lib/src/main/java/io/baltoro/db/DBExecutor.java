@@ -25,11 +25,14 @@ public class DBExecutor
 	{
 		String tableName = getTableName(_class);
 		List<Fields> list = classTableMap.get(tableName);
+		System.out.println(" ))))))))))))))))))))))) 000000 : "+tableName);
+		
 		if(list == null)
 		{
 			
 			System.out.println(" ))))))))))))))))))))))) 11111111 : "+tableName);
-			synchronized (tableName.intern())
+			String key = "table"+tableName;
+			synchronized (key.intern())
 			{
 				
 				System.out.println(" ))))))))))))))))))))))) 22222222 : "+tableName);
