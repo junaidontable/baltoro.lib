@@ -230,6 +230,9 @@ public class DBExecutor
 	throws Exception
 	{
 		
+		
+		System.out.println("query start ..... "+query);
+		
 		String tabelName = getTableName(_class);
 		List<Fields> fList = classTableMap.get(tabelName);
 		if(fList == null)
@@ -284,6 +287,9 @@ public class DBExecutor
 		rs.close();
 		st.close();
 	
+		
+		System.out.println("query end ..... "+query);
+		
 		return rList;
 		
 	}
