@@ -25,7 +25,7 @@ public class DBExecutor
 	{
 		String tableName = getTableName(_class);
 		List<Fields> list = classTableMap.get(tableName);
-		System.out.println(" ))))))))))))))))))))))) 000000 : "+tableName);
+		//System.out.println(" ))))))))))))))))))))))) 000000 : "+tableName);
 		
 		if(list == null)
 		{
