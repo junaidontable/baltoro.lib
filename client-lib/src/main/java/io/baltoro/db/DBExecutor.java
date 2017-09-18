@@ -21,15 +21,29 @@ public class DBExecutor
 	
 	static Map<String , List<Fields>> classTableMap = new HashMap<>();
 
-	public static void insert(java.sql.Connection con, Object obj)
-	throws Exception
+	private static List<Fields> getFields(Class<?> _class) throws Exception
 	{
-		String tabelName = getTableName(obj.getClass());
-		List<Fields> list = classTableMap.get(tabelName);
+		String tableName = getTableName(_class);
+		List<Fields> list = classTableMap.get(tableName);
 		if(list == null)
 		{
-			processObject(obj.getClass());
-			list = classTableMap.get(tabelName);
+			
+			System.out.println(" ))))))))))))))))))))))) 11111111 : "+tableName);
+			synchronized (tableName.intern())
+			{
+				
+				System.out.println(" ))))))))))))))))))))))) 22222222 : "+tableName);
+				
+				list = classTableMap.get(tableName);
+				if(list == null)
+				{
+					System.out.println(" ))))))))))))))))))))))) 3333333333333 : "+tableName);
+					
+					processObject(_class);
+					list = classTableMap.get(tableName);
+				}
+			}
+			
 		}
 		
 		if(list == null || list.isEmpty())
@@ -37,8 +51,17 @@ public class DBExecutor
 			throw new Exception("no columns or table ");
 		}
 		
+		return list;
+	}
+	
+	public static void insert(java.sql.Connection con, Object obj)
+	throws Exception
+	{
+		String tableName = getTableName(obj.getClass());
+		List<Fields> list = getFields(obj.getClass());
+		
 		StringBuffer q = new StringBuffer();
-		q.append("insert into "+tabelName+" (");
+		q.append("insert into "+tableName+" (");
 		for (Fields f : list)
 		{
 			q.append(f.colName+",");
@@ -93,21 +116,12 @@ public class DBExecutor
 	public static void update(java.sql.Connection con, Object obj)
 	throws Exception
 	{
-		String tabelName = getTableName(obj.getClass());
-		List<Fields> list = classTableMap.get(tabelName);
-		if(list == null)
-		{
-			processObject(obj.getClass());
-			list = classTableMap.get(tabelName);
-		}
+		String tableName = getTableName(obj.getClass());
+		List<Fields> list = getFields(obj.getClass());
 		
-		if(list == null || list.isEmpty())
-		{
-			throw new Exception("no columns or table ");
-		}
 		
 		StringBuffer q = new StringBuffer();
-		q.append("update "+tabelName+" set ");
+		q.append("update "+tableName+" set ");
 		for (Fields f : list)
 		{
 			if(!f.pk)
@@ -173,18 +187,7 @@ public class DBExecutor
 	throws Exception
 	{
 		
-		String tabelName = getTableName(_class);
-		List<Fields> list = classTableMap.get(tabelName);
-		if(list == null)
-		{
-			processObject(_class);
-			list = classTableMap.get(tabelName);
-		}
-		
-		if(list == null || list.isEmpty())
-		{
-			throw new Exception("no columns or table ");
-		}
+		List<Fields> list = getFields(_class);
 		
 		
 		Statement st = con.createStatement();
@@ -237,18 +240,8 @@ public class DBExecutor
 		
 		System.out.println("query start ..... "+query);
 		
-		String tabelName = getTableName(_class);
-		List<Fields> fList = classTableMap.get(tabelName);
-		if(fList == null)
-		{
-			processObject(_class);
-			fList = classTableMap.get(tabelName);
-		}
+		List<Fields> fList = getFields(_class);
 		
-		if(fList == null || fList.isEmpty())
-		{
-			throw new Exception("no columns or table ");
-		}
 		
 		List<T> rList = new ArrayList<>(300);
 		Statement st = con.createStatement();
