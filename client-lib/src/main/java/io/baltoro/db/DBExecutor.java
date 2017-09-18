@@ -61,7 +61,7 @@ public class DBExecutor
 		{
 			Fields f = list.get(i);
 			Object value = f.get.invoke(obj, null);
-			//System.out.println(value);
+			//System.out.println(value+"   :   "+value.getClass());
 			
 			if(value instanceof Timestamp)
 			{
@@ -71,6 +71,10 @@ public class DBExecutor
 			{
 				boolean v = (boolean) value;
 				st.setInt(i+1, v ? 1 : 0);
+			}
+			else if(value instanceof Integer)
+			{
+				st.setInt(i+1, (int)value);
 			}
 			else
 			{
