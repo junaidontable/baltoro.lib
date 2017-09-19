@@ -24,24 +24,14 @@ public class DBExecutor
 	private static List<Fields> getFields(Class<?> _class) throws Exception
 	{
 		String tableName = getTableName(_class);
-		List<Fields> list = classTableMap.get(tableName);
-		//System.out.println(" ))))))))))))))))))))))) 000000 : "+tableName);
-		
+		List<Fields> list = classTableMap.get(tableName);	
 		if(list == null)
 		{
-			
-			System.out.println(" ))))))))))))))))))))))) 11111111 : "+tableName);
-			String key = "table"+tableName;
-			synchronized (key.intern())
+			synchronized (tableName.intern())
 			{
-				
-				System.out.println(" ))))))))))))))))))))))) 22222222 : "+tableName);
-				
 				list = classTableMap.get(tableName);
 				if(list == null)
 				{
-					System.out.println(" ))))))))))))))))))))))) 3333333333333 : "+tableName);
-					
 					processObject(_class);
 					list = classTableMap.get(tableName);
 				}
@@ -86,7 +76,7 @@ public class DBExecutor
 		for (int i=0;i<list.size();i++)
 		{
 			Fields f = list.get(i);
-			Object value = f.get.invoke(obj, null);
+			Object value = f.get.invoke(obj);
 			//System.out.println(value+"   :   "+value.getClass());
 			
 			if(value instanceof Timestamp)
@@ -139,12 +129,12 @@ public class DBExecutor
 		{
 			if(f.pk)
 			{
-				Object value = f.get.invoke(obj, null);
-				q.append(f.colName+"='"+value.toString()+"' and");
+				Object value = f.get.invoke(obj);
+				q.append(f.colName+"='"+value.toString()+"' and ");
 			}
 			
 		}
-		q.delete(q.length()-3, q.length());
+		q.delete(q.length()-4, q.length());
 		
 		
 		//System.out.println(" **** > "+q.toString());
@@ -160,8 +150,9 @@ public class DBExecutor
 				continue;
 			}
 			i++;
-			Object value = f.get.invoke(obj, null);
-			//System.out.println(value);
+			Object value = f.get.invoke(obj);
+			
+			//System.out.println(value+"   --   "+value.getClass());
 			
 			if(value instanceof Timestamp)
 			{
@@ -319,7 +310,7 @@ public class DBExecutor
 		String tabelName = tableAnno.value();
 		List<Fields> fieldList = new ArrayList<>();
 		
-		classTableMap.put(tabelName, fieldList);
+	
 		
 		Field[] fields = _class.getDeclaredFields();
 		for (Field field : fields)
@@ -368,6 +359,8 @@ public class DBExecutor
 				
 			}
 		}
+		
+		classTableMap.put(tabelName, fieldList);
 	}
 	
 }
