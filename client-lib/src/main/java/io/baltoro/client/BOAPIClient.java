@@ -54,8 +54,18 @@ public class BOAPIClient
 		} 
 		catch (Exception e)
 		{
+			
 			e.printStackTrace();
+			
+			log.warning(" --------------------------------------------------");
+			log.warning(" --------------------------------------------------");
+			log.warning("IF RUNNING LOCAL TURN DEBUG FLAG FOR 8080 PORT !!!!");
+			log.warning(" ------ -Dbaltoro.debug=true ---------------------");
+			log.warning(" --------------------------------------------------");
+			log.warning("EXITING CURRENT APP");
+			
 			online = false;
+			System.exit(1);
 		}
 	}
 	

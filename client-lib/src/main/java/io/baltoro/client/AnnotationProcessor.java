@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Filter;
+import io.baltoro.features.NoAuth;
+import io.baltoro.features.NoDiscover;
 import io.baltoro.features.Param;
 import io.baltoro.features.Path;
 import io.baltoro.features.Timeout;
@@ -109,6 +111,12 @@ public class AnnotationProcessor
 	private WebMethod processPathAnno(Method method, Class<?> _class, String cPath)
 	{
 		WebMethod wm = null;
+		
+		boolean cNoAuth = _class.isAnnotationPresent(NoAuth.class);
+		boolean cNoDiscover = _class.isAnnotationPresent(NoDiscover.class);
+		
+		
+		
 		if (method.isAnnotationPresent(Path.class))
 		{
 			Path pathAnno = (Path) method.getAnnotation(Path.class);
@@ -132,8 +140,29 @@ public class AnnotationProcessor
 			fPath = fPath.toLowerCase();
 			
 			wm = new WebMethod(fPath, _class, method);
-			wm.authRequired = pathAnno.authRequired();
-			wm.discoverable = pathAnno.discaoverable();
+			
+			if(cNoAuth)
+			{
+				wm.authRequired = false;
+			}
+			else
+			{
+				wm.authRequired = method.isAnnotationPresent(NoAuth.class) ? false : true;
+			}
+			
+			if(cNoDiscover)
+			{
+				wm.discoverable = false;
+			}
+			else
+			{
+				wm.discoverable = method.isAnnotationPresent(NoDiscover.class) ? false : true;
+			}
+			
+			
+			
+			//wm.authRequired = pathAnno.authRequired();
+			//wm.discoverable = pathAnno.discaoverable();
 			
 			pathMap.put(fPath, wm);
 			

@@ -9,9 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Path 
+public @interface NoDiscover 
 {
-	String value();
-	//boolean authRequired() default true;
-	//boolean discaoverable() default true;
 }

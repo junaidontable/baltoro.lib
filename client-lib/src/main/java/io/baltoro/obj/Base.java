@@ -1,7 +1,6 @@
 package io.baltoro.obj;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 import io.baltoro.domain.BODefaults;
 

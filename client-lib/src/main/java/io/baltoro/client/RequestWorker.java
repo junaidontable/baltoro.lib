@@ -322,7 +322,7 @@ public class RequestWorker extends Thread
 		String userName = userSession.getUserName();
 		if (userName == null)
 		{
-			throw new AuthException("no user in session, cannot execute " + path);
+			throw new AuthException("no auth user in session, cannot execute " + path);
 		}
 	}
 
