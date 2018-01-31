@@ -29,7 +29,7 @@ class WSClient implements Callable<Session>
 		
 			
 	    	ClientManager clientManager = ClientManager.createClient();
-	 	    BaltoroClientConfigurator clientConfigurator = new BaltoroClientConfigurator(Baltoro.agentCookieMap, Baltoro.appUuid, Baltoro.instanceUuid, eToken);
+	 	    BaltoroClientConfig clientConfigurator = new BaltoroClientConfig(Baltoro.agentCookieMap, Baltoro.appUuid, Baltoro.instanceUuid, eToken);
 	 	    
 	 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
 	                 .configurator(clientConfigurator)

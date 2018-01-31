@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +16,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
+import javax.websocket.ClientEndpointConfig;
+import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
+
+import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
@@ -663,6 +669,47 @@ public class Baltoro
 			throw new RuntimeException(e);
 		}
 		
+	}
+	
+	
+	public static Session connectWebSocket(String appName, String path, MessageHandler.Whole<ByteBuffer> handlerClass)
+	{
+		try
+		{
+			ClientManager clientManager = ClientManager.createClient();
+	 	    BaltoroClientConfigWSWeb clientConfigurator = new BaltoroClientConfigWSWeb(appName,path, "token");
+	 	    
+	 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
+	                 .configurator(clientConfigurator)
+	                 .build();
+	 	    
+	 	  
+	 	  String url = null;
+	 	  /*
+	 	  if(Baltoro.debug)
+	 	  {
+	 		 url = "ws://"+appName+".baltoro.io:8080/wsc";
+	 	  }
+	 	  else
+	 	  {
+	 		 url = "ws://"+appName+".baltoro.io/wsc";
+	 	  }
+	 	  */
+	 	  
+	 	  url = "ws://localhost:8080/probe1";
+	 	 
+	 	  BaltoroClientEndpointWSWeb instance = new BaltoroClientEndpointWSWeb(appName, path, handlerClass);
+	 	 
+	 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
+	 	  
+	 	  return session ;
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	

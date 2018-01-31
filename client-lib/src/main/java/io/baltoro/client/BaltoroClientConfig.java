@@ -9,10 +9,10 @@ import javax.websocket.ClientEndpointConfig;
 import javax.websocket.HandshakeResponse;
 import javax.ws.rs.core.NewCookie;
 
-public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
+public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
 {
 	
-	static Logger log = Logger.getLogger(BaltoroClientConfigurator.class.getName());
+	static Logger log = Logger.getLogger(BaltoroClientConfig.class.getName());
 	
     static volatile boolean called = false;
     private String appUuid;
@@ -20,7 +20,7 @@ public class BaltoroClientConfigurator extends ClientEndpointConfig.Configurator
     private Map<String, NewCookie> cookieMap;
     private String token;
     
-    public BaltoroClientConfigurator(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
+    public BaltoroClientConfig(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
 	{
     	this.cookieMap = cookieMap;
 		this.appUuid = appUuid;
