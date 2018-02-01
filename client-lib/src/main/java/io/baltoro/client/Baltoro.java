@@ -696,7 +696,9 @@ public class Baltoro
 	 	  }
 	 	  */
 	 	  
-	 	  url = "ws://localhost:8080/probe1";
+	 	  //url = "ws://localhost:8080/probe1";
+	 	  
+	 	 url = "ws://admin.baltoro.io:8080/probe1";
 	 	 
 	 	  BaltoroClientEndpointWSWeb instance = new BaltoroClientEndpointWSWeb(appName, path, handlerClass);
 	 	 
