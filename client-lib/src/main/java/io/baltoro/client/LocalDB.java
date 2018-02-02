@@ -81,6 +81,7 @@ public class LocalDB
 		
 		try
 		{
+			DriverManager.registerDriver(new org.apache.derby.jdbc.EmbeddedDriver());
 			EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
 			_con.setAutoCommit(true);
 			con = new Connection(_con);
