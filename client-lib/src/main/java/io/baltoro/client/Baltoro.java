@@ -132,7 +132,12 @@ public class Baltoro
 	
 	public static LocalDB getDB()
 	{
-		return LocalDB.instance();
+		return LocalDB.instance(false);
+	}
+	
+	public static LocalDB getDB(boolean clean)
+	{
+		return LocalDB.instance(clean);
 	}
 	
 	public static String getMainClassName() 
@@ -698,7 +703,7 @@ public class Baltoro
 	 	  
 	 	  //url = "ws://localhost:8080/probe1";
 	 	  
-	 	 url = "ws://admin.baltoro.io:8080/probe1";
+	 	 url = "ws://www.baltoro.io/probe1";
 	 	 
 	 	  BaltoroClientEndpointWSWeb instance = new BaltoroClientEndpointWSWeb(appName, path, handlerClass);
 	 	 

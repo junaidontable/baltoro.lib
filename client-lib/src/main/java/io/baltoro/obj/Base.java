@@ -20,7 +20,6 @@ public class Base
 	
 	
 	
-	
 	public String getContainerUuid()
 	{
 		return containerUuid;

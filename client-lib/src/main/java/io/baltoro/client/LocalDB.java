@@ -40,23 +40,28 @@ public class LocalDB
 
 	private String instUuid;
 	private Connection con;
+	private boolean clean;
 	Map<String, String> typeClassMap = new HashMap<>(100);
 	Map<String, String> classTypeMap = new HashMap<>(100);
 	
 	Map<String, MDFieldMap> classFieldMap = new HashMap<>(1000);
 	
-	public static LocalDB instance()
+	
+	
+	
+	public static LocalDB instance(boolean clean)
 	{
 		if(db == null)
 		{
-			db = new LocalDB(Baltoro.instanceUuid);
+			db = new LocalDB(Baltoro.instanceUuid, clean);
 		}
 		return db;
 	}
 	
-	private LocalDB(String instUuid)
+	private LocalDB(String instUuid, boolean clean)
 	{
 		this.instUuid = instUuid;
+		this.clean = clean;
 		
 		try
 		{
@@ -89,7 +94,11 @@ public class LocalDB
 		
 		try
 		{
-			cleanUp();
+			if(clean)
+			{
+				cleanUp();
+			}
+
 			con.createStatement().executeQuery("select uuid from base WHERE uuid='1'");
 		} 
 		catch (SQLException e)
@@ -166,7 +175,7 @@ public class LocalDB
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("name varchar(32672) NOT NULL,");
 		sql.append("state varchar(8) NOT NULL,");
-		sql.append("type varchar(5) NOT NULL,");
+		sql.append("type varchar(50) NOT NULL,");
 		sql.append("container_uuid varchar(42) NOT NULL,");
 		sql.append("latest_version_uuid varchar(42) NOT NULL,");
 		sql.append("latest_version_number smallint NOT NULL,");
@@ -419,7 +428,7 @@ public class LocalDB
 	
 	public <T extends Base> T findOne(String name, Class<T> _class)
 	{
-		String type = getType(_class.getName());
+		String type = getType(_class);
 		List<T> objList = find(name, _class);
 		if(objList == null || objList.isEmpty())
 		{
@@ -433,7 +442,7 @@ public class LocalDB
 	
 	public <T extends Base> List<T> find(String name, Class<T> _class)
 	{
-		String type = getType(_class.getName());
+		String type = getType(_class);
 		List<T> objList = new ArrayList<>(200);
 		try
 		{
@@ -441,6 +450,36 @@ public class LocalDB
 			PreparedStatement st = con.prepareStatement("select * from base where name like ? and type=?");
 			st.setString(1, name);
 			st.setString(2, type);
+			
+			ResultSet rs = st.executeQuery();
+			while(rs.next())
+			{
+				String objClass = getObjClass(type);
+				Base obj = (Base) Class.forName(objClass).newInstance();
+				buildBO(rs, obj);
+				objList.add((T) obj);
+			}
+			rs.close();
+			st.close();
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return objList;
+	}
+	
+	public <T extends Base> List<T> find(Class<T> _class)
+	{
+		String type = getType(_class);
+		List<T> objList = new ArrayList<>(200);
+		try
+		{
+			
+			PreparedStatement st = con.prepareStatement("select * from base where type=?");
+			st.setString(1, type);
 			
 			ResultSet rs = st.executeQuery();
 			while(rs.next())
@@ -478,7 +517,7 @@ public class LocalDB
 	
 	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, Base... objs)
 	{
-		String type = getType(_class.getName());
+		String type = getType(_class);
 		//List<T> objList = new ArrayList<>(200);
 		try
 		{
@@ -677,7 +716,7 @@ public class LocalDB
 	{
 		if(StringUtil.isNullOrEmpty(obj.getBaseUuid()))
 		{
-			String type = getType(obj.getClass().getName());
+			String type = getType(obj.getClass());
 			obj.setType(type);
 			String uuid = UUIDGenerator.uuid(type);
 			String versionUuid = UUIDGenerator.uuid(type);
@@ -1130,18 +1169,35 @@ public class LocalDB
 		
 	}
 	
-	private String getType(String className)
-	{
-		int hash = className.hashCode();
-		System.out.println(" ********************** +"+hash);
-		return ""+hash;
-	}
 	
 	/*
-	private String getType(String className)
+	private String getType(Class<?> _class)
 	{
 		
+		String className = _class.getSimpleName();
+		String packageName = _class.getPackage().getName();
+		
+		StringBuffer str = new StringBuffer();
+		
+		str.append(className.substring(0,2).toUpperCase());
+		str.append(packageName.substring(0,2).toUpperCase());
+		
+		return str.toString();
+		
+		int hash = _class.getAnnotation(annotationClass) .hashCode();
+		
+		System.out.println(" ********************** +"+hash);
+		return ""+hash;
+		
+	}
+	*/
 	
+	
+	
+	private String getType(Class _class)
+	{
+		
+		String className = _class.getName();
 		String type = classTypeMap.get(className);
 		if(type != null)
 		{
@@ -1167,11 +1223,24 @@ public class LocalDB
 				typeClassMap.put(type, className);
 				return type;
 			}
-			
 			st.close();
+			
+			
+			String packageName = _class.getPackage().getName();
+			
+			StringBuffer str = new StringBuffer();
+			
+			str.append(_class.getSimpleName().substring(0,2).toUpperCase());
+			int index = packageName.indexOf('.');
+			String pkg = packageName.substring(index+1,index+3).toUpperCase();
+			
+			str.append(pkg);
+			
+			type = str.toString();
+			
 			st = con.prepareStatement("insert into type(class,type,created_by, created_on) values (?,?,?,?)");
 			st.setString(1, className);
-			type = UUIDGenerator.randomString(4);
+			//type = UUIDGenerator.randomString(4);
 			st.setString(2, type);
 			st.setString(3, BODefaults.BASE_USER);
 			st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
@@ -1191,7 +1260,7 @@ public class LocalDB
 		
 		return type;
 	}
-	*/
+	
 	
 	
 	
