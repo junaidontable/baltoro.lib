@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>1.3.5</version>
+  <version>1.3.7</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -133,6 +133,7 @@
 	<plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>build-helper-maven-plugin</artifactId>
+    
     <executions>
         <execution>
         <id>add-source-server</id>
@@ -147,6 +148,8 @@
             </configuration>
         </execution>
    	 </executions>
+   	 
+   	 
  	</plugin>
 
 
@@ -156,6 +159,11 @@
 		    <configuration>
 		    <source>1.8</source>
 		    <target>1.8</target>
+		    
+		    <excludes>
+            	<exclude>**/remote/**/*.java</exclude>
+        	</excludes>
+        	
 		    <includes>
 		   		<include>**/client/**/*.java</include>
 		    	<include>**/features/**/*.java</include>
@@ -165,6 +173,8 @@
 		    	<include>**/db/**/*.java</include>
 		    	<include>**/obj/**/*.java</include>
 		    </includes>
+		    
+		    
 		    </configuration>
 		</plugin>
 
@@ -249,6 +259,8 @@
 			</executions>
 		</plugin>
 		
+		
+		<!--  
 		<plugin>
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-antrun-plugin</artifactId>
@@ -263,6 +275,7 @@
 			</configuration>
 		</plugin>
 		
+		-->
 		
 		<plugin>
       <groupId>org.apache.maven.plugins</groupId>

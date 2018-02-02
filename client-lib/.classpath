@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry including="**/client/**/*.java|**/features/**/*.java|**/ep/**/*.java|**/to/**/*.java|**/exp/**/*.java|**/db/**/*.java|**/obj/**/*.java" kind="src" output="target/classes" path="src/main/java">
+	<classpathentry excluding="**/remote/**/*.java" including="**/client/**/*.java|**/features/**/*.java|**/ep/**/*.java|**/to/**/*.java|**/exp/**/*.java|**/db/**/*.java|**/obj/**/*.java" kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
@@ -27,7 +27,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry including="**/client/**/*.java|**/features/**/*.java|**/ep/**/*.java|**/to/**/*.java|**/exp/**/*.java|**/db/**/*.java|**/obj/**/*.java" kind="src" output="target/classes" path="baltoro/baltoro.server/src/main/java">
+	<classpathentry excluding="**/remote/**/*.java" including="**/client/**/*.java|**/features/**/*.java|**/ep/**/*.java|**/to/**/*.java|**/exp/**/*.java|**/db/**/*.java|**/obj/**/*.java" kind="src" output="target/classes" path="baltoro/baltoro.server/src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
