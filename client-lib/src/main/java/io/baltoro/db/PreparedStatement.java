@@ -3,8 +3,6 @@ package io.baltoro.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.baltoro.client.Replicator;
 

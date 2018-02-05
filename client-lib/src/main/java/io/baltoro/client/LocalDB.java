@@ -41,6 +41,9 @@ public class LocalDB
 	private String instUuid;
 	private Connection con;
 	private boolean clean;
+	private boolean replicate;
+	
+	
 	Map<String, String> typeClassMap = new HashMap<>(100);
 	Map<String, String> classTypeMap = new HashMap<>(100);
 	
@@ -49,19 +52,30 @@ public class LocalDB
 	
 	
 	
-	public static LocalDB instance(boolean clean)
+	public static LocalDB instance(boolean clean, boolean replicate)
 	{
 		if(db == null)
 		{
-			db = new LocalDB(Baltoro.instanceUuid, clean);
+			db = new LocalDB(Baltoro.instanceUuid, clean, replicate);
 		}
 		return db;
 	}
 	
-	private LocalDB(String instUuid, boolean clean)
+	private LocalDB(String instUuid, boolean clean, boolean replicate)
 	{
 		this.instUuid = instUuid;
+		
 		this.clean = clean;
+		this.replicate = replicate;
+		
+		if(!replicate)
+		{
+			Replicator.REPLICATION_ON = false;
+		}
+		else
+		{
+			Replicator.REPLICATION_ON = true;
+		}
 		
 		try
 		{
@@ -107,12 +121,20 @@ public class LocalDB
 			System.out.println("setting up local database.... "+e);
 			Replicator.REPLICATION_ON = false;
 			setupTables();
-			Replicator.REPLICATION_ON = true;
+			
+			if(replicate)
+			{
+				Replicator.REPLICATION_ON = true;
+			}
 		}
 		
 		try
 		{
-			sync();
+			if(replicate)
+			{
+				sync();
+			}
+			
 			//System.exit(1);
 		} 
 		catch (Exception e)
@@ -176,7 +198,7 @@ public class LocalDB
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("name varchar(32672) NOT NULL,");
 		sql.append("state varchar(8) NOT NULL,");
-		sql.append("type varchar(50) NOT NULL,");
+		sql.append("type varchar(5) NOT NULL,");
 		sql.append("container_uuid varchar(42) NOT NULL,");
 		sql.append("latest_version_uuid varchar(42) NOT NULL,");
 		sql.append("latest_version_number smallint NOT NULL,");
@@ -270,7 +292,7 @@ public class LocalDB
 		sql.append("CREATE TABLE link (");
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("ctx_uuid varchar(42) NOT NULL,");
-		sql.append("obj_type varchar(4) NOT NULL,");
+		sql.append("obj_type varchar(5) NOT NULL,");
 		sql.append("sort smallint NOT NULL DEFAULT 5,");
 		sql.append("seq smallint NOT NULL DEFAULT 5,");
 		sql.append("count smallint NOT NULL DEFAULT 5,");
@@ -536,23 +558,34 @@ public class LocalDB
 //			
 //			
 			StringBuffer query = new StringBuffer();
+			/*
 			query.append("select ctx_uuid from link \n");
 			query.append(" where ctx_uuid not in ("+baseUuids+") \n");
 			query.append(" and obj_type = ? \n");
 			query.append(" and uuid in ( select distinct uuid from link \n");
 			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
 			query.append(" and count = ? group by uuid having count(*) = ?)");
+			*/
+			
+			query.append("select ctx_uuid from link \n");
+			query.append(" where obj_type = ? \n");
+			query.append(" and uuid in ( select distinct uuid from link \n");
+			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
+			query.append(" and count >= ? group by uuid having count(*) < ?)");
+			
+			
+			int count = objs.length+1;
 			
 			PreparedStatement st = con.prepareStatement(query.toString());
 			st.setString(1, type);
-			st.setInt(2, objs.length+1);
-			st.setInt(3, objs.length);
+			st.setInt(2, count);
+			st.setInt(3, count);
 			
 			
 			if(debug)
 			{
 				System.out.println(query);
-				System.out.println("type = "+type+" , count = "+objs.length+1);
+				System.out.println("type = "+type+" , count = "+count);
 			}
 			
 			List<String> uuidList = new ArrayList<>(20);

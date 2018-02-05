@@ -132,12 +132,12 @@ public class Baltoro
 	
 	public static LocalDB getDB()
 	{
-		return LocalDB.instance(false);
+		return LocalDB.instance(false, false);
 	}
 	
-	public static LocalDB getDB(boolean clean)
+	public static LocalDB getDB(boolean clean, boolean replicate)
 	{
-		return LocalDB.instance(clean);
+		return LocalDB.instance(clean, replicate);
 	}
 	
 	public static String getMainClassName() 
