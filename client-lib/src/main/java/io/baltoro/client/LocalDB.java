@@ -1227,15 +1227,21 @@ public class LocalDB
 			st.close();
 			
 			
-			String packageName = _class.getPackage().getName();
+			//String packageName = _class.getPackage().getName();
 			
 			StringBuffer str = new StringBuffer();
 			
-			str.append(_class.getSimpleName().substring(0,2).toUpperCase());
-			int index = packageName.indexOf('.');
-			String pkg = packageName.substring(index+1,index+3).toUpperCase();
+			String simpleName = _class.getSimpleName();
 			
-			str.append(pkg);
+			str.append(simpleName.substring(0,2).toUpperCase());
+			//str.append(simpleName.substring(simpleName.length()-1).toUpperCase());
+			str.append(_class.getName().length() == 1 ? "0"+_class.getName().length() : _class.getName().length());
+			
+			str.append(simpleName.substring(simpleName.length()-1).toUpperCase());
+			//int index = packageName.indexOf('.');
+			//String pkg = packageName.substring(index+1,index+3).toUpperCase();
+			
+			//str.append(pkg);
 			
 			type = str.toString();
 			

@@ -19,6 +19,10 @@ public class Base
 	private Timestamp createdOn = new Timestamp(System.currentTimeMillis());
 	
 	
+	public String getUuid()
+	{
+		return baseUuid;
+	}
 	
 	public String getContainerUuid()
 	{
