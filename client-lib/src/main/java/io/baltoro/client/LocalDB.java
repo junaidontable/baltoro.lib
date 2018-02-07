@@ -537,8 +537,12 @@ public class LocalDB
 		}
 	}
 	
-	
 	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, Base... objs)
+	{
+		return findLinked(debug, _class, null, objs);
+	}
+	
+	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, String orderBy, Base... objs)
 	{
 		String type = getType(_class);
 		//List<T> objList = new ArrayList<>(200);
@@ -572,6 +576,11 @@ public class LocalDB
 			query.append(" and uuid in ( select distinct uuid from link \n");
 			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
 			query.append(" and count >= ? group by uuid having count(*) < ?)");
+			
+			if(orderBy != null)
+			{
+				query.append("\r\n "+orderBy);
+			}
 			
 			
 			int count = objs.length+1;
