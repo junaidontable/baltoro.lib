@@ -690,22 +690,22 @@ public class Baltoro
 	 	    
 	 	  
 	 	  String url = null;
-	 	  /*
+	 	 // /*
 	 	  if(Baltoro.debug)
 	 	  {
-	 		 url = "ws://"+appName+".baltoro.io:8080/wsc";
+	 		 url = "ws://"+appName+".baltoro.io:8080/"+path;
 	 	  }
 	 	  else
 	 	  {
-	 		 url = "ws://"+appName+".baltoro.io/wsc";
+	 		 url = "ws://"+appName+".baltoro.io/"+path;
 	 	  }
-	 	  */
+	 	  //*/
 	 	  
 	 	  //url = "ws://localhost:8080/probe1";
 	 	  
-	 	// url = "ws://admin.baltoro.io:8080/"+path;
+	 	 // url = "ws://admin.baltoro.io/"+path;
 	 	  
-	 	 url = "ws://127.0.0.1:8080/"+path;
+	 	 //url = "ws://127.0.0.1:8080/"+path;
 	 	 
 	 	  BaltoroClientEndpointWSWeb instance = new BaltoroClientEndpointWSWeb(appName, path, handlerClass);
 	 	 
