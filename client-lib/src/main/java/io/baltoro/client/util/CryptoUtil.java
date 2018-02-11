@@ -23,6 +23,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
 
 import io.baltoro.to.Keys;
 
@@ -250,6 +251,26 @@ public class CryptoUtil
 		{
 			byte[] bytes = MessageDigest.getInstance("SHA-256").digest(str.getBytes());
 			return Base64.getEncoder().encodeToString(bytes);
+		} 
+		catch (Exception e) 
+		{
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	public static String md5(byte[] bytes) 
+	throws RuntimeException 
+	{
+		try 
+		{
+			MessageDigest md = MessageDigest.getInstance("MD5");
+		    md.update(bytes);
+		    byte[] digest = md.digest();
+		    //String myHash = DatatypeConverter.printHexBinary(digest);
+		    final String result = new String(Hex.encode(digest));
+		    
+		    return result;
 		} 
 		catch (Exception e) 
 		{

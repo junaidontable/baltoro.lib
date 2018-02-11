@@ -53,6 +53,7 @@ public class RequestWorker extends Thread
 		requestCtx.set(req);
 		
 		ResponseContext res = new ResponseContext();
+		res.setHeaders(new HashMap<>());
 		to.responseContext = res;
 		res.setSessionId(req.getSessionId());
 		
@@ -328,14 +329,14 @@ public class RequestWorker extends Thread
 
 	private Object executeMethod(WebMethod wMethod, WSTO to) throws Exception
 	{
-		RequestContext ctx = to.requestContext;
+		RequestContext reqCtx = to.requestContext;
+		ResponseContext resCtx = to.responseContext;
 		
 		
+		String path = reqCtx.getApiPath();
 		
-		String path = ctx.getApiPath();
 		
-		
-		Map<String, String[]> requestParam = ctx.getRequestParams();
+		Map<String, String[]> requestParam = reqCtx.getRequestParams();
 		if (requestParam == null || requestParam.size() == 0)
 		{
 			requestParam = new HashMap<String, String[]>();
@@ -390,8 +391,12 @@ public class RequestWorker extends Thread
 			} 
 			else if (paramClass == RequestContext.class)
 			{
-				methodInputData[i] = ctx;
+				methodInputData[i] = reqCtx;
 			} 
+			else if (paramClass == ResponseContext.class)
+			{
+				methodInputData[i] = resCtx;
+			}
 			else if (paramClass == UserSession.class)
 			{
 				methodInputData[i] = userSession;
