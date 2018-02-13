@@ -449,6 +449,41 @@ public class LocalDB
 		return objList;
 	}
 	
+	public Map<String, Base> findMap(String[] baseUuids)
+	{
+		
+		Map<String, Base> objMap = new HashMap<>(200);
+		try
+		{
+			
+			
+			String uuids = StringUtil.toInClause(baseUuids);
+			String query = ("select * from base where uuid in ("+uuids+")");
+			Statement st = con.createStatement();
+			Map<String, Base> map = new HashMap<String, Base>();
+			ResultSet rs = st.executeQuery(query);
+			while(rs.next())
+			{
+				String type = rs.getString("type");
+				String objClass = getObjClass(type);
+				Base obj = (Base) Class.forName(objClass).newInstance();
+				buildBO(rs, obj);
+				objMap.put(obj.getBaseUuid(), obj);
+				map.put(obj.getBaseUuid(), obj);
+			}
+			rs.close();
+			st.close();
+			
+			addtMetadata(map);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return objMap;
+	}
+	
 	
 	public <T extends Base> T findOne(String name, Class<T> _class)
 	{
@@ -576,12 +611,19 @@ public class LocalDB
 			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
 			query.append(" and count = ? group by uuid having count(*) = ?)");
 			*/
-			
+			/*
 			query.append("select ctx_uuid from link \n");
 			query.append(" where obj_type = ? \n");
 			query.append(" and uuid in ( select distinct uuid from link \n");
 			query.append(" where ctx_uuid in ("+baseUuids+")\n"); 
 			query.append(" and count >= ? group by uuid having count(*) < ?)");
+			*/
+			
+			query.append("select ctx_uuid from link \n");
+			query.append(" where obj_type = ? \n");
+			query.append(" and uuid in ( select distinct uuid from link \n");
+			query.append(" where ctx_uuid in ("+baseUuids+"))\n"); 
+			//query.append(" and count >= ? group by uuid having count(*) <= ?)");
 			
 			if(orderBy != null)
 			{
@@ -593,8 +635,8 @@ public class LocalDB
 			
 			PreparedStatement st = con.prepareStatement(query.toString());
 			st.setString(1, type);
-			st.setInt(2, count);
-			st.setInt(3, count);
+			//st.setInt(2, count);
+			//st.setInt(3, count);
 			
 			
 			if(debug)
@@ -623,8 +665,16 @@ public class LocalDB
 			
 			if(!uuidList.isEmpty())
 			{
-				List<Base> foundObjs = find(uuidList.toArray(new String[]{})); 
-				return (List<T>) foundObjs;
+				Map<String, Base> foundObjs = findMap(uuidList.toArray(new String[]{})); 
+				List<T> objList = new ArrayList<T>(foundObjs.size());
+				
+				for(String uuid : uuidList)
+				{
+					Base obj = foundObjs.get(uuid);
+					objList.add((T) obj);
+				}
+				
+				return objList;
 			}
 			
 		}
