@@ -425,7 +425,7 @@ public class LocalDB
 			String uuids = StringUtil.toInClause(baseUuids);
 			String query = ("select * from base where uuid in ("+uuids+")");
 			Statement st = con.createStatement();
-			
+			Map<String, Base> map = new HashMap<String, Base>();
 			ResultSet rs = st.executeQuery(query);
 			while(rs.next())
 			{
@@ -434,11 +434,12 @@ public class LocalDB
 				Base obj = (Base) Class.forName(objClass).newInstance();
 				buildBO(rs, obj);
 				objList.add(obj);
+				map.put(obj.getBaseUuid(), obj);
 			}
 			rs.close();
 			st.close();
 			
-			
+			addtMetadata(map);
 		}
 		catch(Exception e)
 		{
@@ -474,6 +475,8 @@ public class LocalDB
 			st.setString(1, name);
 			st.setString(2, type);
 			
+			Map<String, Base> map = new HashMap<String, Base>();
+			
 			ResultSet rs = st.executeQuery();
 			while(rs.next())
 			{
@@ -481,10 +484,12 @@ public class LocalDB
 				Base obj = (Base) Class.forName(objClass).newInstance();
 				buildBO(rs, obj);
 				objList.add((T) obj);
+				map.put(obj.getBaseUuid(), obj);
 			}
 			rs.close();
 			st.close();
 			
+			addtMetadata(map);
 		}
 		catch(Exception e)
 		{
@@ -503,7 +508,7 @@ public class LocalDB
 			
 			PreparedStatement st = con.prepareStatement("select * from base where type=?");
 			st.setString(1, type);
-			
+			Map<String, Base> map = new HashMap<String, Base>();
 			ResultSet rs = st.executeQuery();
 			while(rs.next())
 			{
@@ -511,10 +516,11 @@ public class LocalDB
 				Base obj = (Base) Class.forName(objClass).newInstance();
 				buildBO(rs, obj);
 				objList.add((T) obj);
+				map.put(obj.getBaseUuid(), obj);
 			}
 			rs.close();
 			st.close();
-			
+			addtMetadata(map);
 		}
 		catch(Exception e)
 		{
@@ -664,6 +670,10 @@ public class LocalDB
 	private void addtMetadata(Map<String, Base> objMap)
 	throws Exception
 	{
+		if(objMap == null || objMap.isEmpty())
+		{
+			return;
+		}
 		
 		try
 		{
