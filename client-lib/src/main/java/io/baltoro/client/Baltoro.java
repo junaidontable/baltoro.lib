@@ -677,7 +677,7 @@ public class Baltoro
 	}
 	
 	
-	public static Session connectWebSocket(String appName, String path, MessageHandler.Whole<ByteBuffer> handlerClass)
+	public static Session connectWebSocket(boolean debug, String appName, String path, MessageHandler.Whole<ByteBuffer> handlerClass)
 	{
 		try
 		{
@@ -690,10 +690,13 @@ public class Baltoro
 	 	    
 	 	  
 	 	  String url = null;
-	 	 // /*
+	 	 
+	 	 Baltoro.debug = debug;
+	 	 
 	 	  if(Baltoro.debug)
 	 	  {
-	 		 url = "ws://"+appName+".baltoro.io:8080/"+path;
+	 		// url = "ws://"+appName+".baltoro.io:8080/"+path;
+	 		  url = "ws://super-server:8080/"+path;
 	 	  }
 	 	  else
 	 	  {
