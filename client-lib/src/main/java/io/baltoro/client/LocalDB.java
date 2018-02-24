@@ -36,6 +36,7 @@ public class LocalDB
 	//private String framework = "embedded";
 	private ObjectMapper mapper = new ObjectMapper();
 	private static LocalDB db;
+
 	private String protocol = "jdbc:derby:";
 
 	private String instUuid;
@@ -49,7 +50,7 @@ public class LocalDB
 	
 	Map<String, MDFieldMap> classFieldMap = new HashMap<>(1000);
 	
-	
+	public static LocalDBBinary binary;
 	
 	
 	public static LocalDB instance(boolean clean, boolean replicate)
@@ -87,7 +88,10 @@ public class LocalDB
 		}
 	}
 	
-	
+	public LocalDBBinary getBinary()
+	{
+		return binary;
+	}
 	
 	private void initLocalDB()
 	throws Exception
@@ -183,6 +187,9 @@ public class LocalDB
 		st.execute("drop table type", null);
 		st.close();
 		
+		st = con.createStatement();
+		st.execute("drop table binary", null);
+		st.close();
 		
 		st = con.createStatement();
 		st.execute("drop table lcp", null);
@@ -350,6 +357,25 @@ public class LocalDB
 		st.close();
 		
 		createIndex("type", "type");
+		
+		System.out.println("type Table Created");
+		
+		sql = new StringBuffer();
+		sql.append("CREATE TABLE binary (");
+		sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("base_uuid varchar(42) NOT NULL,");
+		sql.append("start_index interger NOT NULL,");
+		sql.append("len smallint NOT NULL,");
+		sql.append("data blob(100K) NOT NULL,");
+		sql.append("created_on timestamp NOT NULL,");
+		sql.append("PRIMARY KEY (uuid))");
+		
+		System.out.println(sql.toString());
+		st = con.createStatement();
+		st.execute(sql.toString(), null);
+		st.close();
+		
+		createIndex("base_uuid", "base_uuid");
 		
 		System.out.println("type Table Created");
 		
