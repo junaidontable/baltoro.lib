@@ -12,6 +12,7 @@ public class WebMethod
 	boolean discoverable = true;
 	String propJson;
 	int timeoutSec = 20;
+	boolean webSocket;
 	
 	public WebMethod(String webPath, Class<?> _class, Method method)
 	{
@@ -37,6 +38,18 @@ public class WebMethod
 	}
 	
 	
+	public boolean isWebSocket()
+	{
+		return webSocket;
+	}
+
+
+	public void setWebSocket(boolean webSocket)
+	{
+		this.webSocket = webSocket;
+	}
+
+
 	@Override
 	public String toString()
 	{

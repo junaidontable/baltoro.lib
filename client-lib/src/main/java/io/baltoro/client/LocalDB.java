@@ -187,9 +187,11 @@ public class LocalDB
 		st.execute("drop table type", null);
 		st.close();
 		
+		/*
 		st = con.createStatement();
 		st.execute("drop table binary", null);
 		st.close();
+		*/
 		
 		st = con.createStatement();
 		st.execute("drop table lcp", null);
@@ -360,6 +362,7 @@ public class LocalDB
 		
 		System.out.println("type Table Created");
 		
+		/*
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE binary (");
 		sql.append("uuid varchar(42) NOT NULL,");
@@ -377,7 +380,8 @@ public class LocalDB
 		
 		createIndex("base_uuid", "base_uuid");
 		
-		System.out.println("type Table Created");
+		System.out.println("binary Table Created");
+		**/
 		
 		
 		sql = new StringBuffer();

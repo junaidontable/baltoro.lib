@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.websocket.OnClose;
+import javax.websocket.OnOpen;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.to.APIError;
@@ -17,6 +20,7 @@ import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 import io.baltoro.to.UserSessionContext;
 import io.baltoro.to.WSTO;
+import io.baltoro.to.WebSocketContext;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
@@ -331,7 +335,7 @@ public class RequestWorker extends Thread
 	{
 		RequestContext reqCtx = to.requestContext;
 		ResponseContext resCtx = to.responseContext;
-		
+		WebSocketContext wsCtx = to.webSocketContext;
 		
 		String path = reqCtx.getApiPath();
 		
@@ -397,18 +401,49 @@ public class RequestWorker extends Thread
 			{
 				methodInputData[i] = resCtx;
 			}
+			else if (paramClass == WebSocketContext.class)
+			{
+				methodInputData[i] = wsCtx;
+			}
 			else if (paramClass == UserSession.class)
 			{
 				methodInputData[i] = userSession;
 			}
 
 		}
-
-		Object obj = _class.newInstance();
 		
-		
-		Object returnObj = method.invoke(obj, methodInputData);
 
+		Object  classInstance = null;
+		
+		if(wMethod.isWebSocket())
+		{
+		
+			if(method.isAnnotationPresent(OnOpen.class))
+			{
+				classInstance = _class.newInstance();
+				WSAPIClassInstance.get().add(_class, classInstance);
+			}
+			else
+			{
+				classInstance = WSAPIClassInstance.get().get(_class);
+			}
+		}
+		else
+		{
+			classInstance = _class.newInstance();
+		}
+		
+		Object returnObj = method.invoke(classInstance, methodInputData);
+
+		if(wMethod.isWebSocket())
+		{
+		
+			if(method.isAnnotationPresent(OnClose.class))
+			{
+				WSAPIClassInstance.get().remove(_class);
+			}
+		}
+			
 		return returnObj;
 
 	}
