@@ -695,8 +695,8 @@ public class Baltoro
 	 	 
 	 	  if(Baltoro.debug)
 	 	  {
-	 		// url = "ws://"+appName+".baltoro.io:8080/"+path;
-	 		  url = "ws://super-server:8080/"+path;
+	 		 url = "ws://"+appName+".baltoro.io:8080/"+path;
+	 		 // url = "ws://super-server:8080/"+path;
 	 	  }
 	 	  else
 	 	  {

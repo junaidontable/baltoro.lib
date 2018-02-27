@@ -337,7 +337,7 @@ public class RequestWorker extends Thread
 		ResponseContext resCtx = to.responseContext;
 		WebSocketContext wsCtx = to.webSocketContext;
 		
-		String path = reqCtx.getApiPath();
+		//String path = reqCtx.getApiPath();
 		
 		
 		Map<String, String[]> requestParam = reqCtx.getRequestParams();
