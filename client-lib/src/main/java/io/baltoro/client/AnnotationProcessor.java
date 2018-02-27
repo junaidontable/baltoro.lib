@@ -160,19 +160,25 @@ public class AnnotationProcessor
 		
 		if (method.isAnnotationPresent(OnOpen.class))
 		{
-			fPath = cPath+"OnOpen";
+			fPath = cPath+"/onopen";
 			isWS = true;
 		}
 		
 		if (method.isAnnotationPresent(OnClose.class))
 		{
-			fPath = cPath+"OnClose";
+			fPath = cPath+"/onclose";
 			isWS = true;
 		}
 		
+		if(fPath == null)
+		{
+			return null;
+		}
+			
+		
 		if (method.isAnnotationPresent(OnMessage.class))
 		{
-			fPath = cPath+"OnMessage";
+			fPath = cPath+"/onmessage";
 			isWS = true;
 		}
 			
