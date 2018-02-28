@@ -53,7 +53,7 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
-		if(to.wsInitRequestUuid == null)
+		if(to.webSocketContext != null)
 		{
 			WebSocketContext ws = to.webSocketContext;
 			wsCtx.set(ws);
@@ -468,9 +468,14 @@ public class RequestWorker extends Thread
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
 			}
-			else
+			
+			
+			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
+			
+			
+			if(method.isAnnotationPresent(OnClose.class))
 			{
-				classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
+				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(), _class);
 			}
 		}
 		else
@@ -480,14 +485,7 @@ public class RequestWorker extends Thread
 		
 		Object returnObj = method.invoke(classInstance, methodInputData);
 
-		if(wMethod.isWebSocket())
-		{
-		
-			if(method.isAnnotationPresent(OnClose.class))
-			{
-				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(), _class);
-			}
-		}
+	
 			
 		return returnObj;
 
