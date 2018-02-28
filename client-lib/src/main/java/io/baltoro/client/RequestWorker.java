@@ -61,7 +61,7 @@ public class RequestWorker extends Thread
 			WebSocketContext ws = to.webSocketContext;
 			wsCtx.set(ws);
 			
-			System.out.println(" ws ctx  >>>>>>>>>>>>>>>>>>>>>> : "+ws.getApiPath());
+			//System.out.println(" ws ctx  >>>>>>>>>>>>>>>>>>>>>> : "+ws.getApiPath());
 			
 			WebMethod wm = null;
 			try
@@ -385,7 +385,7 @@ public class RequestWorker extends Thread
 		//String path = reqCtx.getApiPath();
 		
 		
-		Map<String, String[]> requestParam = reqCtx.getRequestParams();
+		Map<String, String[]> requestParam = reqCtx == null ? null : reqCtx.getRequestParams();
 		if (requestParam == null || requestParam.size() == 0)
 		{
 			requestParam = new HashMap<String, String[]>();
@@ -473,12 +473,6 @@ public class RequestWorker extends Thread
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
 			}
-			
-			if(method.isAnnotationPresent(OnMessage.class))
-			{
-				System.out.println(" ....................................  ");
-			}
-			
 			
 			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
 			

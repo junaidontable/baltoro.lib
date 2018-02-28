@@ -170,18 +170,19 @@ public class AnnotationProcessor
 			isWS = true;
 		}
 		
+		if (method.isAnnotationPresent(OnMessage.class))
+		{
+			fPath = cPath+"/onmessage";
+			isWS = true;
+		}
+		
 		if(fPath == null)
 		{
 			return null;
 		}
 			
 		
-		if (method.isAnnotationPresent(OnMessage.class))
-		{
-			fPath = cPath+"/onmessage";
-			isWS = true;
-		}
-			
+		
 		wm = new WebMethod(fPath, _class, method);
 		
 		wm.setWebSocket(isWS);
