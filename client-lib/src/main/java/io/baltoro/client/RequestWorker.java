@@ -458,6 +458,10 @@ public class RequestWorker extends Thread
 			{
 				methodInputData[i] = wssession;
 			}
+			else if (paramClass == byte[].class && wsCtx != null)
+			{
+				methodInputData[i] = wsCtx.getData();
+			}
 
 		}
 		
