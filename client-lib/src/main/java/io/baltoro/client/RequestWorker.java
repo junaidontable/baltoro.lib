@@ -476,20 +476,27 @@ public class RequestWorker extends Thread
 				classInstance = _class.newInstance();
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
+				//WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSTO.class, to);
 			}
 			
 			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
 			
 			
+			
+			
 			if(method.isAnnotationPresent(OnClose.class))
 			{
 				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(), _class);
+				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSSession.class);
+				//WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSTO.class);
 			}
 		}
 		else
 		{
 			classInstance = _class.newInstance();
 		}
+		
+	
 		
 		Object returnObj = method.invoke(classInstance, methodInputData);
 
