@@ -36,6 +36,7 @@ public class RequestWorker extends Thread
 	
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
 	static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
+	static ThreadLocal<WebSocketContext> wsCtx = new ThreadLocal<>();
 
 	public RequestWorker(ByteBuffer byteBuffer)
 	{
@@ -52,6 +53,31 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
+		if(to.wsInitRequestUuid == null)
+		{
+			WebSocketContext ws = to.webSocketContext;
+			wsCtx.set(ws);
+			
+			WebMethod wm = null;
+			try
+			{
+				 wm = WebMethodMap.getInstance().getMethod(ws.getApiPath());
+				if (wm == null)
+				{
+					//System.out.println("no method for : "+ws.getApiPath());
+					throw new Exception("no method for : "+ws.getApiPath());
+				}
+				
+				Object obj = executeMethod(wm, to);
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			return;
+		}
+		
 		
 		RequestContext req = to.requestContext;
 		requestCtx.set(req);
@@ -63,6 +89,7 @@ public class RequestWorker extends Thread
 		
 		responseCtx.set(res);
 	
+		
 		
 		try
 		{
@@ -123,7 +150,7 @@ public class RequestWorker extends Thread
 			WSSessions.get().addToResponseQueue(buffer);
 			
 			requestCtx.set(null);
-			
+			wsCtx.set(null);
 		
 		}
 
@@ -249,6 +276,10 @@ public class RequestWorker extends Thread
 			for (int i = 0; i < tokens.length; i++)
 			{
 				int lIndex = path.lastIndexOf('/');
+				if(lIndex == -1)
+				{
+					System.out.println("no index found / error path="+path);
+				}
 				path = path.substring(0, lIndex);
 				String lPath = req.getApiPath().substring(lIndex + 1);
 				wm = WebMethodMap.getInstance().getMethod(path + "/*");
@@ -336,6 +367,15 @@ public class RequestWorker extends Thread
 		RequestContext reqCtx = to.requestContext;
 		ResponseContext resCtx = to.responseContext;
 		WebSocketContext wsCtx = to.webSocketContext;
+		WSSession wssession = null;
+		if(wsCtx != null)
+		{
+			wssession = (WSSession) WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), WSSession.class);
+			if(wssession == null)
+			{
+				wssession = new WSSession(to);
+			}
+		}
 		
 		//String path = reqCtx.getApiPath();
 		
@@ -409,6 +449,10 @@ public class RequestWorker extends Thread
 			{
 				methodInputData[i] = userSession;
 			}
+			else if (paramClass == WSSession.class)
+			{
+				methodInputData[i] = wssession;
+			}
 
 		}
 		
@@ -421,11 +465,12 @@ public class RequestWorker extends Thread
 			if(method.isAnnotationPresent(OnOpen.class))
 			{
 				classInstance = _class.newInstance();
-				WSAPIClassInstance.get().add(_class, classInstance);
+				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
+				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
 			}
 			else
 			{
-				classInstance = WSAPIClassInstance.get().get(_class);
+				classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
 			}
 		}
 		else
@@ -440,7 +485,7 @@ public class RequestWorker extends Thread
 		
 			if(method.isAnnotationPresent(OnClose.class))
 			{
-				WSAPIClassInstance.get().remove(_class);
+				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(), _class);
 			}
 		}
 			

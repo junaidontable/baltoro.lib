@@ -26,20 +26,20 @@ public class WSAPIClassInstance
 	
 
 	
-	void add(Class<?> _class, Object obj)
+	void add(String reqUuid, Class<?> _class, Object obj)
 	{
-		map.put(_class.getName(), obj);
+		map.put(reqUuid+_class.getName(), obj);
 	}
 	
-	Object get(Class<?> _class)
+	Object get(String reqUuid, Class<?> _class)
 	{
-		return map.get(_class.getName());
+		return map.get(reqUuid+_class.getName());
 		
 	}
 	
 
-	void remove(Class<?> _class)
+	void remove(String reqUuid, Class<?> _class)
 	{
-		map.remove(_class.getName());
+		map.remove(reqUuid+_class.getName());
 	}
 }
