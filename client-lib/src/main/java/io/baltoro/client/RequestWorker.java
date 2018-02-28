@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.websocket.OnClose;
+import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,8 +56,12 @@ public class RequestWorker extends Thread
 		
 		if(to.webSocketContext != null)
 		{
+			
+			
 			WebSocketContext ws = to.webSocketContext;
 			wsCtx.set(ws);
+			
+			System.out.println(" ws ctx  >>>>>>>>>>>>>>>>>>>>>> : "+ws.getApiPath());
 			
 			WebMethod wm = null;
 			try
@@ -467,6 +472,11 @@ public class RequestWorker extends Thread
 				classInstance = _class.newInstance();
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
+			}
+			
+			if(method.isAnnotationPresent(OnMessage.class))
+			{
+				System.out.println(" ....................................  ");
 			}
 			
 			
