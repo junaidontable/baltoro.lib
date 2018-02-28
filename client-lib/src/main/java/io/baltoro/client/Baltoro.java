@@ -113,6 +113,8 @@ public class Baltoro
 
 			ClientWSSession csession = new ClientWSSession(session);
 			WSSessions.get().addSession(csession);
+			
+			log.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>> started client THREAD : "+csession.getSession().getId()+" ,,, i="+i);
 		}
 		
 			
