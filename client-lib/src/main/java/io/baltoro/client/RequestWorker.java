@@ -11,22 +11,21 @@ import java.util.List;
 import java.util.Map;
 
 import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.ObjectUtil;
+import io.baltoro.client.util.StringUtil;
+import io.baltoro.exp.AuthException;
+import io.baltoro.features.AbstractFilter;
+import io.baltoro.features.Param;
 import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 import io.baltoro.to.UserSessionContext;
 import io.baltoro.to.WSTO;
 import io.baltoro.to.WebSocketContext;
-import io.baltoro.client.util.ObjectUtil;
-import io.baltoro.client.util.StringUtil;
-import io.baltoro.exp.AuthException;
-import io.baltoro.features.AbstractFilter;
-import io.baltoro.features.Param;
 
 public class RequestWorker extends Thread
 {
@@ -430,7 +429,7 @@ public class RequestWorker extends Thread
 				throw new Exception(annoName+" is not submitted as a parameter. incoming params ["+buffer.toString()+"] ");
 			}
 
-			if (paramClass == String.class)
+			if (paramClass == String.class && wsCtx == null)
 			{
 				methodInputData[i] = requestValue[0];
 			} 
@@ -462,6 +461,10 @@ public class RequestWorker extends Thread
 			{
 				methodInputData[i] = wsCtx.getData();
 			}
+			else if (paramClass == String.class && wsCtx != null)
+			{
+				methodInputData[i] = wsCtx.getMessage();
+			}
 
 		}
 		
@@ -476,7 +479,7 @@ public class RequestWorker extends Thread
 				classInstance = _class.newInstance();
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
-				//WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSTO.class, to);
+				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSTO.class, to);
 			}
 			
 			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
@@ -488,7 +491,7 @@ public class RequestWorker extends Thread
 			{
 				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(), _class);
 				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSSession.class);
-				//WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSTO.class);
+				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSTO.class);
 			}
 		}
 		else

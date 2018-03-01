@@ -48,4 +48,24 @@ public class WSSession
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		WSSessions.get().addToResponseQueue(buffer);
 	}
+	
+	public void send(String msg)
+	{
+		
+		this.to.webSocketContext.setMessage(msg);
+		byte[] bytes = null;
+		try
+		{
+			bytes = ObjectUtil.toJason(this.to);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
+			return;
+		}
+		
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		WSSessions.get().addToResponseQueue(buffer);
+	}
 }
