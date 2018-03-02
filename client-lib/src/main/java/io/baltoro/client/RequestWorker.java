@@ -53,7 +53,7 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
-		if(to.webSocketContext != null)
+		if(to.webSocketContext != null && to.webSocketContext.getApiPath().endsWith("onmessage"))
 		{
 			
 			
@@ -137,7 +137,11 @@ public class RequestWorker extends Thread
 		}
 		finally 
 		{
-			to.requestContext = null;
+			if(to.webSocketContext == null)
+			{
+				to.requestContext = null;
+			}
+			
 			byte[] bytes = null;
 			try
 			{
@@ -146,7 +150,7 @@ public class RequestWorker extends Thread
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
+				System.out.println("RESPONSE CANNOT CONVERT TO JSON , !!!! CHECK !");
 				return;
 			}
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
@@ -155,6 +159,7 @@ public class RequestWorker extends Thread
 			
 			requestCtx.set(null);
 			wsCtx.set(null);
+			
 		
 		}
 
@@ -499,6 +504,10 @@ public class RequestWorker extends Thread
 			classInstance = _class.newInstance();
 		}
 		
+		if(classInstance == null)
+		{
+			System.out.println("classInstance is null why ? ");
+		}
 	
 		
 		Object returnObj = method.invoke(classInstance, methodInputData);
