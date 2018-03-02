@@ -53,7 +53,7 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
-		if(to.webSocketContext != null && to.webSocketContext.getApiPath().endsWith("onmessage"))
+		if(to.webSocketContext != null && !to.webSocketContext.getApiPath().endsWith("onopen"))
 		{
 			
 			
@@ -386,8 +386,6 @@ public class RequestWorker extends Thread
 			}
 		}
 		
-		//String path = reqCtx.getApiPath();
-		
 		
 		Map<String, String[]> requestParam = reqCtx == null ? null : reqCtx.getRequestParams();
 		if (requestParam == null || requestParam.size() == 0)
@@ -434,39 +432,48 @@ public class RequestWorker extends Thread
 				throw new Exception(annoName+" is not submitted as a parameter. incoming params ["+buffer.toString()+"] ");
 			}
 
-			if (paramClass == String.class && wsCtx == null)
+			
+			if(annoName != null)
 			{
-				methodInputData[i] = requestValue[0];
-			} 
-			else if (paramClass == String[].class)
-			{
-				methodInputData[i] = requestValue;
-			} 
-			else if (paramClass == RequestContext.class)
-			{
-				methodInputData[i] = reqCtx;
-			} 
-			else if (paramClass == ResponseContext.class)
-			{
-				methodInputData[i] = resCtx;
+				if (paramClass == String.class && requestValue != null)
+				{
+					methodInputData[i] = requestValue[0];
+				} 
+				else if (paramClass == String[].class && requestValue != null)
+				{
+					methodInputData[i] = requestValue;
+				} 
 			}
-			else if (paramClass == WebSocketContext.class)
+			else
 			{
-				methodInputData[i] = wsCtx;
+				if (paramClass == RequestContext.class)
+				{
+					methodInputData[i] = reqCtx;
+				} 
+				else if (paramClass == ResponseContext.class)
+				{
+					methodInputData[i] = resCtx;
+				}
+				else if (paramClass == WebSocketContext.class)
+				{
+					methodInputData[i] = wsCtx;
+				}
+				else if (paramClass == UserSession.class)
+				{
+					methodInputData[i] = userSession;
+				}
+				else if (paramClass == WSSession.class)
+				{
+					methodInputData[i] = wssession;
+				}
 			}
-			else if (paramClass == UserSession.class)
-			{
-				methodInputData[i] = userSession;
-			}
-			else if (paramClass == WSSession.class)
-			{
-				methodInputData[i] = wssession;
-			}
-			else if (paramClass == byte[].class && wsCtx != null)
+			
+			if (paramClass == byte[].class && wsCtx != null && wsCtx.getApiPath().endsWith("onmessage"))
 			{
 				methodInputData[i] = wsCtx.getData();
 			}
-			else if (paramClass == String.class && wsCtx != null)
+			
+			if (paramClass == String.class && wsCtx != null && wsCtx.getApiPath().endsWith("onmessage"))
 			{
 				methodInputData[i] = wsCtx.getMessage();
 			}
