@@ -33,10 +33,22 @@ public class WSSession
 	{
 		
 		this.to.webSocketContext.setData(bytes);
+		
+		WSTO _to = new WSTO();
+		_to.appName = to.appName;
+		_to.appUuid = to.appUuid;
+		_to.instanceUuid = to.instanceUuid;
+		
+		WebSocketContext ctx = new WebSocketContext();
+		ctx.setApiPath(to.webSocketContext.getApiPath().replace("onopen", "onmessage"));
+		ctx.setData(bytes);
+		ctx.setInitRequestUuid(to.uuid);
+		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
+		_to.webSocketContext = ctx;
 		try
 		{
 			
-			bytes = ObjectUtil.toJason(this.to);
+			bytes = ObjectUtil.toJason(_to);
 		} 
 		catch (Exception e)
 		{
@@ -52,11 +64,22 @@ public class WSSession
 	public void send(String msg)
 	{
 		
-		this.to.webSocketContext.setMessage(msg);
+		WSTO _to = new WSTO();
+		_to.appName = to.appName;
+		_to.appUuid = to.appUuid;
+		_to.instanceUuid = to.instanceUuid;
+		
+		WebSocketContext ctx = new WebSocketContext();
+		ctx.setApiPath(to.webSocketContext.getApiPath().replace("onopen", "onmessage"));
+		ctx.setMessage(msg);
+		ctx.setInitRequestUuid(to.uuid);
+		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
+		_to.webSocketContext = ctx;
+		
 		byte[] bytes = null;
 		try
 		{
-			bytes = ObjectUtil.toJason(this.to);
+			bytes = ObjectUtil.toJason(_to);
 		} 
 		catch (Exception e)
 		{

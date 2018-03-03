@@ -153,6 +153,12 @@ public class RequestWorker extends Thread
 				System.out.println("RESPONSE CANNOT CONVERT TO JSON , !!!! CHECK !");
 				return;
 			}
+			
+			if(to.webSocketContext != null)
+			{
+				System.out.println("ws is not null ");
+			}
+			
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 			WSSessions.get().addToResponseQueue(buffer);
