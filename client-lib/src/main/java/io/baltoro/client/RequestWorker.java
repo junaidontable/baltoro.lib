@@ -154,10 +154,6 @@ public class RequestWorker extends Thread
 				return;
 			}
 			
-			if(to.webSocketContext != null)
-			{
-				System.out.println("ws is not null ");
-			}
 			
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
@@ -498,6 +494,8 @@ public class RequestWorker extends Thread
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),_class, classInstance);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSTO.class, to);
+				
+				System.out.println("classInstance cache OnOPen "+wsCtx.getInitRequestUuid()+" - "+_class);
 			}
 			
 			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);
@@ -519,7 +517,8 @@ public class RequestWorker extends Thread
 		
 		if(classInstance == null)
 		{
-			System.out.println("classInstance is null why ? ");
+			System.out.println("classInstance is null why ? "+wsCtx.getInitRequestUuid()+" - "+_class);
+			return null;
 		}
 	
 		
