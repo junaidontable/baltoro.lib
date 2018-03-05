@@ -85,7 +85,7 @@ public class RequestWorker extends Thread
 						
 						if(byteBuffer == null)
 						{
-							System.out.println("bytebuffer is null , continue .......... "+this+",  --- "+count);
+							System.out.println("worker thread no work to do , continue .......... "+this+",  --- "+count+",,,"+WorkerPool.info());
 							continue;
 						}
 					} 
