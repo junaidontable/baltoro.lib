@@ -1,7 +1,6 @@
 package io.baltoro.client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class WorkerPool
 {
@@ -10,44 +9,43 @@ public class WorkerPool
 	//private static Set<RequestWorker> workingRW = new HashSet<>(50);
 	
 	
-	private static List<RequestWorker> freeRW = new ArrayList<>(50);
-	private static List<RequestWorker> workingRW = new ArrayList<>(50);
+	//private static List<RequestWorker> freeRW = new ArrayList<>(50);
+	//private static List<RequestWorker> workingRW = new ArrayList<>(50);
+	
+	private static ConcurrentLinkedQueue<RequestWorker> free = new ConcurrentLinkedQueue<>();
+	private static ConcurrentLinkedQueue<RequestWorker> busy = new ConcurrentLinkedQueue<>();
 	
 	static RequestWorker get()
 	{
-		if(freeRW.size() == 0)
+		if(free.size() == 0)
 		{
 			return null;
 		}
 		
 		
-		RequestWorker worker = freeRW.get(0);
-		
-		
-		freeRW.remove(worker);
-		workingRW.add(worker);
-		
+		RequestWorker worker = free.poll();
+		busy.add(worker);
 		return worker;
 	}
 	
 	static void done(RequestWorker worker)
 	{
 		worker.clear();
-		workingRW.remove(worker);
-		freeRW.add(worker);
+		busy.remove(worker);
+		free.add(worker);
 	}
 	
 	
 	static void add(RequestWorker worker)
 	{
-		workingRW.add(worker);
+		busy.add(worker);
 
 	}
 	
 
 	static String info()
 	{
-		return "free : "+freeRW.size()+" busy : "+workingRW.size();
+		return "free : "+free.size()+" busy : "+busy.size();
 	}
 	
 }

@@ -43,14 +43,14 @@ public class RequestPoller extends Thread
 			RequestWorker worker = WorkerPool.get();
 			if(worker == null)
 			{
-				System.out.println(" >>>>>>> worker is null creating new :::::::: ");
+				//System.out.println(" >>>>>>> worker is null creating new :::::::: ");
 				worker = new RequestWorker();
 				worker.start();
 				WorkerPool.add(worker);
 			}
 			else
 			{
-				System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
+				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
 			}
 			
 			worker.set(byteBuffer);
