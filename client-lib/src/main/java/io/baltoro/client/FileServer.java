@@ -11,12 +11,12 @@ import io.baltoro.to.ResponseContext;
 public class FileServer
 {
 		
-	public static WebFile getFile(String dirPath)
+	public static WebFile getFile(String dirPath, RequestContext req, ResponseContext res)
 	{
 		String path = null;
 		
-		ResponseContext res = RequestWorker.responseCtx.get();
-		RequestContext req = RequestWorker.requestCtx.get();
+		//ResponseContext res = RequestWorker.responseCtx.get();
+		//RequestContext req = RequestWorker.requestCtx.get();
 		
 		if(req.getRelativePath() == null)
 		{

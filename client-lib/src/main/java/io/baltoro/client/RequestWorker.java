@@ -33,17 +33,87 @@ public class RequestWorker extends Thread
 	UserSession userSession;
 	List<AbstractFilter> filters = new ArrayList<>();
 	static ObjectMapper mapper = new ObjectMapper();
+	boolean run = true;
+	static int _count;
+	int count;
+	//String key;
 	
+	/*
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
 	static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
 	static ThreadLocal<WebSocketContext> wsCtx = new ThreadLocal<>();
-
-	public RequestWorker(ByteBuffer byteBuffer)
+	*/
+	
+	static ThreadLocal<String> userSessionIdCtx = new ThreadLocal<>();
+	
+	RequestWorker()
+	{
+		count = _count++;
+	}
+	
+	void set(ByteBuffer byteBuffer)
 	{
 		this.byteBuffer = byteBuffer;
+		synchronized (this)
+		{
+			this.notify();
+		}
 	}
-
+	
+	void clear()
+	{
+		this.byteBuffer = null;
+		this.userSession = null;
+		filters.clear();
+	}
+	
 	public void run()
+	{
+		while (run)
+		{
+			if(byteBuffer == null)
+			{
+				synchronized (this)
+				{
+					try
+					{
+						//System.out.println("worker before waiting ..... "+this+",  --- "+count);
+						
+						this.wait(10000);
+						
+						//System.out.println("worker after waiting ..... "+this+",  --- "+count);
+						
+						if(byteBuffer == null)
+						{
+							System.out.println("bytebuffer is null , continue .......... "+this+",  --- "+count);
+							continue;
+						}
+					} 
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			try
+			{
+				work();
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			finally 
+			{
+				byteBuffer = null;
+				WorkerPool.done(this);
+			}
+			
+		}
+	}
+	
+	public void work()
 	{
 
 		WSTO to = getWSTO();
@@ -53,12 +123,13 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
+		
 		if(to.webSocketContext != null && !to.webSocketContext.getApiPath().endsWith("onopen"))
 		{
 			
 			
 			WebSocketContext ws = to.webSocketContext;
-			wsCtx.set(ws);
+			//wsCtx.set(ws);
 			
 			//System.out.println(" ws ctx  >>>>>>>>>>>>>>>>>>>>>> : "+ws.getApiPath());
 			
@@ -84,14 +155,15 @@ public class RequestWorker extends Thread
 		
 		
 		RequestContext req = to.requestContext;
-		requestCtx.set(req);
+		//requestCtx.set(req);
 		
 		ResponseContext res = new ResponseContext();
 		res.setHeaders(new HashMap<>());
 		to.responseContext = res;
 		res.setSessionId(req.getSessionId());
 		
-		responseCtx.set(res);
+		userSessionIdCtx.set(req.getSessionId());
+		//responseCtx.set(res);
 	
 		
 		
@@ -159,8 +231,8 @@ public class RequestWorker extends Thread
 
 			WSSessions.get().addToResponseQueue(buffer);
 			
-			requestCtx.set(null);
-			wsCtx.set(null);
+			//requestCtx.set(null);
+			//wsCtx.set(null);
 			
 		
 		}
@@ -171,7 +243,7 @@ public class RequestWorker extends Thread
 			sync.intern().notify();
 		}
 
-	
+		WorkerPool.done(this);
 
 	}
 	

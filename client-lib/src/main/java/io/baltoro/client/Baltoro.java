@@ -269,13 +269,14 @@ public class Baltoro
 	
 	public static void setUserToSession(String name)
 	{
-		RequestContext rc = RequestWorker.requestCtx.get();
-		if(rc == null)
+		//RequestContext rc = RequestWorker.requestCtx.get();
+		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		if(userSessionId == null)
 		{
 			return;
 		}
 		
-		UserSession userSession = SessionManager.getSession(rc.getSessionId());
+		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.userName = name;
 		userSession.sendSession();
 		
@@ -284,19 +285,31 @@ public class Baltoro
 	
 	public static UserSession getUserSession()
 	{
-		RequestContext rc = RequestWorker.requestCtx.get();
-		UserSession userSession = SessionManager.getSession(rc.getSessionId());
+		//RequestContext rc = RequestWorker.requestCtx.get();
+		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		if(userSessionId == null)
+		{
+			return null;
+		}
+		UserSession userSession = SessionManager.getSession(userSessionId);
 		return userSession;
 	}
 	
 	public static void invalidateSession()
 	{
-		RequestContext rc = RequestWorker.requestCtx.get();
-		UserSession userSession = SessionManager.getSession(rc.getSessionId());
+		//RequestContext rc = RequestWorker.requestCtx.get();
+		
+		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		if(userSessionId == null)
+		{
+			return;
+		}
+		
+		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.userName = null;
 		userSession.invlaidateSession = true;
 		
-		SessionManager.removeUserSession(rc.getSessionId());
+		SessionManager.removeUserSession(userSessionId);
 		userSession.sendSession();
 	}
 	
