@@ -111,10 +111,10 @@ public class Baltoro
 			Future<Session> future = executor.submit(new WSClient());
 			Session session = future.get();
 
-			ClientWSSession csession = new ClientWSSession(session);
-			WSSessions.get().addSession(csession);
+			//ClientWSSession csession = new ClientWSSession(session);
+			WSSessions.get().addSession(session);
 			
-			log.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>> started client THREAD : "+csession.getSession().getId()+" ,,, i="+i);
+			log.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>> started client THREAD : "+session.getId()+" ,,, i="+i);
 		}
 		
 			

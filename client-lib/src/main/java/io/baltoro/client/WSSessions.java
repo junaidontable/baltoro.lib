@@ -14,15 +14,21 @@ public class WSSessions
 {
 
 	private static WSSessions sessions;
-	private Set<ClientWSSession> set;
+	private Set<Session> set;
 	private ConcurrentLinkedQueue<ByteBuffer> requestQueue;
 	private ConcurrentLinkedQueue<ByteBuffer> responseQueue;
+	
+	private Set<Session> busySessions;
+	private ConcurrentLinkedQueue<Session> freeSessions;
 	
 	private WSSessions()
 	{
 		set = new HashSet<>();
 		requestQueue = new ConcurrentLinkedQueue<>();
 		responseQueue = new ConcurrentLinkedQueue<>();
+		
+		busySessions = new HashSet<>();
+		freeSessions = new ConcurrentLinkedQueue<>();
 		
 	}
 	
@@ -45,15 +51,10 @@ public class WSSessions
 		return responseQueue;
 	}
 	
-	public void addSession(ClientWSSession session)
+	public void addSession(Session session)
 	{
-		String sync = "session-queue";
-		synchronized (sync.intern())
-		{
-			set.add(session);
-			sync.intern().notify();
-		}
-		
+		freeSessions.add(session);
+		set.add(session);
 	}
 	
 	void addToRequestQueue(ByteBuffer byteBuffer)
@@ -96,57 +97,51 @@ public class WSSessions
 		}
 	}
 	
-	ClientWSSession getSession()
+	Session getSessionForWork()
 	{
 		if(StringUtil.isNullOrEmpty(set))
+		{
+			freeSessions.clear();
+			busySessions.clear();
+			return null;
+		}
+		
+		if(freeSessions.isEmpty())
 		{
 			return null;
 		}
 		
-	
-		String sync = "session-queue";
-		synchronized (sync.intern())
-		{
-			for (ClientWSSession session : set)
-			{
-				if(session.isWorking() == false)
-				{
-					return session;
-				}
-			}
-		}
+		Session  session = freeSessions.poll();
+		busySessions.add(session);
 		
-		return null;
+		return session;
+
 	}
 	
-	
+	void releaseSession(Session session)
+	{
+		freeSessions.add(session);
+		busySessions.remove(session);
+		
+		String sync = "response-queue";
+		synchronized (sync.intern())
+		{
+			sync.intern().notifyAll();
+		}
+	}
 	
 	
 	public void removeSession(Session session)
 	{
-		ClientWSSession rm = null;
-		String sync = "session-queue";
-		synchronized (sync.intern())
+		
+		set.remove(session);
+		busySessions.remove(session);
+		freeSessions.remove(session);
+		
+		if(set.size() == 0)
 		{
-			for (ClientWSSession cs : set)
-			{
-				if(cs.getSession().getId().equals(session.getId()))
-				{
-					rm = cs;
-				}
-			}
-			
-			if(rm != null)
-			{
-				set.remove(rm);
-			}
-			
-			if(set.size() == 0)
-			{
-				System.out.println("No running sessions plz restart the instance ");
-				System.exit(1);
-			}
-			
+			System.out.println("No running sessions plz restart the instance ");
+			System.exit(1);
 		}
 		
 		

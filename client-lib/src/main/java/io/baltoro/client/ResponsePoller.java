@@ -3,6 +3,8 @@ package io.baltoro.client;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.websocket.Session;
+
 public class ResponsePoller extends Thread
 {
 	
@@ -35,7 +37,7 @@ public class ResponsePoller extends Thread
 			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getResponseQueue();
 			if(queue == null || queue.size() == 0)
 			{
-				sleep("response queue is empty !");
+				wait("response queue is empty !");
 				continue;
 			}
 			
@@ -43,33 +45,49 @@ public class ResponsePoller extends Thread
 			ByteBuffer byteBuffer = queue.peek();
 			if(byteBuffer == null)
 			{
-				sleep(" No items in response queue !");
+				wait(" No items in response queue !");
 				continue;
 			}
 				
 			
-			ClientWSSession session = WSSessions.get().getSession();
+			Session session = WSSessions.get().getSessionForWork();
 				
 			if(session == null)
 			{
-				sleep(" no free session ! try again in 5 secs ");
+				wait(" no free session ! try again in 50 secs ");
 				continue;
 			}
 			
 			byteBuffer = queue.poll();
 			
-			ResponseWorker worker = new ResponseWorker(byteBuffer, session);
-			worker.start();
+			//System.out.println("Response >>  WorkerPool : "+WorkerPool.info());
+			
+			ResponseWorker worker = WorkerPool.getResponseWorker();
+			if(worker == null)
+			{
+				//System.out.println(" >>>>>>> worker is null creating new :::::::: ");
+				worker = new ResponseWorker();
+				worker.start();
+			}
+			else
+			{
+				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
+			}
+			
+			worker.set(byteBuffer, session );
+			
+			//ResponseWorker worker = new ResponseWorker(byteBuffer, session);
+			//worker.start();
 			
 			
 		}
 	}
 	
-	private void sleep(String text)
+	private void wait(String text)
 	{
 		try
 		{
-			long t0 = System.currentTimeMillis();
+			//long t0 = System.currentTimeMillis();
 			String sync = "response-queue";
 			synchronized (sync.intern())
 			{
