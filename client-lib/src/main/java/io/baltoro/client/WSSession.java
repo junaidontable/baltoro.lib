@@ -45,6 +45,7 @@ public class WSSession
 		ctx.setInitRequestUuid(to.uuid);
 		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
 		_to.webSocketContext = ctx;
+		
 		try
 		{
 			

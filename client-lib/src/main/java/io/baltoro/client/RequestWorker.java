@@ -36,7 +36,7 @@ public class RequestWorker extends Thread
 	boolean run = true;
 	static int _count;
 	int count;
-	//String key;
+	long lastWorked = System.currentTimeMillis();
 	
 	/*
 	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
@@ -85,7 +85,7 @@ public class RequestWorker extends Thread
 						
 						if(byteBuffer == null)
 						{
-							System.out.println("REQUEST thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
+							//System.out.println("REQUEST thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
 						
 							continue;
 						}
@@ -107,6 +107,7 @@ public class RequestWorker extends Thread
 			}
 			finally 
 			{
+				lastWorked = System.currentTimeMillis();
 				byteBuffer = null;
 				WorkerPool.done(this);
 			}
