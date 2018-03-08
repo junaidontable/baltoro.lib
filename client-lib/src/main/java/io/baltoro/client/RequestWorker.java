@@ -48,7 +48,11 @@ public class RequestWorker extends Thread
 	
 	RequestWorker()
 	{
-		count = _count++;
+		synchronized (RequestWorker.class.getName().intern())
+		{
+			count = _count++;
+		}
+		
 	}
 	
 	void set(ByteBuffer byteBuffer)
@@ -77,15 +81,12 @@ public class RequestWorker extends Thread
 				{
 					try
 					{
-						//System.out.println("worker before waiting ..... "+this+",  --- "+count);
-						
 						this.wait(10000);
-						
-						//System.out.println("worker after waiting ..... "+this+",  --- "+count);
 						
 						if(byteBuffer == null)
 						{
 							System.out.println("REQUEST thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
+						
 							continue;
 						}
 					} 
@@ -600,5 +601,12 @@ public class RequestWorker extends Thread
 			
 		return returnObj;
 
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		return count == ((RequestWorker)obj).count;
 	}
 }

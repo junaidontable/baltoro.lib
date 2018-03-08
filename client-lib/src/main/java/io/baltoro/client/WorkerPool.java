@@ -55,7 +55,7 @@ public class WorkerPool
 
 	static String info()
 	{
-		return "freeReq("+freeReq.size()+"), busyReq("+busyReq.size()+"), freeRes("+freeRes.size()+"), busyRes("+busyRes.size()+")";
+		return "freeReq("+freeReq.size()+"), busyReq:("+busyReq.toArray().length+"), freeRes("+freeRes.size()+"), busyRes("+busyRes.size()+")";
 	}
 	
 }

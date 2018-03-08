@@ -19,7 +19,11 @@ public class ResponseWorker extends  Thread
 	
 	public ResponseWorker()
 	{
-		this.count = _count++;
+		synchronized (ResponseWorker.class.getName().intern())
+		{
+			this.count = _count++;
+		}
+		
 	}
 	
 	void set(ByteBuffer byteBuffer, Session session)
@@ -86,6 +90,13 @@ public class ResponseWorker extends  Thread
 			}
 			
 		}
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		return count == ((ResponseWorker)obj).count;
 	}
 	
 }
