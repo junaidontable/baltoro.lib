@@ -38,7 +38,7 @@ public class RequestPoller extends Thread
 			byteBuffer = queue.poll();
 			
 			
-			System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
+			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
 			
 			RequestWorker worker = WorkerPool.getRequestWorker();
 			if(worker == null)
