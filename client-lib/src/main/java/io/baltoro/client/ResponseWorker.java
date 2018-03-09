@@ -62,7 +62,7 @@ public class ResponseWorker extends  Thread
 						
 						if(byteBuffer == null || session == null)
 						{
-							System.out.println("RESPONSE thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
+							//System.out.println("RESPONSE thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
 							continue;
 						}
 					} 
