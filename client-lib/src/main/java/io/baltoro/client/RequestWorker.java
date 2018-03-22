@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import javax.websocket.OnOpen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
@@ -29,7 +27,7 @@ import io.baltoro.to.WebSocketContext;
 
 public class RequestWorker extends Thread
 {
-	private ByteBuffer byteBuffer;
+	private WSTO to;
 	UserSession userSession;
 	List<AbstractFilter> filters = new ArrayList<>();
 	static ObjectMapper mapper = new ObjectMapper();
@@ -48,16 +46,18 @@ public class RequestWorker extends Thread
 	
 	RequestWorker()
 	{
+		/*
 		synchronized (RequestWorker.class.getName().intern())
 		{
 			count = _count++;
 		}
-		
+		*/
 	}
 	
-	void set(ByteBuffer byteBuffer)
+	void set(WSTO to)
 	{
-		this.byteBuffer = byteBuffer;
+		System.out.println(this+" ........... on set  : "+to.requestContext.getApiPath());
+		this.to = to;
 		synchronized (this)
 		{
 			this.notify();
@@ -66,7 +66,7 @@ public class RequestWorker extends Thread
 	
 	void clear()
 	{
-		this.byteBuffer = null;
+		this.to = null;
 		this.userSession = null;
 		filters.clear();
 	}
@@ -75,7 +75,7 @@ public class RequestWorker extends Thread
 	{
 		while (run)
 		{
-			if(byteBuffer == null)
+			if(to == null)
 			{
 				synchronized (this)
 				{
@@ -83,7 +83,7 @@ public class RequestWorker extends Thread
 					{
 						this.wait(10000);
 						
-						if(byteBuffer == null)
+						if(to == null)
 						{
 							//System.out.println("REQUEST thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
 						
@@ -99,7 +99,10 @@ public class RequestWorker extends Thread
 			
 			try
 			{
+				String url = to.requestContext.getApiPath();
+				System.out.println(this+" 1........... on work  : "+url);
 				work();
+				System.out.println(this+" 2........... on work  : "+url);
 			} 
 			catch (Exception e)
 			{
@@ -108,24 +111,23 @@ public class RequestWorker extends Thread
 			finally 
 			{
 				lastWorked = System.currentTimeMillis();
-				byteBuffer = null;
+				to = null;
 				WorkerPool.done(this);
 			}
 			
 		}
 	}
 	
-	public void work()
+	private void work()
 	{
 
-		WSTO to = getWSTO();
 		if(to == null)
 		{
 			System.out.println("ERROR PARSING WSTO !!!!!!! CHECK ");
 			return;
 		}
 		
-		
+		/*
 		if(to.webSocketContext != null && !to.webSocketContext.getApiPath().endsWith("onopen"))
 		{
 			
@@ -154,7 +156,7 @@ public class RequestWorker extends Thread
 			
 			return;
 		}
-		
+		*/
 		
 		RequestContext req = to.requestContext;
 		//requestCtx.set(req);
@@ -172,7 +174,7 @@ public class RequestWorker extends Thread
 		try
 		{
 			
-			process(to);
+			process();
 		
 		} 
 		catch (Exception e)
@@ -211,10 +213,13 @@ public class RequestWorker extends Thread
 		}
 		finally 
 		{
+			
+			/*
 			if(to.webSocketContext == null)
 			{
 				to.requestContext = null;
 			}
+			
 			
 			byte[] bytes = null;
 			try
@@ -225,13 +230,21 @@ public class RequestWorker extends Thread
 			{
 				e.printStackTrace();
 				System.out.println("RESPONSE CANNOT CONVERT TO JSON , !!!! CHECK !");
-				return;
+				//return;
 			}
 			
 			
-			ByteBuffer buffer = ByteBuffer.wrap(bytes);
-
-			WSSessions.get().addToResponseQueue(buffer);
+			if(bytes != null)
+			{
+				System.out.println("** >>>>>>>>>>>>>>>> executing "+path+" return json len : "+bytes.length);
+				ByteBuffer buffer = ByteBuffer.wrap(bytes);
+				WSSessions.get().addToResponseQueue(buffer);
+			}
+			*/
+			
+			//System.out.println("** >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath());
+			WSSessions.get().addToResponseQueue(to);
+			//WorkerPool.done(this);
 			
 			//requestCtx.set(null);
 			//wsCtx.set(null);
@@ -239,39 +252,11 @@ public class RequestWorker extends Thread
 		
 		}
 
-		String sync = "response-queue";
-		synchronized (sync.intern())
-		{
-			sync.intern().notify();
-		}
-
-		WorkerPool.done(this);
-
 	}
 	
 	
-	private WSTO getWSTO()
-	{
-		byte[] jsonBytes = byteBuffer.array();
 
-		WSTO to = null;
-		try
-		{
-			to = mapper.readValue(jsonBytes, WSTO.class);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-		
-		return to;
-	}
-	
-
-
-	private void process(WSTO to) throws Exception
+	private void process() throws Exception
 	{
 
 		RequestContext req = to.requestContext;
@@ -395,6 +380,9 @@ public class RequestWorker extends Thread
 				filter.after(returnObj, to, userSession);
 			}
 			
+
+			System.out.println(")))) >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath()+" return : "+returnObj);
+		
 			
 			if (returnObj != null)
 			{
@@ -595,7 +583,7 @@ public class RequestWorker extends Thread
 			return null;
 		}
 	
-		
+			
 		Object returnObj = method.invoke(classInstance, methodInputData);
 
 	
@@ -604,10 +592,11 @@ public class RequestWorker extends Thread
 
 	}
 	
-	
+	/*
 	@Override
 	public boolean equals(Object obj)
 	{
 		return count == ((RequestWorker)obj).count;
 	}
+	*/
 }

@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -96,7 +95,7 @@ public class UserSession
 			
 			uctx.setAttJson(json);
 			to.userSessionContext = uctx;
-			toBytes = mapper.writeValueAsBytes(to);
+			//toBytes = mapper.writeValueAsBytes(to);
 		} 
 		catch (JsonProcessingException e)
 		{
@@ -104,7 +103,7 @@ public class UserSession
 		}
 		
 		
-		ByteBuffer byteBuffer = ByteBuffer.wrap(toBytes);
-		WSSessions.get().addToResponseQueue(byteBuffer);
+		//ByteBuffer byteBuffer = ByteBuffer.wrap(toBytes);
+		WSSessions.get().addToResponseQueue(to);
 	}
 }

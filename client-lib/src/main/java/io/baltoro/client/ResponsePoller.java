@@ -1,9 +1,10 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.websocket.Session;
+
+import io.baltoro.to.WSTO;
 
 public class ResponsePoller extends Thread
 {
@@ -34,7 +35,7 @@ public class ResponsePoller extends Thread
 				}
 			}
 			
-			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getResponseQueue();
+			ConcurrentLinkedQueue<WSTO> queue = WSSessions.get().getResponseQueue();
 			if(queue == null || queue.size() == 0)
 			{
 				wait("response queue is empty !");
@@ -42,8 +43,8 @@ public class ResponsePoller extends Thread
 			}
 			
 			
-			ByteBuffer byteBuffer = queue.peek();
-			if(byteBuffer == null)
+			WSTO to = queue.peek();
+			if(to == null)
 			{
 				wait(" No items in response queue !");
 				continue;
@@ -58,7 +59,7 @@ public class ResponsePoller extends Thread
 				continue;
 			}
 			
-			byteBuffer = queue.poll();
+			to = queue.poll();
 			
 			//System.out.println("Response >>  WorkerPool : "+WorkerPool.info());
 			
@@ -74,7 +75,7 @@ public class ResponsePoller extends Thread
 				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
 			}
 			
-			worker.set(byteBuffer, session );
+			worker.set(to, session );
 			
 			//ResponseWorker worker = new ResponseWorker(byteBuffer, session);
 			//worker.start();

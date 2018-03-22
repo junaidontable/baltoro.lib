@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -8,7 +7,6 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 
-import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.ReplicationContext;
 import io.baltoro.to.WSTO;
 
@@ -159,6 +157,7 @@ public class Replicator
 		
 		to.replicationContext = ctx;
 		
+		/*
 		byte[] bytes = null;
 		try
 		{
@@ -170,8 +169,9 @@ public class Replicator
 			e.printStackTrace();
 		}
 		ByteBuffer  msg = ByteBuffer.wrap(bytes);
+		*/
 		
-		WSSessions.get().addToResponseQueue(msg);
+		WSSessions.get().addToResponseQueue(to);
 		
 	}
 	

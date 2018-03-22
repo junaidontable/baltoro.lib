@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.websocket.Session;
 
 import io.baltoro.client.util.StringUtil;
+import io.baltoro.to.WSTO;
 
 
 public class WSSessions
@@ -16,7 +17,7 @@ public class WSSessions
 	private static WSSessions sessions;
 	private Set<Session> set;
 	private ConcurrentLinkedQueue<ByteBuffer> requestQueue;
-	private ConcurrentLinkedQueue<ByteBuffer> responseQueue;
+	private ConcurrentLinkedQueue<WSTO> responseQueue;
 	
 	private Set<Session> busySessions;
 	private ConcurrentLinkedQueue<Session> freeSessions;
@@ -46,7 +47,7 @@ public class WSSessions
 		return requestQueue;
 	}
 	
-	ConcurrentLinkedQueue<ByteBuffer> getResponseQueue()
+	ConcurrentLinkedQueue<WSTO> getResponseQueue()
 	{
 		return responseQueue;
 	}
@@ -71,10 +72,10 @@ public class WSSessions
 	}
 	
 	
-	void addToResponseQueue(ByteBuffer byteBuffer)
+	void addToResponseQueue(WSTO to)
 	{
 		
-		responseQueue.add(byteBuffer);
+		responseQueue.add(to);
 		
 		String sync = "response-queue";
 		synchronized (sync.intern())
@@ -126,7 +127,7 @@ public class WSSessions
 		String sync = "response-queue";
 		synchronized (sync.intern())
 		{
-			sync.intern().notifyAll();
+			sync.intern().notify();
 		}
 	}
 	

@@ -1,17 +1,17 @@
 package io.baltoro.client;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class WorkerPool
 {
 
 	private static ConcurrentLinkedQueue<RequestWorker> freeReq = new ConcurrentLinkedQueue<>();
-	private static Set<RequestWorker> busyReq = new HashSet<>(50);
+	private static ConcurrentLinkedQueue<RequestWorker> busyReq = new ConcurrentLinkedQueue<>();
+	//private static Set<RequestWorker> busyReq = new HashSet<>(50);
 	
 	private static ConcurrentLinkedQueue<ResponseWorker> freeRes = new ConcurrentLinkedQueue<>();
-	private static Set<ResponseWorker> busyRes = new HashSet<>(50);
+	private static ConcurrentLinkedQueue<ResponseWorker> busyRes = new ConcurrentLinkedQueue<>();
+	//private static Set<ResponseWorker> busyRes = new HashSet<>(50);
 	
 	static RequestWorker getRequestWorker()
 	{
@@ -24,6 +24,8 @@ public class WorkerPool
 		RequestWorker worker = freeReq.poll();
 		busyReq.add(worker);
 		return worker;
+		
+		
 	}
 	
 	static ResponseWorker getResponseWorker()

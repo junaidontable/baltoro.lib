@@ -87,11 +87,13 @@ public class BaltoroWSHeartbeat extends Thread
 				ctx.setHeartBeatCount(count);
 				to.mgntContext = ctx;
 				
+				/*
 				byte[]  bytes = ObjectUtil.toJason(to);
 					
 				ByteBuffer  msg = ByteBuffer.wrap(bytes);
+				*/
 				
-				WSSessions.get().addToResponseQueue(msg);
+				WSSessions.get().addToResponseQueue(to);
 				
 				/*
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");

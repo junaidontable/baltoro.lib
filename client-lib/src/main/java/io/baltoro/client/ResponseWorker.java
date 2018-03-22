@@ -6,9 +6,12 @@ import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.to.WSTO;
+import io.baltoro.util.ObjectUtil;
+
 public class ResponseWorker extends  Thread
 {
-	private ByteBuffer byteBuffer;
+	private WSTO to;
 	private Session session;
 
 	static ObjectMapper objectMapper = new ObjectMapper();
@@ -26,9 +29,9 @@ public class ResponseWorker extends  Thread
 		
 	}
 	
-	void set(ByteBuffer byteBuffer, Session session)
+	void set(WSTO to, Session session)
 	{
-		this.byteBuffer = byteBuffer;
+		this.to = to;
 		this.session = session;
 		
 		synchronized (this)
@@ -39,7 +42,7 @@ public class ResponseWorker extends  Thread
 	
 	void clear()
 	{
-		this.byteBuffer = null;
+		this.to = null;
 		this.session = null;
 	}
 	
@@ -48,7 +51,7 @@ public class ResponseWorker extends  Thread
 	{
 		while (run)
 		{
-			if(byteBuffer == null)
+			if(to == null || session == null)
 			{
 				synchronized (this)
 				{
@@ -60,7 +63,7 @@ public class ResponseWorker extends  Thread
 						
 						//System.out.println("worker after waiting ..... "+this+",  --- "+count);
 						
-						if(byteBuffer == null || session == null)
+						if(to == null || session == null)
 						{
 							//System.out.println("RESPONSE thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
 							continue;
@@ -75,6 +78,18 @@ public class ResponseWorker extends  Thread
 			
 			try
 			{
+				/*
+				String url = to.requestContext != null ? to.requestContext.getApiPath() : "null";
+				System.out.println("^^^^^^^^^ response triger :: url"+url+", uuid:"+to.uuid);
+				
+				int len = to.responseContext != null ? to.responseContext.getData().length : -1;
+				System.out.println("^^^^^^^^^ response bytes :: "+len);
+				*/
+				
+				to.requestContext = null;
+				
+				byte[] json = ObjectUtil.toJason(to);
+				ByteBuffer byteBuffer = ByteBuffer.wrap(json);
 				session.getBasicRemote().sendBinary(byteBuffer);
 			} 
 			catch (Exception e)
@@ -85,7 +100,7 @@ public class ResponseWorker extends  Thread
 			{
 				WSSessions.get().releaseSession(session);
 				session = null;
-				byteBuffer = null;
+				to = null;
 				WorkerPool.done(this);
 			}
 			

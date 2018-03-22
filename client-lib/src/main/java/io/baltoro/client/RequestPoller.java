@@ -3,10 +3,15 @@ package io.baltoro.client;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.baltoro.to.WSTO;
+
 public class RequestPoller extends Thread
 {
 	
 	boolean run = true;
+	static ObjectMapper mapper = new ObjectMapper();
 	
 	public RequestPoller()
 	{
@@ -36,9 +41,11 @@ public class RequestPoller extends Thread
 			
 			
 			byteBuffer = queue.poll();
+			WSTO to = getWSTO(byteBuffer);
 			
 			
-			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
+			
+			System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
 			
 			RequestWorker worker = WorkerPool.getRequestWorker();
 			if(worker == null)
@@ -52,7 +59,8 @@ public class RequestPoller extends Thread
 				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
 			}
 			
-			worker.set(byteBuffer);
+			System.out.println(this+" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+to.requestContext.getApiPath());
+			worker.set(to);
 			
 			//RequestWorker worker = new RequestWorker(byteBuffer);
 			//worker.start();
@@ -78,6 +86,25 @@ public class RequestPoller extends Thread
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private WSTO getWSTO(ByteBuffer byteBuffer)
+	{
+		byte[] jsonBytes = byteBuffer.array();
+
+		WSTO to = null;
+		try
+		{
+			to = mapper.readValue(jsonBytes, WSTO.class);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
+		
+		return to;
 	}
 	
 }

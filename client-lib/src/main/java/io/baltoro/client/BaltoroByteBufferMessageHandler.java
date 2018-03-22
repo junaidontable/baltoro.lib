@@ -23,11 +23,9 @@ public class BaltoroByteBufferMessageHandler implements MessageHandler.Whole<Byt
 	}
 
 	@Override
-	public void onMessage(ByteBuffer bytesBuffer)
+	public void onMessage(ByteBuffer byteBuffer)
 	{
-		//System.out.println(" ........... onMessage "+bytesBuffer);
-		WSSessions.get().addToRequestQueue(bytesBuffer);
-		
+		WSSessions.get().addToRequestQueue(byteBuffer);
 	}
 }
 

@@ -46,6 +46,7 @@ public class WSSession
 		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
 		_to.webSocketContext = ctx;
 		
+		/*
 		try
 		{
 			
@@ -57,9 +58,10 @@ public class WSSession
 			System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
 			return;
 		}
+		*/
 		
-		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		WSSessions.get().addToResponseQueue(buffer);
+		//ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		WSSessions.get().addToResponseQueue(_to);
 	}
 	
 	public void send(String msg)
@@ -77,6 +79,7 @@ public class WSSession
 		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
 		_to.webSocketContext = ctx;
 		
+		/*
 		byte[] bytes = null;
 		try
 		{
@@ -90,6 +93,8 @@ public class WSSession
 		}
 		
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		WSSessions.get().addToResponseQueue(buffer);
+		*/
+		
+		WSSessions.get().addToResponseQueue(_to);
 	}
 }
