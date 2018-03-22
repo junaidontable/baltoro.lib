@@ -319,7 +319,7 @@ public class RequestWorker extends Thread
 			Class<AbstractFilter> _class = WebMethodMap.getInstance().getFilterClass(fNames);
 			try
 			{
-				System.out.println(" filter  >>>>>>> "+fNames);
+				//System.out.println(" filter  >>>>>>> "+fNames);
 				AbstractFilter filter = _class.newInstance();
 				filters.add(filter);
 				filter.before(to, userSession);
@@ -569,7 +569,7 @@ public class RequestWorker extends Thread
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSSession.class, wssession);
 				WSAPIClassInstance.get().add(wsCtx.getInitRequestUuid(),WSTO.class, to);
 				
-				System.out.println("classInstance cache OnOPen "+wsCtx.getInitRequestUuid()+" - "+_class);
+				System.out.println("classInstance cache OnOPen "+wsCtx.getInitRequestUuid()+" - "+_class+" - "+wsCtx.getWsSessionUuid());
 			}
 			
 			classInstance = WSAPIClassInstance.get().get(wsCtx.getInitRequestUuid(), _class);

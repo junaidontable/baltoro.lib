@@ -671,8 +671,8 @@ public class LocalDB
 			
 			if(debug)
 			{
-				System.out.println(query);
-				System.out.println("type = "+type+" , count = "+count);
+				//System.out.println(query);
+				//System.out.println("type = "+type+" , count = "+count);
 			}
 			
 			List<String> uuidList = new ArrayList<>(20);
