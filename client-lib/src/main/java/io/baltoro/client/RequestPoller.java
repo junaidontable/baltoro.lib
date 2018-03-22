@@ -45,7 +45,7 @@ public class RequestPoller extends Thread
 			
 			
 			
-			System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
+			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
 			
 			RequestWorker worker = WorkerPool.getRequestWorker();
 			if(worker == null)
@@ -59,7 +59,7 @@ public class RequestPoller extends Thread
 				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
 			}
 			
-			System.out.println(this+" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+to.requestContext.getApiPath());
+			//System.out.println(this+" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+to.requestContext.getApiPath());
 			worker.set(to);
 			
 			//RequestWorker worker = new RequestWorker(byteBuffer);

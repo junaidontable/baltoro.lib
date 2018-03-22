@@ -56,7 +56,7 @@ public class RequestWorker extends Thread
 	
 	void set(WSTO to)
 	{
-		System.out.println(this+" ........... on set  : "+to.requestContext.getApiPath());
+		//System.out.println(this+" ........... on set  : "+to.requestContext.getApiPath());
 		this.to = to;
 		synchronized (this)
 		{
@@ -99,10 +99,10 @@ public class RequestWorker extends Thread
 			
 			try
 			{
-				String url = to.requestContext.getApiPath();
-				System.out.println(this+" 1........... on work  : "+url);
+				//String url = to.requestContext.getApiPath();
+				//System.out.println(this+" 1........... on work  : "+url);
 				work();
-				System.out.println(this+" 2........... on work  : "+url);
+				//System.out.println(this+" 2........... on work  : "+url);
 			} 
 			catch (Exception e)
 			{
@@ -381,7 +381,7 @@ public class RequestWorker extends Thread
 			}
 			
 
-			System.out.println(")))) >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath()+" return : "+returnObj);
+			//System.out.println(")))) >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath()+" return : "+returnObj);
 		
 			
 			if (returnObj != null)
