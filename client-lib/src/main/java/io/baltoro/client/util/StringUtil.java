@@ -71,6 +71,19 @@ public class StringUtil
 	}
 	
 	
+	public static String[] toUuids(Base[] objs)
+	{
+		String[] uuids = new String[objs.length];
+		
+		for (int i=0;i<objs.length;i++) 
+		{
+			uuids[i] = objs[i].getBaseUuid();
+		}
+	
+		
+		return uuids;
+	}
+	
 	public static String toInClause(String[] array)
 	{
 		StringBuilder buffer = new StringBuilder(array.length * 10); 

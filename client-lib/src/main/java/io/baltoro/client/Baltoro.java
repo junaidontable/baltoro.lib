@@ -30,7 +30,6 @@ import io.baltoro.ep.ParamInput;
 import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
 import io.baltoro.to.PrivateDataTO;
-import io.baltoro.to.RequestContext;
 import io.baltoro.to.UserTO;
 
 
@@ -224,7 +223,7 @@ public class Baltoro
 	}
 	
 	
-	public static <T> T call(String appName, String path, Class<T> returnType, ParamInput input)
+	public static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
@@ -406,7 +405,7 @@ public class Baltoro
 	    		Baltoro.instanceUuid = instUuid;
 	    		props.put("app.instance.uuid", instUuid);
 	    		
-				PrivateDataTO to = call("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
+				PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
 				props.put("app.key", to.privateKey);
 				props.store(output, "updated on "+new Date());
 				
@@ -534,12 +533,12 @@ public class Baltoro
 			{
 				if(option.toLowerCase().equals("n"))
 				{
-					user = call("admin","/api/app/createUser", UserTO.class, a -> a.add("email", email).add("password", password));
+					user = callSync("admin","/api/app/createUser", UserTO.class, a -> a.add("email", email).add("password", password));
 				}
 					
 				ParamInput input = a -> a.add("email", email).add("password", password);
 			
-				user = call("admin", "/api/adminlogin",UserTO.class, input);
+				user = callSync("admin", "/api/adminlogin",UserTO.class, input);
 				
 				userUuid = user.uuid;
 				logedin = true;
@@ -595,7 +594,7 @@ public class Baltoro
     	AppTO selectApp = null;
     	
 		//AppTO[] apps = adminEP.getMyApps();
-    	AppTO[] apps = call("admin", "/api/app/getMyApps", AppTO[].class, a -> a);
+    	AppTO[] apps = callSync("admin", "/api/app/getMyApps", AppTO[].class, a -> a);
 		
 		if(apps.length > 0)
 		{
@@ -636,7 +635,7 @@ public class Baltoro
 					String name = systemIn("enter name of your new app : ");
 					//to = adminEP.createApp(name);
 					
-					to = call("admin","/api/app/createApp", AppTO.class, a -> a.add("name", name));
+					to = callSync("admin","/api/app/createApp", AppTO.class, a -> a.add("name", name));
 					break;
 				} 
 				catch (APIError e)

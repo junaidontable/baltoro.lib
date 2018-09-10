@@ -57,7 +57,14 @@ public class LocalDB
 	{
 		if(db == null)
 		{
-			db = new LocalDB(Baltoro.instanceUuid, clean, replicate);
+			String dbUuid = Baltoro.instanceUuid;
+			
+			if(Baltoro.instanceUuid == null)
+			{
+				dbUuid = "INST-NO-UUID";
+			}
+			
+			db = new LocalDB(dbUuid, clean, replicate);
 		}
 		return db;
 	}
@@ -297,6 +304,7 @@ public class LocalDB
 		createIndex("link", "created_on");
 		*/
 		
+		/*
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE link (");
 		sql.append("uuid varchar(42) NOT NULL,");
@@ -309,14 +317,38 @@ public class LocalDB
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid, ctx_uuid))");
 		//System.out.println(sql.toString());
-		st = con.createStatement();
-		st.execute(sql.toString(), null);
-		st.close();
-		
+		 * 
 		createIndex("link", "ctx_uuid");
 		createIndex("link", "obj_type");
 		createIndex("link", "count");
 		createIndex("link", "ctx_uuid,obj_type,count");
+		createIndex("link", "created_on");
+		
+		 * 
+		 */
+		
+		sql = new StringBuffer();
+		sql.append("CREATE TABLE link (");
+		sql.append("link_uuid varchar(42) NOT NULL,");
+		sql.append("link_type varchar(12) NOT NULL DEFAULT 'default',");
+		sql.append("obj_type varchar(5) NOT NULL,");
+		sql.append("obj_uuid varchar(42) NOT NULL,");
+		sql.append("sort smallint NOT NULL DEFAULT 50,");
+		sql.append("seq smallint NOT NULL DEFAULT 5,");
+		sql.append("count smallint NOT NULL DEFAULT 5,");
+		sql.append("created_by varchar(42) NOT NULL, ");
+		sql.append("created_on timestamp NOT NULL)");
+		//sql.append("PRIMARY KEY (uuid, ctx_uuid))");
+		
+		st = con.createStatement();
+		st.execute(sql.toString(), null);
+		st.close();
+		
+		createIndex("link", "link_uuid");
+		createIndex("link", "link_type");
+		createIndex("link", "obj_type");
+		createIndex("link", "obj_uuid");
+		createIndex("link", "obj_uuid,obj_type");
 		createIndex("link", "created_on");
 		
 		System.out.println("Link Table Created");
@@ -353,7 +385,7 @@ public class LocalDB
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (class))");
-		System.out.println(sql.toString());
+		//System.out.println(sql.toString());
 		st = con.createStatement();
 		st.execute(sql.toString(), null);
 		st.close();
@@ -392,7 +424,7 @@ public class LocalDB
 		sql.append("init_sync_on timestamp,");
 		sql.append("last_sync_on timestamp,");
 		sql.append("PRIMARY KEY (uuid))");
-		System.out.println(sql.toString());
+		//System.out.println(sql.toString());
 		st = con.createStatement();
 		st.execute(sql.toString(), null);
 		st.close();
@@ -597,7 +629,7 @@ public class LocalDB
 	
 	public <T extends Base> T findFirstLinked(Class<T> _class, Base... objs)
 	{
-		List<T> list = findLinked(false, _class, objs);
+		List<T> list = findLinked(_class, objs);
 		if(list != null && !list.isEmpty())
 		{
 			return list.get(0);
@@ -608,12 +640,84 @@ public class LocalDB
 		}
 	}
 	
-	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, Base... objs)
+	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
 	{
-		return findLinked(debug, _class, null, objs);
+		
+		String[] uuids = StringUtil.toUuids(objs);
+		return findLinked(_class, null, uuids);
 	}
 	
-	public <T extends Base> List<T> findLinked(boolean debug, Class<T> _class, String orderBy, Base... objs)
+	public <T extends Base> List<T> findLinkedByUuids(Class<T> _class, String... uuids)
+	{
+		return findLinked(_class, null, uuids);
+	}
+	
+	
+	public <T extends Base> List<T> findLinked(Class<T> _class, String linkType, String... uuids)
+	{
+		String type = getType(_class);
+		//List<T> objList = new ArrayList<>(200);
+		try
+		{
+			
+			String baseUuids = StringUtil.toInClause(uuids);
+			int count = uuids.length+1;
+		
+			StringBuffer query = new StringBuffer();
+			
+			query.append("select distinct obj_uuid from link \n");
+			query.append(" where link_uuid in ( select distinct link_uuid from link \n");
+			query.append(" where obj_uuid in ("+baseUuids+") and count="+count+")\n"); 
+			query.append(" and obj_type = ? ");
+			
+		
+			
+			PreparedStatement st = con.prepareStatement(query.toString());
+			st.setString(1, type);
+		
+			 
+			//if(debug)
+			{
+				System.out.println(query);
+				//System.out.println("type = "+type+" , count = "+count);
+			}
+			
+			List<String> uuidList = new ArrayList<>(200);
+			
+			ResultSet rs = st.executeQuery();
+			while(rs.next())
+			{
+				String uuid = rs.getString("obj_uuid");
+				uuidList.add(uuid);
+			}
+			
+			rs.close();
+			st.close();
+			
+			if(!uuidList.isEmpty())
+			{
+				Map<String, Base> foundObjs = findMap(uuidList.toArray(new String[]{})); 
+				List<T> objList = new ArrayList<T>(foundObjs.size());
+				
+				for(String uuid : uuidList)
+				{
+					Base obj = foundObjs.get(uuid);
+					objList.add((T) obj);
+				}
+				
+				return objList;
+			}
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return new ArrayList<>();
+	}
+	
+	private <T extends Base> List<T> findLinked_old(boolean debug, Class<T> _class, String orderBy, Base... objs)
 	{
 		String type = getType(_class);
 		//List<T> objList = new ArrayList<>(200);
@@ -1159,7 +1263,7 @@ public class LocalDB
 				if(storeAnno != null)
 				{
 					Class<?> fieldType = field.getType();
-					System.out.println(" ---- > "+field.getName());
+					//System.out.println(" ---- > "+field.getName());
 					String fieldName = field.getName();
 					
 					MDFieldMap mdFieldMap = classFieldMap.get(obj.getClass().getName());
@@ -1228,7 +1332,7 @@ public class LocalDB
 			for (String fieldName : fieldNames)
 			{
 					
-				System.out.println(" ---- > "+fieldName);
+				//System.out.println(" ---- > "+fieldName);
 				
 				
 				String getMethodName = "get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1);
@@ -1256,7 +1360,7 @@ public class LocalDB
 				}
 				
 				mdMap.put(fieldName, value);
-				System.out.println(mdObj);
+				//System.out.println(mdObj);
 				
 			}
 			
@@ -1447,7 +1551,7 @@ public class LocalDB
 	{
 		try
 		{
-			return insertLink(5, objs);
+			return insertLink(null,50, objs);
 		} 
 		catch (Exception e)
 		{
@@ -1457,6 +1561,7 @@ public class LocalDB
 		return null;
 	}
 
+	/*
 	public String link(int sortOrder, Base... objs)
 	{
 		try
@@ -1470,7 +1575,8 @@ public class LocalDB
 		
 		return null;
 	}
-	
+	*/
+	/*
 	public String insertLink(int sortOrder, Base... objs) throws Exception
 	{
 		
@@ -1491,6 +1597,50 @@ public class LocalDB
 			st.setInt(6, objs.length);
 			st.setString(7, BODefaults.BASE_USER);
 			st.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+			st.addbatch();
+		}
+		
+		Replicate repAnno = objs[0].getClass().getAnnotation(Replicate.class);
+		if(repAnno != null)
+		{
+			String[] apps = repAnno.value();
+			st.executeBatch(apps);
+		}
+		else
+		{
+			st.executeBatch(null);
+		}
+		
+		st.close();
+		
+		return uuid;
+	}
+	*/
+	
+	
+	private String insertLink(String linkType, int sort, Base... objs) throws Exception
+	{
+		
+		PreparedStatement st = con.prepareStatement("insert into link"
+				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
+				+ " values(?,?,?,?,?,?,?,?,?) ");
+	
+		String uuid = io.baltoro.util.UUIDGenerator.uuid("LINK");
+		
+		int seq = 0;
+		for (Base base : objs)
+		{
+			seq++;
+			st.setString(1, uuid);
+			st.setString(2, StringUtil.isNullOrEmpty(linkType) ? "default" : linkType);
+			st.setString(3, base.getType());
+			st.setString(4, base.getBaseUuid());
+			
+			st.setInt(5, sort);
+			st.setInt(6, seq);
+			st.setInt(7, objs.length);
+			st.setString(8, BODefaults.BASE_USER);
+			st.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
 			st.addbatch();
 		}
 		

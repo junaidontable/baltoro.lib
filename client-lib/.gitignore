@@ -1,4 +1,5 @@
 /target/
 /.apt_generated/
 /baltoro-db/
+/INST*/
 derby.log
