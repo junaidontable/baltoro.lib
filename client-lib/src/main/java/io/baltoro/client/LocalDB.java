@@ -164,6 +164,55 @@ public class LocalDB
 		deleteTables();
 	}
 	
+	
+	void cleanData()
+	{
+		try
+		{
+			Statement st = con.createStatement();
+			
+			st = con.createStatement();
+			st.execute("delete from base", null);
+			st.close();
+			
+			st = con.createStatement();
+			st.execute("delete from version", null);
+			st.close();
+			
+			st = con.createStatement();
+			st.execute("delete from metadata", null);
+			st.close();
+			
+			st = con.createStatement();
+			st.execute("delete from link", null);
+			st.close();
+			
+			
+			st = con.createStatement();
+			st.execute("delete from permission", null);
+			st.close();
+			
+			
+			st = con.createStatement();
+			st.execute("delete from type", null);
+			st.close();
+			
+			/*
+			st = con.createStatement();
+			st.execute("drop table binary", null);
+			st.close();
+			*/
+			
+			st = con.createStatement();
+			st.execute("delete from lcp", null);
+			st.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	void deleteTables() throws Exception
 	{
 		Statement st = con.createStatement();

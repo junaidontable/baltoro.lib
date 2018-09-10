@@ -12,7 +12,7 @@ import junit.framework.TestSuite;
 public class DBTest extends TestCase
 {
     
-	private LocalDB db;
+	private static LocalDB db = LocalDB.instance(true, false);
 	
 	private static String uuidObj1;
 	private static String uuidObj2;
@@ -23,7 +23,6 @@ public class DBTest extends TestCase
     {
         super( testName );
         
-        db = LocalDB.instance(true, false);
     }
 
     /**
@@ -75,7 +74,11 @@ public class DBTest extends TestCase
     
     public void testLoad()
     {
-    	System.out.println("............. begin read test ............. ");
+    	
+    	db.cleanData();
+    	testInsert();
+    	System.out.println("............. begin read test ............. "+uuidObj1);
+    	
     	
     	TestObj1 obj1 = db.get(uuidObj1, TestObj1.class);
     	
@@ -106,6 +109,9 @@ public class DBTest extends TestCase
     
     public void testFind()
     {
+    	db.cleanData();
+    	testInsert();
+    	
     	System.out.println("............. begin find test ............. ");
     	
     	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
@@ -136,6 +142,9 @@ public class DBTest extends TestCase
     
     public void testLinkCreate()
     {
+    	db.cleanData();
+    	testInsert();
+    	
     	System.out.println("............. begin link create test ............. ");
     	
     	
@@ -173,6 +182,10 @@ public class DBTest extends TestCase
     
     public void testLinkGet()
     {
+    	db.cleanData();
+    	testInsert();
+    	testLinkCreate();
+    	
     	System.out.println("............. begin link get test ............. ");
     	
     	List<TestObj2> list = db.findLinkedByUuids(TestObj2.class, uuidObj1);
@@ -193,6 +206,34 @@ public class DBTest extends TestCase
     	
     	System.out.println("list size obj3 : "+list1.size());
     	assertEquals(10, list1.size());
+    	
+    	
+    }
+    
+    public void testLinkGet2()
+    {
+    	db.cleanData();
+    	testInsert();
+    	
+    	System.out.println("............. begin link get test ....... 2 ...... ");
+    	
+    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	assertNotNull(obj1);
+    	
+    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	assertNotNull(obj2);
+    	
+    	TestObj3 obj3 = db.findOne("name3", TestObj3.class);
+    	assertNotNull(obj2);
+    	
+    	
+    	String linkUuid = db.link(obj1, obj2, obj3);
+    	
+    	System.out.println(linkUuid);
+    	
+    	List<TestObj2> list = db.findLinked(TestObj2.class, obj1, obj3);
+    	
+    	System.out.println("obj found = "+list.get(0));
     	
     	
     }
