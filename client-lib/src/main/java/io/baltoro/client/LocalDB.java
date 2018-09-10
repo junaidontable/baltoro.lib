@@ -717,20 +717,20 @@ public class LocalDB
 			
 			String baseUuids = StringUtil.toInClause(uuids);
 			int count = uuids.length+1;
-		
+			String _linkType = StringUtil.isNullOrEmpty(linkType) ? "" : " and link_type='"+linkType+"' ";
+			
 			StringBuffer query = new StringBuffer();
 			
 			query.append("select distinct obj_uuid from link \n");
 			query.append(" where link_uuid in ( select distinct link_uuid from link \n");
-			query.append(" where obj_uuid in ("+baseUuids+") and count=? and link_type=?)\n"); 
+			query.append(" where obj_uuid in ("+baseUuids+") and count=? "+_linkType+")\n"); 
 			query.append(" and obj_type = ? ");
 			
 		
 			
 			PreparedStatement st = con.prepareStatement(query.toString());
 			st.setInt(1, count);
-			st.setString(2, linkType);
-			st.setString(3, type);
+			st.setString(2, type);
 		
 			 
 			//if(debug)
