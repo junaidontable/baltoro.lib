@@ -138,6 +138,8 @@ public class DBTest extends TestCase
     {
     	System.out.println("............. begin link create test ............. ");
     	
+    	
+    	
     	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
     	assertNotNull(obj1);
     	
@@ -150,6 +152,22 @@ public class DBTest extends TestCase
     	System.out.println("link uuid = "+linkUuid);
     	
     	assertNotNull(linkUuid);
+    	
+    	
+    	for (int i = 0; i < 10; i++)
+		{
+    		TestObj3 obj = new TestObj3();
+    		obj.setName("name3"+i);
+    		obj.setAtt1("att3"+i);
+    		obj.setAtt2(i);
+    		obj.setAtt3("att3"+i);
+    		db.save(obj);
+    		
+    		linkUuid = db.link(obj1, obj);
+    		
+    		System.out.println("link obj1 to "+obj.getName()+" = "+linkUuid);
+        	
+		}
     	
     }
     
@@ -169,7 +187,13 @@ public class DBTest extends TestCase
     	
     	assertEquals(TestObj2.class, obj2.getClass());
     	
-    
+    	
+    	List<TestObj3> list1 = db.findLinkedByUuids(TestObj3.class, uuidObj1);
+    	
+    	
+    	System.out.println("list size obj3 : "+list1.size());
+    	assertEquals(10, list1.size());
+    	
     	
     }
     
