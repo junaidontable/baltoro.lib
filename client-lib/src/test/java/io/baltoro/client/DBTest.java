@@ -239,4 +239,49 @@ public class DBTest extends TestCase
     }
     
     
+    public void testLinkGet3()
+    {
+    	db.cleanData();
+    	testInsert();
+    	
+    	System.out.println("............. begin link get test ....... 2 ...... ");
+    	
+    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	assertNotNull(obj1);
+    	
+    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	assertNotNull(obj2);
+    	
+    	TestObj3 obj3 = db.findOne("name3", TestObj3.class);
+    	assertNotNull(obj2);
+    	
+    	
+    	TestObj2 obj22 = new TestObj2();
+    	obj22.setName("name2-2");
+    	db.save(obj22);
+    	
+    	TestObj2 obj23 = new TestObj2();
+    	obj23.setName("name2-3");
+    	db.save(obj23);
+    	
+    	String linkUuid = db.link("linkType22",obj1, obj22);
+    	System.out.println(linkUuid);
+    	
+    	
+    	linkUuid = db.link("linkType23",obj1, obj23);
+    	System.out.println(linkUuid);
+    	
+    	
+    	List<TestObj2> list = db.findLinked(TestObj2.class, "linkType22",obj1);
+    	
+    	System.out.println(" ------------> linkType22 obj found = "+list.get(0));
+    	
+    	list = db.findLinked(TestObj2.class, "linkType23",obj1);
+    	
+    	System.out.println("-------------> linkType23 obj found = "+list.get(0));
+    	
+    	
+    }
+    
+    
 }

@@ -23,6 +23,7 @@ import io.baltoro.db.Connection;
 import io.baltoro.db.PreparedStatement;
 import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
+import io.baltoro.exception.ServiceException;
 import io.baltoro.features.Replicate;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
@@ -691,9 +692,14 @@ public class LocalDB
 	
 	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
 	{
-		
 		String[] uuids = StringUtil.toUuids(objs);
 		return findLinked(_class, null, uuids);
+	}
+	
+	public <T extends Base> List<T> findLinked(Class<T> _class, String linkType, Base... objs)
+	{
+		String[] uuids = StringUtil.toUuids(objs);
+		return findLinked(_class, linkType, uuids);
 	}
 	
 	public <T extends Base> List<T> findLinkedByUuids(Class<T> _class, String... uuids)
@@ -716,13 +722,15 @@ public class LocalDB
 			
 			query.append("select distinct obj_uuid from link \n");
 			query.append(" where link_uuid in ( select distinct link_uuid from link \n");
-			query.append(" where obj_uuid in ("+baseUuids+") and count="+count+")\n"); 
+			query.append(" where obj_uuid in ("+baseUuids+") and count=? and link_type=?)\n"); 
 			query.append(" and obj_type = ? ");
 			
 		
 			
 			PreparedStatement st = con.prepareStatement(query.toString());
-			st.setString(1, type);
+			st.setInt(1, count);
+			st.setString(2, linkType);
+			st.setString(3, type);
 		
 			 
 			//if(debug)
@@ -1609,6 +1617,21 @@ public class LocalDB
 		
 		return null;
 	}
+	
+	public String link(String type, Base... objs)
+	{
+		try
+		{
+			return insertLink(type,50, objs);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		
+		//return null;
+	}
 
 	/*
 	public String link(int sortOrder, Base... objs)
@@ -1679,6 +1702,11 @@ public class LocalDB
 		int seq = 0;
 		for (Base base : objs)
 		{
+			if(StringUtil.isNullOrEmpty(base.getBaseUuid()))
+			{
+				throw new ServiceException(base.getName() + "object has no UUID, make sure that the save meathod on this object has been called ");
+			}
+					
 			seq++;
 			st.setString(1, uuid);
 			st.setString(2, StringUtil.isNullOrEmpty(linkType) ? "default" : linkType);
