@@ -15,16 +15,17 @@ public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
 	static Logger log = Logger.getLogger(BaltoroClientConfig.class.getName());
 	
     static volatile boolean called = false;
-    private String appUuid;
-    private String instanceUuid;
+    //private String appUuid;
+    //private String instanceUuid;
     private Map<String, NewCookie> cookieMap;
     private String token;
     
-    public BaltoroClientConfig(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
+   // public BaltoroClientConfig(Map<String, NewCookie> cookieMap, String appUuid, String insatnceUuid, String token)
+    public BaltoroClientConfig(Map<String, NewCookie> cookieMap, String token)
 	{
     	this.cookieMap = cookieMap;
-		this.appUuid = appUuid;
-		this.instanceUuid = insatnceUuid;
+		//this.appUuid = appUuid;
+		//this.instanceUuid = insatnceUuid;
 		this.token = token;
 	}
 
@@ -41,9 +42,13 @@ public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
 		}	
         
        
-        headers.put("BLT_APP_UUID", Arrays.asList(this.appUuid));
-        headers.put("BLT_INSTANCE_UUID", Arrays.asList(this.instanceUuid));
+        headers.put("BLT_APP_UUID", Arrays.asList(Baltoro.appUuid));
+        headers.put("BLT_INSTANCE_UUID", Arrays.asList(Baltoro.instanceUuid));
         headers.put("BLT_TOKEN", Arrays.asList(this.token));
+        headers.put("BLT_APP_NAME", Arrays.asList(Baltoro.appName));
+        headers.put("BLT_SERVICE_NAME", Arrays.asList(Baltoro.serviceName));
+        
+        
        
     }
 

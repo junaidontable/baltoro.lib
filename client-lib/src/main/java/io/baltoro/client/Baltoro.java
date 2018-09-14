@@ -66,7 +66,9 @@ public class Baltoro
 	private static BaltoroWSHeartbeat mgntThread;
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
-	static String clusterPath = "/*";
+	//static String clusterPath = "/*";
+	
+	static String serviceName = "*";
 	static String lcp;
 	static long repMillis;
 	
@@ -92,8 +94,8 @@ public class Baltoro
 		
 		WebMethodMap.getInstance().setMap(pathMap);
 		
-		
-		int count = cs.getRemainingInsanceThreadsCount(appUuid, instanceUuid);
+		/*
+		int count = cs.getRemainingInsanceThreadsCount(appName, serviceName);
 	
 		System.out.println(" ++++++++Allowed count +++++++++++++ "+count);
 		Baltoro.instanceThreadCount = count;
@@ -103,6 +105,9 @@ public class Baltoro
 			System.out.println("Exceed allowed count , exiting");
 			System.exit(1);
 		}
+		*/
+		
+		int count = 5;
 		
 		ExecutorService executor = Executors.newFixedThreadPool(count);
 		for (int i = 0; i <count; i++)
@@ -314,39 +319,7 @@ public class Baltoro
 	
 	
 	
-	public static void start()
-	{
-		String _package = getMainClassPackageName();
-		start(_package, clusterPath);
-	}
-	
-	public static void start(String clusterPath)
-	{
-		String _package = getMainClassPackageName();
-		start(_package, clusterPath);
-	}
-	
-	public static void startDebug()
-	{
-		System.setProperty("baltoro.debug", "true");
-		String _package = getMainClassPackageName();
-		start(_package, clusterPath);
-	}
-	
-	public static void startDebug(String clusterPath)
-	{
-		System.setProperty("baltoro.debug", "true");
-		String _package = getMainClassPackageName();
-		start(_package, clusterPath);
-	}
-	
-	public static void startDebug(String _package, String clusterPath)
-	{
-		System.setProperty("baltoro.debug", "true");
-		start(_package, clusterPath);
-	}
-	
-	public static void start(String _package, String clusterPath)
+	public static void start(String _package, String appName, String serviceName)
 	{
 	
 		String _debug = System.getProperty("baltoro.debug");
@@ -358,6 +331,7 @@ public class Baltoro
 		}
 		
 		packages = _package;
+		Baltoro.appName = appName;
 		String _packages = System.getProperty("baltoro.packages");
 		System.out.println("-D.baltoro.packages= "+_packages);
 		if(_packages != null)
@@ -366,14 +340,18 @@ public class Baltoro
 		}
 		System.out.println("packages= "+Baltoro.packages);
 		
-		Baltoro.clusterPath = clusterPath != null ? clusterPath : Baltoro.clusterPath;
+		Baltoro.serviceName = serviceName;
+		/*
 		String _clusterPath = System.getProperty("baltoro.clusterPath");
+		
 		System.out.println("-D.baltoro.clusterPath="+_clusterPath);
 		if(_clusterPath != null)
 		{
 			Baltoro.clusterPath = _clusterPath;
 		}
-		System.out.println("clusterPathh="+Baltoro.clusterPath);
+		*/
+		
+		System.out.println("servieName="+Baltoro.serviceName);
 		
 		Session session = _start();
 		System.out.println(session);
@@ -384,29 +362,33 @@ public class Baltoro
 		try
 		{
 			
-			boolean useLocal = init();
-			if(!useLocal)
+			boolean loaded = loadProperties();
+			if(!loaded)
 			{
 				
 				FileOutputStream output = new FileOutputStream(propFile);
-				AppTO selectedApp = getMyApp();
+				//AppTO selectedApp = getMyApp();
 				
-				appUuid = selectedApp.uuid;
-	    		appName = selectedApp.name;
+				appUuid = cs.getAppUuidByName(appName);
+				props.put("app.uuid", appUuid);
 	    		
 	    		
-	    		String instUuid = cs.createInstance(appUuid);
+	    		
+	    		String instUuid = cs.createInstance(appUuid, serviceName);
 	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
 	    		{
-	    			System.out.println("can't find or create an instance exiting "+appUuid);
+	    			System.out.println("can't find or create an instance exiting "+appName);
 	    			System.exit(1);
 	    		}
 	    		
 	    		Baltoro.instanceUuid = instUuid;
 	    		props.put("app.instance.uuid", instUuid);
 	    		
-				PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
-				props.put("app.key", to.privateKey);
+	    		
+				//PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
+				
+	    		String appKey = cs.getAppData(appUuid);
+				props.put("app.key", appKey);
 				props.store(output, "updated on "+new Date());
 				
 			}
@@ -426,60 +408,13 @@ public class Baltoro
 	
     public static void main(String[] args )
     {
-    	Baltoro.start("io", "/*");
+    	//Baltoro.start("io", "/*");
     	
     	//Baltoro.start("io");
     }
     
-    /*
-    void init_db() throws Exception
-    {
-    	cs = new BOAPIClient(this);
-    	
-    	db = new LocalDB(this);
-    	boolean isSetup = db.isSetup();
-		if(!isSetup)
-		{
-			setupDB();
-			return;	
-		}
-	
-
-		for (int i = 0; i < 3; i++)
-		{
-			password = systemIn("enter password to login (enter 0 to reset) : ");
-			if(password.equals("0"))
-			{
-				db.cleanUp();
-				System.out.println("cleanup complete restart the program");
-				System.exit(1);
-			}
-			
-			email = db.login(password);
-			
-			if(email == null)
-			{
-				System.out.println("wrong password, retry");
-				continue;
-			}
-			
-			UserTO userTO = cs.login(email, password);
-			logedin = true;
-			break;
-			
-		}
-				
-		if(!logedin)
-		{
-			System.out.println("could not login");
-			System.exit(1);
-		}
-				
-			
-	}
-    */
     
-    private static boolean init() throws Exception
+    private static boolean loadProperties() throws Exception
     {
     	  
     	cs = new BOAPIClient();
@@ -498,9 +433,9 @@ public class Baltoro
     		props.load(new FileInputStream(propFile));
     		appPrivateKey = props.getProperty("app.key");
     		appUuid = props.getProperty("app.uuid");
-    		appName = props.getProperty("app.name");
-    		userUuid = props.getProperty("user.uuid");
-    		email = props.getProperty("user.email");
+    		//appName = props.getProperty("app.name");
+    		//userUuid = props.getProperty("user.uuid");
+    		//email = props.getProperty("user.email");
     		instanceUuid = props.getProperty("app.instance.uuid");
     		//packages = props.getProperty("packages", Baltoro.packages);
     		//clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
@@ -522,7 +457,9 @@ public class Baltoro
     	
     	}
     	
-		
+    	return false;
+    	
+		/*
     	String option = systemIn("Do you have an account ? [y/n] : ");
     	for (int i = 0; i < 3; i++)
 		{
@@ -564,6 +501,7 @@ public class Baltoro
 		
 		return false;
 		
+		*/
     }
     
     private static AppTO getMyApp() throws Exception

@@ -73,9 +73,9 @@ public class BaltoroWSHeartbeat extends Thread
 				
 				
 				ctx.setThreadCount(Baltoro.instanceThreadCount);
-				ctx.setClusterPath(Baltoro.clusterPath);
+				ctx.setServiceName(Baltoro.serviceName);
 				ctx.setCpuPercent((int)os.getSystemLoadAverage());
-				ctx.setClusterPath(Baltoro.clusterPath);
+				ctx.setServiceName(Baltoro.serviceName);
 				
 				long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
 				long usedMem = (int) mem.getHeapMemoryUsage().getUsed();

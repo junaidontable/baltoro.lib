@@ -101,7 +101,7 @@ public class BOAPIClient
 	}
 	
 	
-	String createInstance(String appUuid) throws Exception
+	String createInstance(String appUuid, String serviceName) throws Exception
 	{
 		log.info("... creating new instance -> server ...");
 	
@@ -109,12 +109,44 @@ public class BOAPIClient
 		
 		Form form = new Form();
 		form.param("appUuid", appUuid);
-		form.param("clusterPath", Baltoro.clusterPath);
+		form.param("serviceName", serviceName);
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		String instUuid = response.readEntity(String.class);
 		return instUuid;
+	}
+	
+	String getAppUuidByName(String appName) throws Exception
+	{
+		log.info("... getting app uuid -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/getAppUuidByName");
+		
+		Form form = new Form();
+		form.param("app-name", appName);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		String instUuid = response.readEntity(String.class);
+		return instUuid;
+	}
+	
+	String getAppData(String appUuid) throws Exception
+	{
+		log.info("... getting app data -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/getAppData");
+		
+		Form form = new Form();
+		form.param("app-uuid", appUuid);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		String data = response.readEntity(String.class);
+		return data;
 	}
 	
 	

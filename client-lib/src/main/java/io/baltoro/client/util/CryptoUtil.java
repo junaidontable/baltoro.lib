@@ -1,6 +1,7 @@
 package io.baltoro.client.util;
 
 
+import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -9,6 +10,9 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.EllipticCurve;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -22,6 +26,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -39,6 +45,21 @@ public class CryptoUtil
 	static
 	{
 		Security.addProvider(new BouncyCastleProvider());
+		
+		EllipticCurve curve = new EllipticCurve(
+                new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
+                new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16), // a
+                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16)); // b
+    	
+    	ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
+                curve,
+                ECPointUtil.decodePoint(curve, Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
+                new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307"), // n
+                1); // h
+    	
+    	ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+    	config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
+    	
 	}
 	
 	
@@ -78,6 +99,52 @@ public class CryptoUtil
     	keys.keypair = pair;
     	
 	    return keys;
+    }
+    
+    public static Keys generateECKeys()
+    throws RuntimeException
+    {
+
+    	KeyPair pair = getKeyPairEC();
+    
+    	byte[] privateBytes = pair.getPrivate().getEncoded();
+    	byte[] publicBytes = pair.getPublic().getEncoded();
+    	
+    	//KeyFactory fact = KeyFactory.getInstance("ECDSA", "BC");
+    	//PublicKey pub = fact.generatePublic(new X509EncodedKeySpec(pair.getPublic().getEncoded()));
+    	//PrivateKey prv = fact.generatePrivate(new PKCS8EncodedKeySpec(pair.getPrivate().getEncoded()));
+    	
+    	String privateKey = Base64.getEncoder().encodeToString(privateBytes);
+    	String publicKey = Base64.getEncoder().encodeToString(publicBytes);
+    	
+    	Keys keys = new Keys(privateKey, publicKey);
+    	keys.keypair = pair;
+    	
+	    return keys;
+    }
+    
+    private static KeyPair getKeyPairEC() throws RuntimeException
+    {
+    	KeyPairGenerator g = null;
+		try
+		{
+			g = KeyPairGenerator.getInstance("ECDSA", "BC");
+			g.initialize(null, new SecureRandom());
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+    	
+    	
+    	
+    	KeyPair p = g.generateKeyPair();
+    	//ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
+    	//ECPublicKey vKey = (ECPublicKey)p.getPublic();
+	
+    	  
+    	
+    	return p;
     }
     
     private static KeyPair getKeyPair() 

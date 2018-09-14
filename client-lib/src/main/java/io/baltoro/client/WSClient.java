@@ -29,7 +29,7 @@ class WSClient implements Callable<Session>
 		
 			
 	    	ClientManager clientManager = ClientManager.createClient();
-	 	    BaltoroClientConfig clientConfigurator = new BaltoroClientConfig(Baltoro.agentCookieMap, Baltoro.appUuid, Baltoro.instanceUuid, eToken);
+	 	    BaltoroClientConfig clientConfigurator = new BaltoroClientConfig(Baltoro.agentCookieMap, eToken);
 	 	    
 	 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
 	                 .configurator(clientConfigurator)
@@ -40,12 +40,15 @@ class WSClient implements Callable<Session>
 	 	  if(Baltoro.debug)
 	 	  {
 	 		
-	 		 url = "ws://"+Baltoro.appUuid+".baltoro.io:8080/ws";
+	 		 //url = "ws://"+Baltoro.appUuid+".baltoro.io:8080/ws";
+	 		  
+	 		 url = "ws://"+Baltoro.appName+".baltoro.io:8080/ws";
 	 		 
 	 	  }
 	 	  else
 	 	  {
-	 		 url = "ws://"+Baltoro.appUuid+".baltoro.io/ws";
+	 		 //url = "ws://"+Baltoro.appUuid+".baltoro.io/ws";
+	 		 url = "ws://"+Baltoro.appName+".baltoro.io/ws";
 	 	  }
 	 	  
 	 	 System.out.println("server url >>> "+url);
