@@ -338,7 +338,7 @@ public class Baltoro
 		Baltoro.appName = appName;
 	}
 	
-	public static void addService(String serviceName, String ... packageNames)
+	public static void register(String serviceName, String ... packageNames)
 	{
 		if(StringUtil.isNullOrEmpty(serviceName))
 		{
