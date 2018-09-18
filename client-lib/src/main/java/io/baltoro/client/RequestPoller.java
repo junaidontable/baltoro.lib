@@ -7,9 +7,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.to.WSTO;
 import io.baltoro.util.StringUtil;
 
-public class HTTPRequestPoller extends Thread
+public class RequestPoller extends Thread
 {
 	
 	boolean run = true;
@@ -18,7 +19,7 @@ public class HTTPRequestPoller extends Thread
 	MemoryMXBean mem;
 	
 	
-	public HTTPRequestPoller()
+	public RequestPoller()
 	{
 		os = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 		mem = ManagementFactory.getPlatformMXBean(MemoryMXBean.class);
@@ -45,30 +46,33 @@ public class HTTPRequestPoller extends Thread
 				continue;
 			}
 			
-			List list = readData(json);
+			WSTO[] tos = readData(json);
 		
-			for (int i = 0; i < list.size(); i++)
+			for (int i = 0; i < tos.length; i++)
 			{
-				String str = (String) list.get(i);
-				System.out.println(" ===========> str "+str);
-			}
+			
+				WSTO to = tos[i];
+				System.out.println(" ===========> to "+to);
+			
 			
 			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
 			
-			RequestWorker worker = WorkerPool.getRequestWorker();
-			if(worker == null)
-			{
-				//System.out.println(" >>>>>>> worker is null creating new :::::::: ");
-				worker = new RequestWorker();
-				worker.start();
-			}
-			else
-			{
-				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
-			}
+				RequestWorker worker = WorkerPool.getRequestWorker();
+				if(worker == null)
+				{
+					//System.out.println(" >>>>>>> worker is null creating new :::::::: ");
+					worker = new RequestWorker();
+					worker.start();
+				}
+				else
+				{
+					//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
+				}
+				
+				//System.out.println(this+" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+to.requestContext.getApiPath());
+				worker.set(to);
 			
-			//System.out.println(this+" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+to.requestContext.getApiPath());
-			worker.set(null);
+			}
 			
 			//RequestWorker worker = new RequestWorker(byteBuffer);
 			//worker.start();
@@ -96,15 +100,17 @@ public class HTTPRequestPoller extends Thread
 		}
 	}
 	
-	private List<byte[]> readData(String json)
+	private WSTO[] readData(String json)
 	{
 		byte[] jsonBytes = json.getBytes();
 		
 
-		List<byte[]> list = null;
+		WSTO[] tos = null;
 		try
 		{
-			list = mapper.readValue(jsonBytes, List.class);
+			tos = mapper.readValue(jsonBytes, WSTO[].class);
+			
+			System.out.println(" to ===== > "+tos.length);
 		} 
 		catch (Exception e)
 		{
@@ -113,7 +119,7 @@ public class HTTPRequestPoller extends Thread
 		}
 
 		
-		return list;
+		return tos;
 	}
 	
 }

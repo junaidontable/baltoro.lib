@@ -1,9 +1,5 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-
-import javax.websocket.Session;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.to.WSTO;
@@ -12,7 +8,7 @@ import io.baltoro.util.ObjectUtil;
 public class ResponseWorker extends  Thread
 {
 	private WSTO to;
-	private Session session;
+	//private Session session;
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -29,10 +25,9 @@ public class ResponseWorker extends  Thread
 		
 	}
 	
-	void set(WSTO to, Session session)
+	void set(WSTO to)
 	{
 		this.to = to;
-		this.session = session;
 		
 		synchronized (this)
 		{
@@ -43,7 +38,6 @@ public class ResponseWorker extends  Thread
 	void clear()
 	{
 		this.to = null;
-		this.session = null;
 	}
 	
 	@Override
@@ -51,7 +45,7 @@ public class ResponseWorker extends  Thread
 	{
 		while (run)
 		{
-			if(to == null || session == null)
+			if(to == null)
 			{
 				synchronized (this)
 				{
@@ -63,7 +57,7 @@ public class ResponseWorker extends  Thread
 						
 						//System.out.println("worker after waiting ..... "+this+",  --- "+count);
 						
-						if(to == null || session == null)
+						if(to == null)
 						{
 							//System.out.println("RESPONSE thread no work to do  "+this+",  --- "+count+",,,"+WorkerPool.info());
 							continue;
@@ -88,9 +82,12 @@ public class ResponseWorker extends  Thread
 				
 				to.requestContext = null;
 				
-				byte[] json = ObjectUtil.toJason(to);
-				ByteBuffer byteBuffer = ByteBuffer.wrap(json);
-				session.getBasicRemote().sendBinary(byteBuffer);
+				String json = ObjectUtil.toJason(to);
+				//ByteBuffer byteBuffer = ByteBuffer.wrap(json);
+				//session.getBasicRemote().sendBinary(byteBuffer);
+				Baltoro.cs.sendAPIResponse(to.uuid, json);
+				
+				
 			} 
 			catch (Exception e)
 			{
@@ -98,8 +95,6 @@ public class ResponseWorker extends  Thread
 			}
 			finally 
 			{
-				WSSessions.get().releaseSession(session);
-				session = null;
 				to = null;
 				WorkerPool.done(this);
 			}

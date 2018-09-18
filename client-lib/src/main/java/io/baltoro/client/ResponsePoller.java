@@ -2,17 +2,15 @@ package io.baltoro.client;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.websocket.Session;
-
 import io.baltoro.to.WSTO;
 
-public class WSResponsePoller extends Thread
+public class ResponsePoller extends Thread
 {
 	
 	
 	boolean run = true;
 	
-	public WSResponsePoller()
+	public ResponsePoller()
 	{
 	}
 
@@ -22,19 +20,6 @@ public class WSResponsePoller extends Thread
 		while(run)
 		{
 			
-			int count = WSSessions.get().checkSessions();
-			{
-				if(count == 0)
-				{
-					System.out.println("No running sessions plz restart the instance ");
-					System.exit(1);
-				}
-				else
-				{
-					//System.out.println("total valid connections ["+count+"] ");
-				}
-			}
-			
 			ConcurrentLinkedQueue<WSTO> queue = ResponseQueue.instance().getQueue();
 			if(queue == null || queue.size() == 0)
 			{
@@ -43,25 +28,13 @@ public class WSResponsePoller extends Thread
 			}
 			
 			
-			WSTO to = queue.peek();
+			WSTO to = queue.poll();
 			if(to == null)
 			{
 				wait(" No items in response queue !");
 				continue;
 			}
 				
-			
-			Session session = WSSessions.get().getSessionForWork();
-				
-			if(session == null)
-			{
-				wait(" no free session ! try again in 50 secs ");
-				continue;
-			}
-			
-			to = queue.poll();
-			
-			//System.out.println("Response >>  WorkerPool : "+WorkerPool.info());
 			
 			ResponseWorker worker = WorkerPool.getResponseWorker();
 			if(worker == null)
@@ -75,7 +48,7 @@ public class WSResponsePoller extends Thread
 				//System.out.println(" >>>>>>> exisitng worker :::::::: "+worker.count+" ,,,, "+worker);
 			}
 			
-			worker.set(to, session );
+			worker.set(to);
 			
 			//ResponseWorker worker = new ResponseWorker(byteBuffer, session);
 			//worker.start();

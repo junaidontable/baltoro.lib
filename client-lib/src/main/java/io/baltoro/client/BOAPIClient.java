@@ -1,5 +1,8 @@
 package io.baltoro.client;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -16,7 +19,12 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.baltoro.to.MgntContext;
+import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
+import io.baltoro.to.WSTO;
 
 public class BOAPIClient
 {
@@ -25,6 +33,7 @@ public class BOAPIClient
 	
 	Client webClient;
 	Client pollerClient;
+	ObjectMapper mapper = new ObjectMapper();
 	
 	String blHost = "http://admin.baltoro.io";
 	String host = "http://admin.baltoro.io";
@@ -46,6 +55,13 @@ public class BOAPIClient
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)
 				.register(responseFilter)
+				.build();
+		
+		HttpRequestPollerHeaderHandler pollerFilter = new HttpRequestPollerHeaderHandler();
+		
+		pollerClient = ClientBuilder.newBuilder()
+				.register(JacksonFeature.class)
+				.register(pollerFilter)
 				.build();
 		
 	
@@ -151,6 +167,69 @@ public class BOAPIClient
 		return data;
 	}
 	
+	String sendAppAPI() throws Exception
+	{
+		log.info("... getting app data -> server ...");
+		
+		MgntContext ctx = new MgntContext();
+		
+		Map<String, WebMethod> map = WebMethodMap.getInstance().getMap();
+		List<PathTO> pathList = new ArrayList<>(200);
+		
+		for (String key : map.keySet())
+		{
+			WebMethod wm = map.get(key);
+			
+			PathTO pto = new PathTO();
+			pto.appUuid = Baltoro.appUuid;
+			pto.createdBy = Baltoro.instanceUuid;
+			pto.path = key;
+			pto.authRequired = wm.authRequired;
+			pto.discoverable = wm.discoverable;
+			pto.propsJson = wm.propJson;
+			pto.timeoutSec = wm.timeoutSec;
+			
+			pathList.add(pto);
+			//System.out.println("PATH ADDING TO LIST -> "+key+" --> "+map.get(key));
+		} 
+		
+		ctx.setPathTOs(pathList);
+	
+		WebTarget target = webClient.target(blHost).path("/setappapi");
+		
+		String json = mapper.writeValueAsString(pathList);
+		
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("json", json);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		String data = response.readEntity(String.class);
+		return data;
+	}
+	
+	String sendAPIResponse(String toUuid, String json) throws Exception
+	{
+		log.info("... getting app data -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/RSSVA0BE926D318342BD9939D7AC06FE9A9B/resp");
+			
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("to-uuid", toUuid);
+		form.param("json", json);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		String data = response.readEntity(String.class);
+		return data;
+	}
+	
 	
 	Builder getIB(WebTarget target)
 	{
@@ -199,19 +278,7 @@ public class BOAPIClient
 	{
 		log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
 	
-		
-		if(pollerClient == null)
-		{
-			HttpRequestPollerHeaderHandler pollerFilter = new HttpRequestPollerHeaderHandler();
-			
-			
-			
-			pollerClient = ClientBuilder.newBuilder()
-					.register(JacksonFeature.class)
-					.register(pollerFilter)
-					.build();
-		}
-		
+	
 		WebTarget target = pollerClient.target("http://"+Baltoro.appName+".baltoro.io:8080")
 				.path("/PLSV93CA659B1BEB4229B49FF44852DA462F/poll")
 				.queryParam("BLT_CPU", cpu)

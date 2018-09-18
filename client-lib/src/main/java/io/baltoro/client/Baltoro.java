@@ -71,11 +71,12 @@ public class Baltoro
 	static String userUuid;
 	static File propFile;
 	
-	private static BaltoroWSHeartbeat mgntThread;
-	static WSRequestPoller requestPoller;
-	static WSResponsePoller responsePoller;
+	//private static BaltoroWSHeartbeat mgntThread;
+	//static WSRequestPoller requestPoller;
+	//static WSResponsePoller responsePoller;
 	
-	static HTTPRequestPoller httpRequestPoller;
+	static RequestPoller requestPoller;
+	static ResponsePoller responsePoller;
 	
 	
 	static String lcp;
@@ -138,6 +139,7 @@ public class Baltoro
 		}
 		
 			
+		/*
 		mgntThread = new BaltoroWSHeartbeat();
 		mgntThread.start();
 	
@@ -147,7 +149,8 @@ public class Baltoro
 		
 		responsePoller = new WSResponsePoller();
 		responsePoller.start();
-	 	
+	 	*/
+		
 		return null;
 		
 	}
@@ -351,6 +354,7 @@ public class Baltoro
 		serviceNames.append(serviceName+",");
 	}
 	
+	/*
 	private static void start(String appName, String serviceName, String _package)
 	{
 	
@@ -374,7 +378,7 @@ public class Baltoro
 		//Session session = _start();
 		//System.out.println(session);
 	}
-	
+	*/
 	
 	
 	public static Session start()
@@ -492,10 +496,14 @@ public class Baltoro
 			
 			buildService();
 			
+			cs.sendAppAPI();
 			
-			httpRequestPoller = new HTTPRequestPoller();
-			httpRequestPoller.start();
+			requestPoller = new RequestPoller();
+			requestPoller.start();
 			
+			
+			responsePoller = new ResponsePoller();
+			responsePoller.start();
 			
 			
 		} 
