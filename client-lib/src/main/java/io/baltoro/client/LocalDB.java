@@ -58,14 +58,9 @@ public class LocalDB
 	{
 		if(db == null)
 		{
-			String dbUuid = Baltoro.instanceUuid;
-			
-			if(Baltoro.instanceUuid == null)
-			{
-				dbUuid = "INST-NO-UUID";
-			}
-			
-			db = new LocalDB(dbUuid, clean, replicate);
+			//String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.serviceNames.toString().replaceAll(",", "-").replaceAll("/", "-");
+			String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.hostId;
+			db = new LocalDB(dbName, clean, replicate);
 		}
 		return db;
 	}

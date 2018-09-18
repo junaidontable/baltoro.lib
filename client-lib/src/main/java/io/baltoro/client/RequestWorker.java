@@ -18,6 +18,7 @@ import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
+import io.baltoro.remote.ResponseMap;
 import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
@@ -243,7 +244,7 @@ public class RequestWorker extends Thread
 			*/
 			
 			//System.out.println("** >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath());
-			WSSessions.get().addToResponseQueue(to);
+			ResponseQueue.instance().addToResponseQueue(to);
 			//WorkerPool.done(this);
 			
 			//requestCtx.set(null);

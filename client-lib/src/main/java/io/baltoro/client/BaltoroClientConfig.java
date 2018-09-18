@@ -46,7 +46,7 @@ public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
         headers.put("BLT_INSTANCE_UUID", Arrays.asList(Baltoro.instanceUuid));
         headers.put("BLT_TOKEN", Arrays.asList(this.token));
         headers.put("BLT_APP_NAME", Arrays.asList(Baltoro.appName));
-        headers.put("BLT_SERVICE_NAME", Arrays.asList(Baltoro.serviceName));
+        headers.put("BLT_SERVICE_NAME", Arrays.asList(Baltoro.serviceNames.toString()));
         
         
        

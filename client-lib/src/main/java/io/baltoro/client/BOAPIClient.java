@@ -24,6 +24,8 @@ public class BOAPIClient
 	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
 	
 	Client webClient;
+	Client pollerClient;
+	
 	String blHost = "http://admin.baltoro.io";
 	String host = "http://admin.baltoro.io";
 	
@@ -190,6 +192,39 @@ public class BOAPIClient
 		
 		ReplicationTO to = response.readEntity(ReplicationTO.class);
 		return to;
+	}
+	
+	
+	String poll(int cpu, int memoryGB)
+	{
+		log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
+	
+		
+		if(pollerClient == null)
+		{
+			HttpRequestPollerHeaderHandler pollerFilter = new HttpRequestPollerHeaderHandler();
+			
+			
+			
+			pollerClient = ClientBuilder.newBuilder()
+					.register(JacksonFeature.class)
+					.register(pollerFilter)
+					.build();
+		}
+		
+		WebTarget target = pollerClient.target("http://"+Baltoro.appName+".baltoro.io:8080")
+				.path("/PLSV93CA659B1BEB4229B49FF44852DA462F/poll")
+				.queryParam("BLT_CPU", cpu)
+				.queryParam("BLT_MEMORY_GB", memoryGB);
+	
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.get();
+		String json = response.readEntity(String.class);
+		log.info("response ==>"+json);
+		
+		
+		return json;
 	}
 	
 	

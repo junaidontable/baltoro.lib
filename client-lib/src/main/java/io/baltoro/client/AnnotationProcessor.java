@@ -27,6 +27,7 @@ import io.baltoro.features.Param;
 import io.baltoro.features.Path;
 import io.baltoro.features.Timeout;
 import io.baltoro.features.WS;
+import io.baltoro.util.StringUtil;
 
 public class AnnotationProcessor
 {
@@ -38,9 +39,9 @@ public class AnnotationProcessor
 	static ObjectMapper mapper = new ObjectMapper();
 	
 	
-	public Map<String, WebMethod> processAnnotation(String packageName) throws Exception
+	public Map<String, WebMethod> processAnnotation(String serviceName, String packageName) throws Exception
 	{
-		log.info("packageName = "+packageName);
+		log.info("serviceName = "+serviceName+", packageName = "+packageName);
 		
 		Set<Class<?>> classes = getClasses(packageName);
 		
@@ -82,17 +83,21 @@ public class AnnotationProcessor
 					
 				for (Method method : _class.getDeclaredMethods())
 				{
-					WebMethod wm = processPathAnno(method, _class, cPath);
-					if(wm == null)
-					{
-						continue;
-					}
-					
-					Timeout timeoutAnno = method.getAnnotation(Timeout.class);
-					if(timeoutAnno != null)
-					{
-						wm.timeoutSec = timeoutAnno.value();
-					}
+					//String[] serviceNames = Baltoro.serviceName.split(",");
+					//for (int i = 0; i < serviceNames.length; i++)
+					//{
+						WebMethod wm = processPathAnno(serviceName,method, _class, cPath);
+						if(wm == null)
+						{
+							continue;
+						}
+						
+						Timeout timeoutAnno = method.getAnnotation(Timeout.class);
+						if(timeoutAnno != null)
+						{
+							wm.timeoutSec = timeoutAnno.value();
+						}
+					//}
 					
 				}
 					
@@ -124,7 +129,7 @@ public class AnnotationProcessor
 	}
 	
 	
-	private WebMethod processPathAnno(Method method, Class<?> _class, String cPath)
+	private WebMethod processPathAnno(String serviceName, Method method, Class<?> _class, String cPath)
 	{
 		WebMethod wm = null;
 		
@@ -155,7 +160,14 @@ public class AnnotationProcessor
 				fPath = cPath+mPath;
 			}
 				
-			fPath = fPath.toLowerCase();
+			if(StringUtil.isNullOrEmpty(serviceName) || serviceName.equals("/"))
+			{
+				fPath = fPath.toLowerCase();
+			}
+			else
+			{
+				fPath = "/"+serviceName+fPath.toLowerCase();
+			}
 		}
 		
 		if (method.isAnnotationPresent(OnOpen.class))

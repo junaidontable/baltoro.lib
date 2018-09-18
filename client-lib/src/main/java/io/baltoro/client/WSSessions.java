@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -8,7 +7,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.websocket.Session;
 
 import io.baltoro.client.util.StringUtil;
-import io.baltoro.to.WSTO;
 
 
 public class WSSessions
@@ -16,8 +14,6 @@ public class WSSessions
 
 	private static WSSessions sessions;
 	private Set<Session> set;
-	private ConcurrentLinkedQueue<ByteBuffer> requestQueue;
-	private ConcurrentLinkedQueue<WSTO> responseQueue;
 	
 	private Set<Session> busySessions;
 	private ConcurrentLinkedQueue<Session> freeSessions;
@@ -25,8 +21,6 @@ public class WSSessions
 	private WSSessions()
 	{
 		set = new HashSet<>();
-		requestQueue = new ConcurrentLinkedQueue<>();
-		responseQueue = new ConcurrentLinkedQueue<>();
 		
 		busySessions = new HashSet<>();
 		freeSessions = new ConcurrentLinkedQueue<>();
@@ -42,15 +36,7 @@ public class WSSessions
 		return sessions;
 	}
 	
-	ConcurrentLinkedQueue<ByteBuffer> getRequestQueue()
-	{
-		return requestQueue;
-	}
-	
-	ConcurrentLinkedQueue<WSTO> getResponseQueue()
-	{
-		return responseQueue;
-	}
+
 	
 	public void addSession(Session session)
 	{
@@ -58,33 +44,6 @@ public class WSSessions
 		set.add(session);
 	}
 	
-	void addToRequestQueue(ByteBuffer byteBuffer)
-	{
-		
-		requestQueue.add(byteBuffer);
-		
-		String sync = "request-queue";
-		synchronized (sync.intern())
-		{
-			sync.intern().notify();
-		}
-		
-	}
-	
-	
-	void addToResponseQueue(WSTO to)
-	{
-		
-		responseQueue.add(to);
-		
-		String sync = "response-queue";
-		synchronized (sync.intern())
-		{
-			sync.intern().notify();
-		}
-		
-	}
-
 
 	int checkSessions()
 	{

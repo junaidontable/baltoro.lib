@@ -3,7 +3,6 @@ package io.baltoro.client;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.Map;
 import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.WSTO;
-import io.baltoro.client.util.ObjectUtil;
 
 public class BaltoroWSHeartbeat extends Thread
 {
@@ -73,9 +71,9 @@ public class BaltoroWSHeartbeat extends Thread
 				
 				
 				ctx.setThreadCount(Baltoro.instanceThreadCount);
-				ctx.setServiceName(Baltoro.serviceName);
+				ctx.setServiceName(Baltoro.serviceNames.toString());
 				ctx.setCpuPercent((int)os.getSystemLoadAverage());
-				ctx.setServiceName(Baltoro.serviceName);
+				ctx.setServiceName(Baltoro.serviceNames.toString());
 				
 				long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
 				long usedMem = (int) mem.getHeapMemoryUsage().getUsed();
@@ -93,7 +91,7 @@ public class BaltoroWSHeartbeat extends Thread
 				ByteBuffer  msg = ByteBuffer.wrap(bytes);
 				*/
 				
-				WSSessions.get().addToResponseQueue(to);
+				ResponseQueue.instance().addToResponseQueue(to);
 				
 				/*
 				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");

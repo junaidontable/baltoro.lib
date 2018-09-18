@@ -171,7 +171,7 @@ public class Replicator
 		ByteBuffer  msg = ByteBuffer.wrap(bytes);
 		*/
 		
-		WSSessions.get().addToResponseQueue(to);
+		ResponseQueue.instance().addToResponseQueue(to);
 		
 	}
 	

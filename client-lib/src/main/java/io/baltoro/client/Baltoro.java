@@ -7,10 +7,13 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -29,8 +32,8 @@ import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
 import io.baltoro.to.APIError;
 import io.baltoro.to.AppTO;
-import io.baltoro.to.PrivateDataTO;
 import io.baltoro.to.UserTO;
+import io.baltoro.util.StringUtil;
 
 
 public class Baltoro 
@@ -48,7 +51,11 @@ public class Baltoro
 	
 	static Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
-	static String packages;
+		
+	static List<ServicePackage> serviceList = new ArrayList<ServicePackage>();
+	
+	static StringBuffer serviceNames = new StringBuffer();
+	static String hostId;
 	static BOAPIClient cs;
 	private static boolean logedin = false;
 	static private String email;
@@ -63,36 +70,45 @@ public class Baltoro
 	static String appName;
 	static String userUuid;
 	static File propFile;
-	private static BaltoroWSHeartbeat mgntThread;
-	static RequestPoller requestPoller;
-	static ResponsePoller responsePoller;
-	//static String clusterPath = "/*";
 	
-	static String serviceName = "*";
+	private static BaltoroWSHeartbeat mgntThread;
+	static WSRequestPoller requestPoller;
+	static WSResponsePoller responsePoller;
+	
+	static HTTPRequestPoller httpRequestPoller;
+	
+	
 	static String lcp;
 	static long repMillis;
 	
+
 	
-	private Baltoro()
-	{
-		
-	}
-	
-	
-	private static Session startClient() throws Exception
+	private static void buildService() throws Exception
 	{
 			
-		
 		Map<String, WebMethod> pathMap = new HashMap<String, WebMethod>(200);
 		
 		AnnotationProcessor p = new AnnotationProcessor();
-		for (String _package : packages.split(","))
-		{
-			Map<String, WebMethod> pMap = p.processAnnotation(_package.trim());
-			pathMap.putAll(pMap);
-		}
 		
-		WebMethodMap.getInstance().setMap(pathMap);
+		for (ServicePackage sp : serviceList)
+		{
+			
+			for (String _package : sp.packageNames)
+			{
+				//Map<String, WebMethod> pMap = p.processAnnotation(_package.trim());
+				Map<String, WebMethod> pMap = p.processAnnotation(sp.serviceName, _package);
+				pathMap.putAll(pMap);
+			}
+			
+			WebMethodMap.getInstance().setMap(pathMap);
+			
+		}
+	}
+	
+	private static Session startWSClient() throws Exception
+	{
+			
+		
 		
 		/*
 		int count = cs.getRemainingInsanceThreadsCount(appName, serviceName);
@@ -107,7 +123,7 @@ public class Baltoro
 		}
 		*/
 		
-		int count = 5;
+		int count = 1;
 		
 		ExecutorService executor = Executors.newFixedThreadPool(count);
 		for (int i = 0; i <count; i++)
@@ -126,10 +142,10 @@ public class Baltoro
 		mgntThread.start();
 	
 		
-		requestPoller = new RequestPoller();
+		requestPoller = new WSRequestPoller();
 		requestPoller.start();
 		
-		responsePoller = new ResponsePoller();
+		responsePoller = new WSResponsePoller();
 		responsePoller.start();
 	 	
 		return null;
@@ -317,9 +333,25 @@ public class Baltoro
 		userSession.sendSession();
 	}
 	
+	public static void init(String appName)
+	{
+		Baltoro.appName = appName;
+	}
 	
+	public static void addService(String serviceName, String ... packageNames)
+	{
+		if(StringUtil.isNullOrEmpty(serviceName))
+		{
+			serviceName = "/";
+		}
+		
+		ServicePackage sp = new ServicePackage(serviceName, packageNames);
+		serviceList.add(sp);
+		
+		serviceNames.append(serviceName+",");
+	}
 	
-	public static void start(String _package, String appName, String serviceName)
+	private static void start(String appName, String serviceName, String _package)
 	{
 	
 		String _debug = System.getProperty("baltoro.debug");
@@ -330,35 +362,31 @@ public class Baltoro
 			Baltoro.debug = true;
 		}
 		
-		packages = _package;
+		//Baltoro.packages = _package;
 		Baltoro.appName = appName;
-		String _packages = System.getProperty("baltoro.packages");
-		System.out.println("-D.baltoro.packages= "+_packages);
-		if(_packages != null)
-		{
-			Baltoro.packages = _packages;
-		}
-		System.out.println("packages= "+Baltoro.packages);
+	
+		//System.out.println("packages= "+Baltoro.packages);
 		
-		Baltoro.serviceName = serviceName;
-		/*
-		String _clusterPath = System.getProperty("baltoro.clusterPath");
+		//Baltoro.serviceName = serviceName;
+ 
+		//System.out.println("servieName="+Baltoro.serviceName);
 		
-		System.out.println("-D.baltoro.clusterPath="+_clusterPath);
-		if(_clusterPath != null)
-		{
-			Baltoro.clusterPath = _clusterPath;
-		}
-		*/
-		
-		System.out.println("servieName="+Baltoro.serviceName);
-		
-		Session session = _start();
-		System.out.println(session);
+		//Session session = _start();
+		//System.out.println(session);
 	}
 	
-	private static Session _start()
+	
+	
+	public static Session start()
 	{
+		String _debug = System.getProperty("baltoro.debug");
+		
+		System.out.println("running mod : "+_debug);
+		if(_debug != null && _debug.equals("true"))
+		{
+			Baltoro.debug = true;
+		}
+		
 		try
 		{
 			
@@ -374,7 +402,7 @@ public class Baltoro
 	    		
 	    		
 	    		
-	    		String instUuid = cs.createInstance(appUuid, serviceName);
+	    		String instUuid = cs.createInstance(appUuid, serviceNames.toString());
 	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
 	    		{
 	    			System.out.println("can't find or create an instance exiting "+appName);
@@ -389,12 +417,19 @@ public class Baltoro
 				
 	    		String appKey = cs.getAppData(appUuid);
 				props.put("app.key", appKey);
+				
+				
+				hostId = ""+new Random().nextInt();
+				props.put("app.host.id", hostId);
+				
 				props.store(output, "updated on "+new Date());
 				
 			}
 			
 			
-			Session session = startClient();
+			buildService();
+			
+			Session session = startWSClient();
 			return session;
 		} 
 		catch (Exception e)
@@ -403,6 +438,73 @@ public class Baltoro
 		}
 		
 		return null;
+	}
+	
+	public static void start1()
+	{
+		String _debug = System.getProperty("baltoro.debug");
+		
+		System.out.println("running mod : "+_debug);
+		if(_debug != null && _debug.equals("true"))
+		{
+			Baltoro.debug = true;
+		}
+		
+		try
+		{
+			
+			boolean loaded = loadProperties();
+			if(!loaded)
+			{
+				
+				FileOutputStream output = new FileOutputStream(propFile);
+				//AppTO selectedApp = getMyApp();
+				
+				appUuid = cs.getAppUuidByName(appName);
+				props.put("app.uuid", appUuid);
+	    		
+	    		
+	    		
+	    		String instUuid = cs.createInstance(appUuid, serviceNames.toString());
+	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
+	    		{
+	    			System.out.println("can't find or create an instance exiting "+appName);
+	    			System.exit(1);
+	    		}
+	    		
+	    		Baltoro.instanceUuid = instUuid;
+	    		props.put("app.instance.uuid", instUuid);
+	    		
+	    		
+				//PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
+				
+	    		String appKey = cs.getAppData(appUuid);
+				props.put("app.key", appKey);
+				
+				
+				hostId = ""+new Random().nextInt();
+				props.put("app.host.id", hostId);
+				
+				props.store(output, "updated on "+new Date());
+				
+			}
+			
+			
+			buildService();
+			
+			
+			httpRequestPoller = new HTTPRequestPoller();
+			httpRequestPoller.start();
+			
+			
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	
 	}
 	
 	
@@ -422,7 +524,7 @@ public class Baltoro
 		//adminEP = endPointFactory(AdminEP.class);
 		
 		String propName = getMainClassName();
-		String fileName = "."+propName+".props";
+		String fileName = propName+".props";
 		
 		System.out.println(fileName);
 		propFile = new File(fileName);
@@ -432,14 +534,29 @@ public class Baltoro
     		
     		props.load(new FileInputStream(propFile));
     		appPrivateKey = props.getProperty("app.key");
-    		appUuid = props.getProperty("app.uuid");
-    		//appName = props.getProperty("app.name");
-    		//userUuid = props.getProperty("user.uuid");
-    		//email = props.getProperty("user.email");
-    		instanceUuid = props.getProperty("app.instance.uuid");
-    		//packages = props.getProperty("packages", Baltoro.packages);
-    		//clusterPath = props.getProperty("cluster.path", Baltoro.clusterPath);
+    		if(StringUtil.isNullOrEmpty(appPrivateKey))
+    		{
+    			return false;
+    		}
     		
+    		
+    		appUuid = props.getProperty("app.uuid");
+    		if(StringUtil.isNullOrEmpty(appUuid))
+    		{
+    			return false;
+    		}
+    		
+    		instanceUuid = props.getProperty("app.instance.uuid");
+    		if(StringUtil.isNullOrEmpty(instanceUuid))
+    		{
+    			return false;
+    		}
+    		
+    		hostId = props.getProperty("app.host.id");
+    		if(StringUtil.isNullOrEmpty(hostId))
+    		{
+    			return false;
+    		}
     		
     		return true;
     		

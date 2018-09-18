@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.to.WSTO;
 
-public class RequestPoller extends Thread
+public class WSRequestPoller extends Thread
 {
 	
 	boolean run = true;
 	static ObjectMapper mapper = new ObjectMapper();
 	
-	public RequestPoller()
+	public WSRequestPoller()
 	{
 	}
 
@@ -23,7 +23,7 @@ public class RequestPoller extends Thread
 		while(run)
 		{
 			
-			ConcurrentLinkedQueue<ByteBuffer> queue = WSSessions.get().getRequestQueue();
+			ConcurrentLinkedQueue<ByteBuffer> queue = RequestQueue.instance().getQueue();
 			if(queue == null || queue.size() == 0)
 			{
 				sleep("request queue is empty !");

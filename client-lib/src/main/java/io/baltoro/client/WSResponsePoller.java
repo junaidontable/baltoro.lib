@@ -6,13 +6,13 @@ import javax.websocket.Session;
 
 import io.baltoro.to.WSTO;
 
-public class ResponsePoller extends Thread
+public class WSResponsePoller extends Thread
 {
 	
 	
 	boolean run = true;
 	
-	public ResponsePoller()
+	public WSResponsePoller()
 	{
 	}
 
@@ -35,7 +35,7 @@ public class ResponsePoller extends Thread
 				}
 			}
 			
-			ConcurrentLinkedQueue<WSTO> queue = WSSessions.get().getResponseQueue();
+			ConcurrentLinkedQueue<WSTO> queue = ResponseQueue.instance().getQueue();
 			if(queue == null || queue.size() == 0)
 			{
 				wait("response queue is empty !");

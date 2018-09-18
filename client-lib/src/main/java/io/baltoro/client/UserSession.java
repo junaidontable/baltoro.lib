@@ -104,6 +104,6 @@ public class UserSession
 		
 		
 		//ByteBuffer byteBuffer = ByteBuffer.wrap(toBytes);
-		WSSessions.get().addToResponseQueue(to);
+		ResponseQueue.instance().addToResponseQueue(to);
 	}
 }

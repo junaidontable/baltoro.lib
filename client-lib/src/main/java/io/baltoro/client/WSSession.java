@@ -1,8 +1,5 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-
-import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.WSTO;
 import io.baltoro.to.WebSocketContext;
 
@@ -61,7 +58,7 @@ public class WSSession
 		*/
 		
 		//ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		WSSessions.get().addToResponseQueue(_to);
+		ResponseQueue.instance().addToResponseQueue(_to);
 	}
 	
 	public void send(String msg)
@@ -95,6 +92,6 @@ public class WSSession
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		*/
 		
-		WSSessions.get().addToResponseQueue(_to);
+		ResponseQueue.instance().addToResponseQueue(_to);
 	}
 }
