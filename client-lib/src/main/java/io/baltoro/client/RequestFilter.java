@@ -6,13 +6,13 @@ import java.util.logging.Logger;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
-public class HttpRequestPollerHeaderHandler implements ClientRequestFilter
+public class RequestFilter implements ClientRequestFilter
 {
  
-	static Logger log = Logger.getLogger(HttpRequestPollerHeaderHandler.class.getName());
+	static Logger log = Logger.getLogger(RequestFilter.class.getName());
 	
 
-	public HttpRequestPollerHeaderHandler()
+	public RequestFilter()
 	{
 		
 	}
@@ -20,9 +20,9 @@ public class HttpRequestPollerHeaderHandler implements ClientRequestFilter
 	public void filter(ClientRequestContext requestContext) 
 	throws IOException
 	{
+		requestContext.getHeaders().add("BLT_INST_SERVER_HOST", BOAPIClient.BLTC_CLIENT);
 		
 		requestContext.getHeaders().add("BLT_APP_UUID", Baltoro.appUuid);
-		
 		requestContext.getHeaders().add("BLT_INSTANCE_UUID", Baltoro.instanceUuid);
 		requestContext.getHeaders().add("BLT_TOKEN", Baltoro.hostId);
 		requestContext.getHeaders().add("BLT_APP_NAME", Baltoro.appName);

@@ -3,6 +3,7 @@ package io.baltoro.client;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
+import java.net.ConnectException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +41,18 @@ public class RequestPoller extends Thread
 			
 		
 		
-			String json = Baltoro.cs.poll(cpu, freeMem);
+			String json = null;
+			try
+			{
+				json = Baltoro.cs.poll(cpu, freeMem);
+			} 
+			catch (ConnectException e)
+			{
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			
 			if(StringUtil.isNullOrEmpty(json))
 			{
 				continue;

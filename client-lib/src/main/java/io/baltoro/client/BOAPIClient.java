@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
-import io.baltoro.to.WSTO;
 
 public class BOAPIClient
 {
+	
+	static final String POLL_SERVICE = "/PLSV93CA659B1BEB4229B49FF44852DA462F".toLowerCase();
+	static final String RESP_SERVICE = "/RSSVA0BE926D318342BD9939D7AC06FE9A9B".toLowerCase();
+	static final String BLTC_CLIENT = "BLCT4B0F12FA974043E3BB23D485237EAB64".toLowerCase();
 	
 	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
 	
@@ -35,33 +39,49 @@ public class BOAPIClient
 	Client pollerClient;
 	ObjectMapper mapper = new ObjectMapper();
 	
-	String blHost = "http://admin.baltoro.io";
-	String host = "http://admin.baltoro.io";
+	String host;
+	String port;
+	
+	String blHost = "http://"+BLTC_CLIENT+".baltoro.io";
+	//String host = "http://admin.baltoro.io";
 	
 	
 	boolean online = false;
 	
 	BOAPIClient()
 	{
+		/*
 		if(Baltoro.debug)
 		{
-			blHost = "http://admin.baltoro.io:8080";
-			host = "http://admin.baltoro.io:8080";
+			//blHost = "http://admin.baltoro.io:8080";
+			//host = "http://admin.baltoro.io:8080";
+		}
+		*/
+		
+		
+		if(Baltoro.env == Env.LOC)
+		{
+			blHost = "http://localhost:8080";
 		}
 		
+		
+		RequestFilter reqFilter = new RequestFilter();
+		
 		CheckResponseFilter responseFilter = new CheckResponseFilter("admin",Baltoro.agentCookieMap);
+		
 		
 		webClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(CheckRequestFilter.class)
+				.register(reqFilter)
 				.register(responseFilter)
 				.build();
 		
-		HttpRequestPollerHeaderHandler pollerFilter = new HttpRequestPollerHeaderHandler();
+		
 		
 		pollerClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
-				.register(pollerFilter)
+				.register(reqFilter)
 				.build();
 		
 	
@@ -233,7 +253,7 @@ public class BOAPIClient
 	{
 		log.info("... getting app data -> server ...");
 	
-		WebTarget target = webClient.target(blHost).path("/RSSVA0BE926D318342BD9939D7AC06FE9A9B/resp");
+		WebTarget target = webClient.target(blHost).path(RESP_SERVICE);
 			
 		Form form = new Form();
 		form.param("app-uuid", Baltoro.appUuid);
@@ -293,12 +313,13 @@ public class BOAPIClient
 	
 	
 	String poll(int cpu, int memoryGB)
+	throws ConnectException
 	{
 		//log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
 	
 	
-		WebTarget target = pollerClient.target("http://"+Baltoro.appName+".baltoro.io:8080")
-				.path("/PLSV93CA659B1BEB4229B49FF44852DA462F/poll")
+		WebTarget target = pollerClient.target(blHost)
+				.path(POLL_SERVICE)
 				.queryParam("BLT_CPU", cpu)
 				.queryParam("BLT_MEMORY_GB", memoryGB);
 	

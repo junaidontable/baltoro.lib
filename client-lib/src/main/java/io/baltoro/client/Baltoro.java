@@ -70,6 +70,8 @@ public class Baltoro
 	static String appName;
 	static String userUuid;
 	static File propFile;
+	static String serverURL = "http://www.baltoro.io";
+	static Env env = Env.PRD;
 	
 	//private static BaltoroWSHeartbeat mgntThread;
 	//static WSRequestPoller requestPoller;
@@ -336,8 +338,38 @@ public class Baltoro
 		userSession.sendSession();
 	}
 	
-	public static void init(String appName)
+	public static void init(String appName, Env env)
 	{
+		Baltoro.env = env;
+		
+		switch (env)
+		{
+			case PRD:
+				serverURL = "http://"+appName+".baltoro.io";
+				break;
+				
+			case STG:
+				serverURL = "http://"+appName+"-stg.baltoro.io";
+				break;
+				
+			case QA:
+				serverURL = "http://"+appName+"-qa.baltoro.io";
+				break;	
+				
+			case DEV:
+				serverURL = "http://"+appName+"-dev.baltoro.io";
+				break;	
+
+			case LOC:
+				serverURL = "http://localhost:8080";
+				break;
+				
+			default :
+				serverURL = "http://admin.baltoro.io";
+				break;
+		}
+		
+		
 		Baltoro.appName = appName;
 	}
 	
