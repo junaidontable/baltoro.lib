@@ -135,6 +135,24 @@ public class BOAPIClient
 		return instUuid;
 	}
 	
+	
+	
+	String instanceCreated(String instUuid) throws Exception
+	{
+		log.info("... creating new instance -> server ...");
+	
+		WebTarget target = webClient.target(blHost).path("/instancecreated");
+		
+		Form form = new Form();
+		form.param("inst-uuid", instUuid);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		return response.readEntity(String.class);
+		
+	}
+	
 	String getAppUuidByName(String appName) throws Exception
 	{
 		log.info("... getting app uuid -> server ...");
@@ -276,7 +294,7 @@ public class BOAPIClient
 	
 	String poll(int cpu, int memoryGB)
 	{
-		log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
+		//log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
 	
 	
 		WebTarget target = pollerClient.target("http://"+Baltoro.appName+".baltoro.io:8080")
@@ -288,7 +306,7 @@ public class BOAPIClient
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		String json = response.readEntity(String.class);
-		log.info("response ==>"+json);
+		//log.info("response ==>"+json);
 		
 		
 		return json;

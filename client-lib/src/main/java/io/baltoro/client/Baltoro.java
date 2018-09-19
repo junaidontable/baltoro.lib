@@ -381,7 +381,7 @@ public class Baltoro
 	*/
 	
 	
-	public static Session start()
+	private static Session start_old()
 	{
 		String _debug = System.getProperty("baltoro.debug");
 		
@@ -444,7 +444,7 @@ public class Baltoro
 		return null;
 	}
 	
-	public static void start1()
+	public static void start()
 	{
 		String _debug = System.getProperty("baltoro.debug");
 		
@@ -554,8 +554,21 @@ public class Baltoro
     			return false;
     		}
     		
+    		String _appUuid = cs.getAppUuidByName(appName);
+    		if(StringUtil.isNullOrEmpty(_appUuid) || !appUuid.equals(_appUuid))
+    		{
+    			return false;
+    		}
+    		
     		instanceUuid = props.getProperty("app.instance.uuid");
     		if(StringUtil.isNullOrEmpty(instanceUuid))
+    		{
+    			return false;
+    		}
+    		
+   
+    		String _instanceUuid = cs.instanceCreated(instanceUuid);
+    		if(StringUtil.isNullOrEmpty(_instanceUuid) || !"YES".equals(_instanceUuid))
     		{
     			return false;
     		}
