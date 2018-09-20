@@ -265,14 +265,16 @@ public class CloudServer
 		
 		Form form = new Form();
 		
-		List<Object[]> list = data.list;
-		for (Object[] objects : list)
+		if(data != null)
 		{
-			String name = (String) objects[0];
-			String value = (String) objects[1];
-			form.param(name, value);
+			List<Object[]> list = data.list;
+			for (Object[] objects : list)
+			{
+				String name = (String) objects[0];
+				String value = (String) objects[1];
+				form.param(name, value);
+			}
 		}
-		
 		
 		
 		Invocation.Builder ib =	getIB(target);

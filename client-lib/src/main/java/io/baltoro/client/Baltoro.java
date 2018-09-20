@@ -276,15 +276,23 @@ public class Baltoro
 	}
 	
 	
+	public static Future<?> callAsync(String appName, String path, Class<?> returnType)
+	{
+		return callAsync(appName, path, returnType, null);
+	}
+	
 	public static Future<?> callAsync(String appName, String path, Class<?> returnType, ParamInput input)
 	{
 		try
 		{
 			CloudServer cServer = new CloudServer(appName);
-			EPData epData = input.getEPData();
+			EPData epData = null;
+			if(input != null)
+			{
+				epData = input.getEPData();
+			}
 				
 			Future<?> f = cServer.callAsyn(path, epData, returnType);
-			
 			
 			return f;
 			
