@@ -344,6 +344,11 @@ public class Baltoro
 		userSession.sendSession();
 	}
 	
+	public static void init(String appName)
+	{
+		init(appName, Env.PRD);
+	}
+	
 	public static void init(String appName, Env env)
 	{
 		Baltoro.env = env;
