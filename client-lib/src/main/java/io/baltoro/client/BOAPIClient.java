@@ -139,7 +139,7 @@ public class BOAPIClient
 	}
 	
 	
-	String createInstance(String appUuid, String serviceName) throws Exception
+	String createInstance(String appUuid, String serviceName, String instUuid) throws Exception
 	{
 		log.info("... creating new instance -> server ...");
 	
@@ -148,30 +148,15 @@ public class BOAPIClient
 		Form form = new Form();
 		form.param("appUuid", appUuid);
 		form.param("serviceName", serviceName);
+		form.param("inst-uud", instUuid);
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		String instUuid = response.readEntity(String.class);
+		instUuid = response.readEntity(String.class);
 		return instUuid;
 	}
 	
-	
-	
-	String instanceCreated(String instUuid) throws Exception
-	{
-		log.info("... creating new instance -> server ...");
-	
-		WebTarget target = webClient.target(blHost).path("/instancecreated");
-		
-		Form form = new Form();
-		form.param("inst-uuid", instUuid);
-		
-		
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		return response.readEntity(String.class);
-		
-	}
+
 	
 	String getAppUuidByName(String appName) throws Exception
 	{

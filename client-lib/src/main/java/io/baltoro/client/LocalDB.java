@@ -44,6 +44,7 @@ public class LocalDB
 	private Connection con;
 	private boolean clean;
 	private boolean replicate;
+	private static String dbName;
 	
 	
 	Map<String, String> typeClassMap = new HashMap<>(100);
@@ -59,7 +60,7 @@ public class LocalDB
 		if(db == null)
 		{
 			//String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.serviceNames.toString().replaceAll(",", "-").replaceAll("/", "-");
-			String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.hostId;
+			dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.env+"-"+Baltoro.hostId;
 			db = new LocalDB(dbName, clean, replicate);
 		}
 		return db;
@@ -122,10 +123,12 @@ public class LocalDB
 			}
 
 			con.createStatement().executeQuery("select uuid from base WHERE uuid='1'");
+			
+			System.out.println("Found local database.... "+dbName);
 		} 
 		catch (SQLException e)
 		{
-			System.out.println("setting up local database.... "+e);
+			System.out.println("setting up NEW local database.... "+dbName);
 			Replicator.REPLICATION_ON = false;
 			setupTables();
 			

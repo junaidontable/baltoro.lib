@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,6 @@ import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
-import io.baltoro.to.APIError;
-import io.baltoro.to.AppTO;
-import io.baltoro.to.UserTO;
 import io.baltoro.util.StringUtil;
 
 
@@ -51,10 +47,13 @@ public class Baltoro
 	static StringBuffer serviceNames = new StringBuffer();
 	static String hostId;
 	static BOAPIClient cs;
+	/*
 	private static boolean logedin = false;
 	static private String email;
 	static private String password;
 	private static UserTO user;
+	*/
+	
 	static String instanceUuid;
 	static int instanceThreadCount = 3;
 	//public static boolean debug = false;
@@ -66,6 +65,10 @@ public class Baltoro
 	static File propFile;
 	static String serverURL = "http://www.baltoro.io";
 	static Env env = Env.PRD;
+	
+	static String serverDomain = "baltoro.io";
+	static int serverPort = 80;
+	static String serverProtocol = "http";
 	
 	//private static BaltoroWSHeartbeat mgntThread;
 	//static WSRequestPoller requestPoller;
@@ -359,24 +362,32 @@ public class Baltoro
 	
 	public static void init(String appName, Env env)
 	{
+		if(env == null)
+		{
+		
+			String _env = System.getProperties().getProperty("env");
+			env = Env.valueOf(_env.toUpperCase());
+		}
+		
+		
 		Baltoro.env = env;
 		
 		switch (env)
 		{
 			case PRD:
-				serverURL = "http://"+appName+".baltoro.io";
+				serverURL = serverProtocol+"://"+appName+"."+serverDomain+":"+serverPort;
 				break;
 				
 			case STG:
-				serverURL = "http://"+appName+"-stg.baltoro.io";
+				serverURL = serverProtocol+"://"+appName+"-stg."+serverDomain+":"+serverPort;
 				break;
 				
 			case QA:
-				serverURL = "http://"+appName+"-qa.baltoro.io";
+				serverURL = serverProtocol+"://"+appName+"-qa."+serverDomain+":"+serverPort;
 				break;	
 				
 			case DEV:
-				serverURL = "http://"+appName+"-dev.baltoro.io";
+				serverURL = serverProtocol+"://"+appName+"-dev."+serverDomain+":"+serverPort;
 				break;	
 
 			case LOC:
@@ -384,7 +395,7 @@ public class Baltoro
 				break;
 				
 			default :
-				serverURL = "http://admin.baltoro.io";
+				serverURL = serverProtocol+"://www.baltoro.io";
 				break;
 		}
 		
@@ -405,149 +416,15 @@ public class Baltoro
 		serviceNames.append(serviceName+",");
 	}
 	
-	/*
-	private static void start(String appName, String serviceName, String _package)
-	{
 	
-		String _debug = System.getProperty("baltoro.debug");
-		
-		System.out.println("running mod : "+_debug);
-		if(_debug != null && _debug.equals("true"))
-		{
-			Baltoro.debug = true;
-		}
-		
-		//Baltoro.packages = _package;
-		Baltoro.appName = appName;
-	
-		//System.out.println("packages= "+Baltoro.packages);
-		
-		//Baltoro.serviceName = serviceName;
- 
-		//System.out.println("servieName="+Baltoro.serviceName);
-		
-		//Session session = _start();
-		//System.out.println(session);
-	}
-	*/
-	
-	
-	private static Session start_old()
-	{
-		/*
-		String _debug = System.getProperty("baltoro.debug");
-		
-		System.out.println("running mod : "+_debug);
-		if(_debug != null && _debug.equals("true"))
-		{
-			Baltoro.debug = true;
-		}
-		*/
-		
-		try
-		{
-			
-			boolean loaded = loadProperties();
-			if(!loaded)
-			{
-				
-				FileOutputStream output = new FileOutputStream(propFile);
-				//AppTO selectedApp = getMyApp();
-				
-				appUuid = cs.getAppUuidByName(appName);
-				props.put("app.uuid", appUuid);
-	    		
-	    		
-	    		
-	    		String instUuid = cs.createInstance(appUuid, serviceNames.toString());
-	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
-	    		{
-	    			System.out.println("can't find or create an instance exiting "+appName);
-	    			System.exit(1);
-	    		}
-	    		
-	    		Baltoro.instanceUuid = instUuid;
-	    		props.put("app.instance.uuid", instUuid);
-	    		
-	    		
-				//PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
-				
-	    		String appKey = cs.getAppData(appUuid);
-				props.put("app.key", appKey);
-				
-				
-				hostId = ""+new Random().nextInt();
-				props.put("app.host.id", hostId);
-				
-				props.store(output, "updated on "+new Date());
-				
-			}
-			
-			
-			buildService();
-			
-			Session session = startWSClient();
-			return session;
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
 	
 	public static void start()
 	{
-		/*
-		String _debug = System.getProperty("baltoro.debug");
-		
-		System.out.println("running mod : "+_debug);
-		if(_debug != null && _debug.equals("true"))
-		{
-			Baltoro.debug = true;
-		}
-		*/
+
 		
 		try
 		{
-			
-			boolean loaded = loadProperties();
-			if(!loaded)
-			{
-				
-				FileOutputStream output = new FileOutputStream(propFile);
-				//AppTO selectedApp = getMyApp();
-				
-				appUuid = cs.getAppUuidByName(appName);
-				props.put("app.uuid", appUuid);
-	    		
-	    		
-	    		
-	    		String instUuid = cs.createInstance(appUuid, serviceNames.toString());
-	    		if(instUuid == null || instUuid.equals("NOT ALLOWED"))
-	    		{
-	    			System.out.println("can't find or create an instance exiting "+appName);
-	    			System.exit(1);
-	    		}
-	    		
-	    		Baltoro.instanceUuid = instUuid;
-	    		props.put("app.instance.uuid", instUuid);
-	    		
-	    		
-				//PrivateDataTO to = callSync("admin", "/api/app/get", PrivateDataTO.class, a -> a.add("base-uuid", selectedApp.privateDataUuid));
-				
-	    		String appKey = cs.getAppData(appUuid);
-				props.put("app.key", appKey);
-				
-				
-				hostId = ""+new Random().nextInt();
-				props.put("app.host.id", hostId);
-				
-				props.store(output, "updated on "+new Date());
-				
-			}
-			
+			processEnv();
 			
 			buildService();
 			
@@ -570,240 +447,80 @@ public class Baltoro
 	
 	}
 	
-	
-    public static void main(String[] args )
-    {
-    	//Baltoro.start("io", "/*");
-    	
-    	//Baltoro.start("io");
-    }
+
     
-    
-    private static boolean loadProperties() throws Exception
+    private static void processEnv() throws Exception
     {
     	  
     	cs = new BOAPIClient();
 		props = new Properties();
-		//adminEP = endPointFactory(AdminEP.class);
 		
 		String propName = getMainClassName();
-		String fileName = propName+".props";
+		String fileName = propName+"-"+Baltoro.env.toString().toUpperCase()+".env";
 		
 		System.out.println(fileName);
 		propFile = new File(fileName);
 		
-    	if(propFile.exists())
-    	{
-    		
-    		props.load(new FileInputStream(propFile));
-    		appPrivateKey = props.getProperty("app.key");
-    		if(StringUtil.isNullOrEmpty(appPrivateKey))
-    		{
-    			return false;
-    		}
-    		
-    		
-    		appUuid = props.getProperty("app.uuid");
-    		if(StringUtil.isNullOrEmpty(appUuid))
-    		{
-    			return false;
-    		}
-    		
-    		String _appUuid = cs.getAppUuidByName(appName);
-    		if(StringUtil.isNullOrEmpty(_appUuid) || !appUuid.equals(_appUuid))
-    		{
-    			return false;
-    		}
-    		
-    		instanceUuid = props.getProperty("app.instance.uuid");
-    		if(StringUtil.isNullOrEmpty(instanceUuid))
-    		{
-    			return false;
-    		}
-    		
-   
-    		String _instanceUuid = cs.instanceCreated(instanceUuid);
-    		if(StringUtil.isNullOrEmpty(_instanceUuid) || !"YES".equals(_instanceUuid))
-    		{
-    			return false;
-    		}
-    		
-    		hostId = props.getProperty("app.host.id");
-    		if(StringUtil.isNullOrEmpty(hostId))
-    		{
-    			return false;
-    		}
-    		
-    		return true;
-    		
-    		/*
-    		String option = systemIn("Start "+appName+" ? [y/n] : ");
-    		if(option.equals("n"))
-    		{
-    			propFile.delete();
-    		}
-    		else
-    		{
-    			return true;
-    		}
-    		//*/
     	
-    	}
-    	
-    	return false;
-    	
-		/*
-    	String option = systemIn("Do you have an account ? [y/n] : ");
-    	for (int i = 0; i < 3; i++)
+		
+		if(!propFile.exists())
 		{
-    		email = systemIn("email : ");
-			password = systemIn("password : ");
-			
-			try
-			{
-				if(option.toLowerCase().equals("n"))
-				{
-					user = callSync("admin","/api/app/createUser", UserTO.class, a -> a.add("email", email).add("password", password));
-				}
-					
-				ParamInput input = a -> a.add("email", email).add("password", password);
-			
-				user = callSync("admin", "/api/adminlogin",UserTO.class, input);
-				
-				userUuid = user.uuid;
-				logedin = true;
-			
-				
-				props.put("user.email", Baltoro.email);
-				props.put("user.uuid", user.uuid);
-				//props.put("packages", Baltoro.packages);
-	    		//props.put("cluster.path", Baltoro.clusterPath);
-	    	
-				
-				return false;
-			} 
-			catch (RuntimeException e)
-			{
-				System.out.println("=====> "+e.getMessage());
-			}
-			
+			propFile.createNewFile();
 		}
+		
+		props.load(new FileInputStream(propFile));
+		
+		appUuid = props.getProperty("app.uuid");
+		String _appUuid = cs.getAppUuidByName(appName);
+		if(StringUtil.isNullOrEmpty(_appUuid) || (appUuid ==null || !appUuid.equals(_appUuid)))
+		{
+			props.put("app.uuid", _appUuid);
+			appUuid = _appUuid;
+		}
+		
+		appPrivateKey = props.getProperty("app.key");
+		if(StringUtil.isNullOrEmpty(appPrivateKey))
+		{
+			String appKey = cs.getAppData(appUuid);
+			props.put("app.key", appKey);
+			appPrivateKey = appKey;
+		}
+		
+		instanceUuid = props.getProperty("app.instance.uuid");
+		String _instanceUuid = cs.createInstance(_appUuid, serviceNames.toString(), instanceUuid);
+		if(StringUtil.isNullOrEmpty(_instanceUuid) || (instanceUuid==null || !instanceUuid.equals(_instanceUuid)))
+		{
+			props.put("app.instance.uuid", _instanceUuid);
+			instanceUuid = _instanceUuid;
+		}
+		
+		if(instanceUuid == null || instanceUuid.equals("NOT ALLOWED"))
+		{
+			System.out.println("can't find or create an instance exiting "+appName);
+			System.exit(1);
+		}
+		
+		hostId = props.getProperty("app.host.id");
+		if(StringUtil.isNullOrEmpty(hostId))
+		{
+			
+			hostId = ""+(999+new Random().nextInt(8999));
+			props.put("app.host.id", hostId);
+		}
+		
+		
+		props.put("app.name", appName);
+		props.put("app.env", Baltoro.env.toString());
+		props.put("app.service.names", Baltoro.serviceNames.toString());
+		props.put("app.server.url", Baltoro.serverURL);
+		
+		FileOutputStream output = new FileOutputStream(propFile);
+		props.store(output,"For App "+appName.toUpperCase());
+		
     	
-    	System.out.println("Would not process sfter 3 tries. restart the program");
-		System.exit(1);
-		
-		return false;
-		
-		*/
     }
     
-    private static AppTO getMyApp() throws Exception
-    {
-    	if(!logedin)
-    		return null;
-    	
-    	/*
-    	String lastAppUuid = db.get(OName.APP_UUID);
-    	if(lastAppUuid !=  null)
-    	{
-    		AppTO appTO = new AppTO();
-    		appTO.uuid = lastAppUuid;
-    		
-    		String appPublicKey = db.get(OName.APP_PUBLIC_KEY);
-    		appTO.publicKey = appPublicKey;
-    		
-    		String _privKey = db.get(OName.APP_PRIVATE_KEY);
-    		String appPrivKey = CryptoUtil.decryptWithPassword(password, _privKey);
-    		appTO.privateKey = appPrivKey;
-    		
-    		return appTO;
-    	}
-    	*/
-    	
-    	boolean newApp = true;
-    	
-    	AppTO selectApp = null;
-    	
-		//AppTO[] apps = adminEP.getMyApps();
-    	AppTO[] apps = callSync("admin", "/api/app/getMyApps", AppTO[].class, a -> a);
-		
-		if(apps.length > 0)
-		{
-			newApp = false;
-			System.out.println(" ========  apps ========= ");
-			System.out.println("0 -- to create new app : ");
-			
-			System.out.println(" ======== exisiting apps ========= ");
-			int i = 1;
-			for (AppTO appTO : apps)
-			{
-				System.out.println(i++ +" -- to start app : "+appTO.name);
-			}
-			String option = systemIn("enter option : ");
-			
-			if(option.equals("0"))
-			{
-				newApp = true;
-			}
-			else
-			{
-				int opt = Integer.parseInt(option);
-				selectApp = apps[opt-1];
-				System.out.println("selected app : "+selectApp.name);
-			}
-			
-		}
-		
-		if(newApp)
-		{
-			
-			AppTO to = null;
-			
-			for (int i = 0; i < 5; i++)
-			{
-				try
-				{
-					String name = systemIn("enter name of your new app : ");
-					//to = adminEP.createApp(name);
-					
-					to = callSync("admin","/api/app/createApp", AppTO.class, a -> a.add("name", name));
-					break;
-				} 
-				catch (APIError e)
-				{
-					System.out.println("************************");
-					System.out.println(e.getMessage());
-					System.out.println("************************");
-				}
-			}
-			
-			if(to == null)
-			{
-				System.out.println("5 tries, restart the app again");
-				System.exit(1);
-			}
-			
-			selectApp = to;
-			
-		}
-		
-		
-		System.out.println(" =-==== "+selectApp.privateDataUuid);
-		
-		props.put("app.uuid", selectApp.uuid);
-		props.put("app.name", selectApp.name);
-		
-		
-		/*
-		db.save(OName.APP_UUID, selectedApp.uuid);
-		String appPrivKey = CryptoUtil.encryptWithPassword(password, selectedApp.privateKey);
-		db.save(OName.APP_PRIVATE_KEY, appPrivKey);
-		db.save(OName.APP_PUBLIC_KEY, selectedApp.publicKey);
-		*/
-		
-		return selectApp;
-				
-    }
+   
 	
 	static String systemIn(String msg)
 	{
@@ -820,54 +537,5 @@ public class Baltoro
 		}
 		
 	}
-	
-	/*
-	public static Session connectWebSocket(boolean debug, String appName, String path, MessageHandler.Whole<ByteBuffer> handlerClass)
-	{
-		try
-		{
-			ClientManager clientManager = ClientManager.createClient();
-	 	    BaltoroClientConfigWSWeb clientConfigurator = new BaltoroClientConfigWSWeb(appName,path, "token");
-	 	    
-	 	    ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
-	                 .configurator(clientConfigurator)
-	                 .build();
-	 	    
-	 	  
-	 	  String url = null;
-	 	 
-	 	 Baltoro.debug = debug;
-	 	 
-	 	  if(Baltoro.debug)
-	 	  {
-	 		 url = "ws://"+appName+".baltoro.io:8080/"+path;
-	 		 // url = "ws://super-server:8080/"+path;
-	 	  }
-	 	  else
-	 	  {
-	 		 url = "ws://"+appName+".baltoro.io/"+path;
-	 	  }
-	 	  //
-	 	  
-	 	  //url = "ws://localhost:8080/probe1";
-	 	  
-	 	 // url = "ws://admin.baltoro.io/"+path;
-	 	  
-	 	 //url = "ws://127.0.0.1:8080/"+path;
-	 	 
-	 	  BaltoroClientEndpointWSWeb instance = new BaltoroClientEndpointWSWeb(appName, path, handlerClass);
-	 	 
-	 	  Session session = clientManager.connectToServer(instance, config, new URI(url));
-	 	  
-	 	  return session ;
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	*/
-	
+
 }
