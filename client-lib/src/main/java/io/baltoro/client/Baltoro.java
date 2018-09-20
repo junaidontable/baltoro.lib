@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,12 +17,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
-
-import org.glassfish.tyrus.client.ClientManager;
 
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
@@ -63,7 +57,7 @@ public class Baltoro
 	private static UserTO user;
 	static String instanceUuid;
 	static int instanceThreadCount = 3;
-	public static boolean debug = false;
+	//public static boolean debug = false;
 	static Properties props = null;
 	static String appUuid;
 	static String appPrivateKey;
@@ -131,7 +125,7 @@ public class Baltoro
 		ExecutorService executor = Executors.newFixedThreadPool(count);
 		for (int i = 0; i <count; i++)
 		{
-			Future<Session> future = executor.submit(new WSClient());
+			Future<Session> future = null;//executor.submit(new WSClient());
 			Session session = future.get();
 
 			//ClientWSSession csession = new ClientWSSession(session);
@@ -176,6 +170,10 @@ public class Baltoro
         return ste.getClassName();
     }
 	
+	public static Env getEnv()
+	{
+		return env;
+	}
 	
 	public static String getMainClassPackageName() 
 	{ 
@@ -248,13 +246,21 @@ public class Baltoro
 		
 	}
 	
+	public static <T> T callSync(String appName, String path, Class<T> returnType)
+	{
+		return callSync(appName, path, returnType, null);
+	}
 	
 	public static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
 			CloudServer cServer = new CloudServer(appName);
-			EPData epData = input.getEPData();
+			EPData epData = null;
+			if(input != null)
+			{
+				epData = input.getEPData();
+			}
 			
 			
 			T t = cServer.call(path, epData, returnType);
@@ -415,6 +421,7 @@ public class Baltoro
 	
 	private static Session start_old()
 	{
+		/*
 		String _debug = System.getProperty("baltoro.debug");
 		
 		System.out.println("running mod : "+_debug);
@@ -422,6 +429,7 @@ public class Baltoro
 		{
 			Baltoro.debug = true;
 		}
+		*/
 		
 		try
 		{
@@ -478,6 +486,7 @@ public class Baltoro
 	
 	public static void start()
 	{
+		/*
 		String _debug = System.getProperty("baltoro.debug");
 		
 		System.out.println("running mod : "+_debug);
@@ -485,6 +494,7 @@ public class Baltoro
 		{
 			Baltoro.debug = true;
 		}
+		*/
 		
 		try
 		{
@@ -798,7 +808,7 @@ public class Baltoro
 		
 	}
 	
-	
+	/*
 	public static Session connectWebSocket(boolean debug, String appName, String path, MessageHandler.Whole<ByteBuffer> handlerClass)
 	{
 		try
@@ -824,7 +834,7 @@ public class Baltoro
 	 	  {
 	 		 url = "ws://"+appName+".baltoro.io/"+path;
 	 	  }
-	 	  //*/
+	 	  //
 	 	  
 	 	  //url = "ws://localhost:8080/probe1";
 	 	  
@@ -845,6 +855,6 @@ public class Baltoro
 		
 		return null;
 	}
-
+	*/
 	
 }

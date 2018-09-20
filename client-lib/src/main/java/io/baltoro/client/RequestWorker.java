@@ -338,8 +338,8 @@ public class RequestWorker extends Thread
 		}
 		
 		
-
-		WebMethod wm = WebMethodMap.getInstance().getMethod(req.getApiPath());
+		String url = req.getApiPath();
+		WebMethod wm = WebMethodMap.getInstance().getMethod(url);
 		if (wm == null)
 		{
 			String path = req.getApiPath();
@@ -351,7 +351,10 @@ public class RequestWorker extends Thread
 				{
 					System.out.println("no index found / error path="+path);
 				}
+				
 				path = path.substring(0, lIndex);
+				
+				
 				String lPath = req.getApiPath().substring(lIndex + 1);
 				wm = WebMethodMap.getInstance().getMethod(path + "/*");
 				if (wm != null)

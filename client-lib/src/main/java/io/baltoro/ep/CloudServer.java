@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
+import io.baltoro.client.Env;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
@@ -61,14 +62,15 @@ public class CloudServer
 		
 		CheckResponseFilter responseFilter = new CheckResponseFilter(appName,map);
 	
-		if(Baltoro.debug == true)
+		
+		this.host = "http://"+appName+".baltoro.io";
+		
+		
+		if(Baltoro.getEnv() == Env.LOC)
 		{
-			this.host = "http://"+appName+".baltoro.io:8080";
+			host = "http://localhost:8080";
 		}
-		else
-		{
-			this.host = "http://"+appName+".baltoro.io";
-		}
+		
 		
 		client = cientMap.get(appName);
 		if(client == null)
@@ -218,12 +220,15 @@ public class CloudServer
 		
 		Form form = new Form();
 		
-		List<Object[]> list = data.list;
-		for (Object[] objects : list)
+		if(data != null)
 		{
-			String name = (String) objects[0];
-			String value = (String) objects[1];
-			form.param(name, value);
+			List<Object[]> list = data.list;
+			for (Object[] objects : list)
+			{
+				String name = (String) objects[0];
+				String value = (String) objects[1];
+				form.param(name, value);
+			}
 		}
 		
 		Invocation.Builder ib =	getIB(target);

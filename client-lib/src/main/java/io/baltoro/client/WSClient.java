@@ -8,7 +8,7 @@ import javax.websocket.Session;
 
 import org.glassfish.tyrus.client.ClientManager;
 
-class WSClient implements Callable<Session>
+class WSClient //implements Callable<Session>
 {
 	
 	 
@@ -17,7 +17,7 @@ class WSClient implements Callable<Session>
 		
 	}
 	
-	
+	/*
 	@Override
 	public Session call() throws Exception
 	{
@@ -65,7 +65,7 @@ class WSClient implements Callable<Session>
 	        throw new IllegalStateException("task interrupted", e);
 	    }
 	}
-	
+	*/
 	
 	
 
