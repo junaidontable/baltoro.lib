@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -357,20 +358,40 @@ public class Baltoro
 	
 	public static void init(String appName)
 	{
-		init(appName, Env.PRD);
+		init(appName, null);
 	}
 	
 	public static void init(String appName, Env env)
 	{
+		
+		String _envStr = System.getProperties().getProperty("env");
+		if(StringUtil.isNotNullAndNotEmpty(_envStr))
+		{
+			Env _env = null;
+			try
+			{
+				_env = Env.valueOf(_envStr.toUpperCase());
+			} 
+			catch (Exception e)
+			{
+				System.out.println("Check JVM argument -Denv=? ALLOWED env values are "+Arrays.toString(Env.values()));
+				System.out.println("shut down ...");
+				System.exit(1);
+			}
+			
+			
+			Baltoro.env = _env;
+		}
+		else
+		{
+			Baltoro.env = env;
+		}
+
 		if(env == null)
 		{
-		
-			String _env = System.getProperties().getProperty("env");
-			env = Env.valueOf(_env.toUpperCase());
+			env = Env.PRD;
 		}
 		
-		
-		Baltoro.env = env;
 		
 		switch (env)
 		{
