@@ -4,7 +4,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.ConnectException;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -64,7 +63,7 @@ public class RequestPoller extends Thread
 			{
 			
 				WSTO to = tos[i];
-				System.out.println(" ===========> to "+to);
+				//System.out.println(" ===========> to "+to);
 			
 			
 			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
@@ -122,7 +121,7 @@ public class RequestPoller extends Thread
 		{
 			tos = mapper.readValue(jsonBytes, WSTO[].class);
 			
-			System.out.println(" to ===== > "+tos.length);
+			//System.out.println(" to ===== > "+tos.length);
 		} 
 		catch (Exception e)
 		{

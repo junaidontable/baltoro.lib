@@ -4,16 +4,10 @@ import java.util.UUID;
 
 public class UUIDGenerator 
 {
-	/*
-	public static String uuid(String type) 
-	{
-		return type+"_"+UUID.randomUUID().toString().toUpperCase();
-	}
-	*/
 	
 	public static String uuid(String type) 
 	{
-		return type+"_"+UUID.randomUUID().toString().toUpperCase();
+		return UUID.randomUUID().toString().toUpperCase()+"_"+type;
 	}
 	
 	public static String randomString(int len) 

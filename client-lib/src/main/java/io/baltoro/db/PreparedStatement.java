@@ -3,14 +3,26 @@ package io.baltoro.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import io.baltoro.client.Replicator;
+import io.baltoro.features.NoReplication;
+import io.baltoro.obj.Base;
+import io.baltoro.to.ReplicationTO;
 
 public class PreparedStatement
 {
 
 	private java.sql.PreparedStatement stmt;
+	/*
 	private StringBuffer stmtBatch = new StringBuffer();
+	private boolean batchPush = false;
+	*/
+	
+	List<ReplicationTO> repList = null;
 	
 	public PreparedStatement(java.sql.PreparedStatement stmt)
 	{
@@ -18,28 +30,38 @@ public class PreparedStatement
 	}
 	
 	
-	public boolean execute(String[] apps) throws SQLException
+	public boolean execute(Base obj) throws SQLException
 	{
 		boolean x = stmt.execute();
-		Replicator.push(stmt, apps);
+		
+		if(obj == null)
+		{
+			return x;
+		}
+		
+		NoReplication repAnno = obj.getClass().getAnnotation(NoReplication.class);
+		if(repAnno == null)
+		{
+			Replicator.push(stmt, obj.getBaseUuid());
+		}
+		
 		return x;
 	}
 	
-	public int executeUpdateNoReplication() throws SQLException
-	{
-		return stmt.executeUpdate();
-	}
 	
-	public boolean executeNoReplication() throws SQLException
-	{
-		return stmt.execute();
-	}
-	
-	public int executeUpdate(String[] apps) throws SQLException
+	public int executeUpdate(boolean doPush, Base obj) throws SQLException
 	{
 		
 		int x = stmt.executeUpdate();
-		Replicator.push(stmt, apps);
+		if(obj == null)
+		{
+			return x;
+		}
+		
+		if(doPush)
+		{
+			Replicator.push(stmt, obj.getBaseUuid());
+		}
 		return x;
 	}
 	
@@ -75,16 +97,64 @@ public class PreparedStatement
 		stmt.setTimestamp(parameterIndex, x);
 	}
 	
-	public void addbatch() throws SQLException
+	public void addbatch(Base obj) throws SQLException
 	{
-		stmtBatch.append(Replicator.getSQL(stmt)+";");
+		if(obj != null)
+		{
+			NoReplication repAnno = obj.getClass().getAnnotation(NoReplication.class);
+			if(repAnno == null)
+			{
+				if(repList == null)
+				{
+					repList = new ArrayList<>();
+				}
+				
+				ReplicationTO repTO = Replicator.create(obj.getBaseUuid(), Replicator.getSQL(stmt));
+				repList.add(repTO);
+			}
+		}
+		
 		stmt.addBatch();
+
 	}
 	
-	public void executeBatch(String[] apps) throws SQLException
+	public void executeBatch() throws SQLException
 	{
-		Replicator.push(stmtBatch.toString(), apps);
+		
+		Set<String> attSet = new HashSet<>();
+		StringBuffer sqls = new StringBuffer();
+		StringBuffer attBuffer = new StringBuffer();
+		
+		for (ReplicationTO to : repList)
+		{
+			String[] item = to.att.split(" ");
+			for (int i = 0; i < item.length; i++)
+			{
+				attSet.add(item[i]);
+			}
+			
+			sqls.append(to.cmd+";\n");
+		}
+		
+		sqls.delete(sqls.length()-2, sqls.length());
+		
+		attSet.stream().forEach((a) -> 
+		{
+			attBuffer.append(a+" ");
+		});
+		
+		Replicator.pushBatch(sqls.toString(), attBuffer.toString());
 		stmt.executeBatch();
-		stmtBatch = new StringBuffer();
+		
+		repList = null;
+		
 	}
+
+
+	public java.sql.PreparedStatement getStmt()
+	{
+		return stmt;
+	}
+	
+	
 }

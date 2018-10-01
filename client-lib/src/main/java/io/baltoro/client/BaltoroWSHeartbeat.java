@@ -83,7 +83,7 @@ public class BaltoroWSHeartbeat extends Thread
 				ctx.setMemoryGB(freeMem);
 				ctx.setLocalTimestamp(System.currentTimeMillis());
 				ctx.setHeartBeatCount(count);
-				to.mgntContext = ctx;
+				//to.mgntContext = ctx;
 				
 				/*
 				byte[]  bytes = ObjectUtil.toJason(to);

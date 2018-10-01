@@ -84,6 +84,7 @@ public class StringUtil
 		return uuids;
 	}
 	
+	
 	public static String toInClause(String[] array)
 	{
 		StringBuilder buffer = new StringBuilder(array.length * 10); 

@@ -15,9 +15,13 @@ public class Statement
 		this.stmt = stmt;
 	}
 	
-	public boolean execute(String sql, String[] apps) throws SQLException
+	public boolean execute(String sql, boolean replicate) throws SQLException
 	{
-		Replicator.push(sql, apps);
+		if(replicate)
+		{
+			Replicator.push(sql, null);
+		}
+		
 		return stmt.execute(sql);
 	}
 	
@@ -41,6 +45,11 @@ public class Statement
 		stmt.close();
 	}
 	
+	
+	public int[] executeBatch() throws SQLException
+	{
+		return stmt.executeBatch();
+	}
 
 	
 }

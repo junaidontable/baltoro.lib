@@ -18,7 +18,6 @@ import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
-import io.baltoro.remote.ResponseMap;
 import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
@@ -42,8 +41,7 @@ public class RequestWorker extends Thread
 	static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
 	static ThreadLocal<WebSocketContext> wsCtx = new ThreadLocal<>();
 	*/
-	
-	static ThreadLocal<String> userSessionIdCtx = new ThreadLocal<>();
+
 	
 	RequestWorker()
 	{
@@ -128,37 +126,6 @@ public class RequestWorker extends Thread
 			return;
 		}
 		
-		/*
-		if(to.webSocketContext != null && !to.webSocketContext.getApiPath().endsWith("onopen"))
-		{
-			
-			
-			WebSocketContext ws = to.webSocketContext;
-			//wsCtx.set(ws);
-			
-			//System.out.println(" ws ctx  >>>>>>>>>>>>>>>>>>>>>> : "+ws.getApiPath());
-			
-			WebMethod wm = null;
-			try
-			{
-				 wm = WebMethodMap.getInstance().getMethod(ws.getApiPath());
-				if (wm == null)
-				{
-					//System.out.println("no method for : "+ws.getApiPath());
-					throw new Exception("no method for : "+ws.getApiPath());
-				}
-				
-				Object obj = executeMethod(wm, to);
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			
-			return;
-		}
-		*/
-		
 		RequestContext req = to.requestContext;
 		//requestCtx.set(req);
 		
@@ -167,7 +134,8 @@ public class RequestWorker extends Thread
 		to.responseContext = res;
 		res.setSessionId(req.getSessionId());
 		
-		userSessionIdCtx.set(req.getSessionId());
+		Baltoro.userSessionIdCtx.set(req.getSessionId());
+		Baltoro.serviceNameCtx.set(to.serviceName);
 		//responseCtx.set(res);
 	
 		

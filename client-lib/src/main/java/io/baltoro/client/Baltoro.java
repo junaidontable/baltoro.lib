@@ -12,12 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import javax.websocket.Session;
 import javax.ws.rs.core.NewCookie;
 
 import io.baltoro.ep.ClassBuilder;
@@ -37,9 +34,11 @@ public class Baltoro
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT:%4$s > %5$s%6$s%n");
 	}
 	
+	static ThreadLocal<String> userSessionIdCtx = new ThreadLocal<>();
+	static ThreadLocal<String> serviceNameCtx = new ThreadLocal<>();
+	
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
-	
-	
+
 	static Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
 	
 		
@@ -47,7 +46,8 @@ public class Baltoro
 	
 	static StringBuffer serviceNames = new StringBuffer();
 	static String hostId;
-	static BOAPIClient cs;
+	static APIClient cs;
+	
 	/*
 	private static boolean logedin = false;
 	static private String email;
@@ -71,14 +71,15 @@ public class Baltoro
 	static int serverPort = 80;
 	static String serverProtocol = "http";
 	
-	//private static BaltoroWSHeartbeat mgntThread;
-	//static WSRequestPoller requestPoller;
-	//static WSResponsePoller responsePoller;
+	static String pullReplicationServiceNames;
 	
 	static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	
+	private static boolean running = false;
 	
+	
+	static LocalDB db;
 	static String lcp;
 	static long repMillis;
 	
@@ -106,64 +107,20 @@ public class Baltoro
 		}
 	}
 	
-	private static Session startWSClient() throws Exception
-	{
-			
-		
-		
-		/*
-		int count = cs.getRemainingInsanceThreadsCount(appName, serviceName);
-	
-		System.out.println(" ++++++++Allowed count +++++++++++++ "+count);
-		Baltoro.instanceThreadCount = count;
-		
-		if(count < 1)
-		{
-			System.out.println("Exceed allowed count , exiting");
-			System.exit(1);
-		}
-		*/
-		
-		int count = 1;
-		
-		ExecutorService executor = Executors.newFixedThreadPool(count);
-		for (int i = 0; i <count; i++)
-		{
-			Future<Session> future = null;//executor.submit(new WSClient());
-			Session session = future.get();
-
-			//ClientWSSession csession = new ClientWSSession(session);
-			WSSessions.get().addSession(session);
-			
-			log.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>> started client THREAD : "+session.getId()+" ,,, i="+i);
-		}
-		
-			
-		/*
-		mgntThread = new BaltoroWSHeartbeat();
-		mgntThread.start();
-	
-		
-		requestPoller = new WSRequestPoller();
-		requestPoller.start();
-		
-		responsePoller = new WSResponsePoller();
-		responsePoller.start();
-	 	*/
-		
-		return null;
-		
-	}
 	
 	public static LocalDB getDB()
 	{
-		return LocalDB.instance(false, false);
+		if(!Baltoro.running)
+		{
+			System.out.println("Baltoro not running, first call Baltoro.start() method ... ");
+			System.out.println("Shutting down ... ");
+			System.exit(1);
+		}
+		
+		
+		return LocalDB.instance();
 	}
 	
-	public static LocalDB getDB(boolean clean, boolean replicate)
-	{
-		return LocalDB.instance(clean, replicate);
-	}
 	
 	public static String getMainClassName() 
 	{ 
@@ -313,7 +270,7 @@ public class Baltoro
 	public static void setUserToSession(String name)
 	{
 		//RequestContext rc = RequestWorker.requestCtx.get();
-		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
 		{
 			return;
@@ -329,7 +286,7 @@ public class Baltoro
 	public static UserSession getUserSession()
 	{
 		//RequestContext rc = RequestWorker.requestCtx.get();
-		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
 		{
 			return null;
@@ -342,7 +299,7 @@ public class Baltoro
 	{
 		//RequestContext rc = RequestWorker.requestCtx.get();
 		
-		String userSessionId = RequestWorker.userSessionIdCtx.get();
+		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
 		{
 			return;
@@ -431,10 +388,31 @@ public class Baltoro
 			serviceName = "/";
 		}
 		
-		ServicePackage sp = new ServicePackage(serviceName, packageNames);
+		String[] _packageNames = new String[packageNames.length+1];
+		_packageNames[_packageNames.length-1] = "io.baltoro.client.APITest";
+		
+		ServicePackage sp = new ServicePackage(serviceName, _packageNames);
 		serviceList.add(sp);
 		
 		serviceNames.append(serviceName+",");
+	}
+	
+	
+	/**
+	 * useage appName:serviceName:objectType:ObjectUuid, if no appName then serviceName is for default appName
+	 * example upcap:deals - upcap is app name, deals is the service name
+	 * example deals - deals is the servicename in current app
+	 * @param serviceName
+	 */
+	public static void pullReplication(String ... serviceName)
+	{
+		for (int i = 0; i < serviceName.length; i++)
+		{
+			pullReplicationServiceNames = serviceName[i] + " ";
+		}
+		
+		pullReplicationServiceNames = pullReplicationServiceNames.substring(0 , pullReplicationServiceNames.length()-1);
+		
 	}
 	
 	
@@ -458,6 +436,20 @@ public class Baltoro
 			responsePoller = new ResponsePoller();
 			responsePoller.start();
 			
+			running = true;
+			
+			for (ServicePackage sp : serviceList)
+			{
+				log.info("=====================================================");
+				log.info("=====================================================");
+				log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
+				log.info("=====================================================");
+				log.info("=====================================================");
+				
+			}
+			
+			db = LocalDB.instance();
+			
 			
 		} 
 		catch (Exception e)
@@ -473,7 +465,7 @@ public class Baltoro
     private static void processEnv() throws Exception
     {
     	  
-    	cs = new BOAPIClient();
+    	cs = new APIClient();
 		props = new Properties();
 		
 		String propName = getMainClassName();

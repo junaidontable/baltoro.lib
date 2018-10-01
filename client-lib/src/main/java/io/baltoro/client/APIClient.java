@@ -22,18 +22,20 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.LocalDB.Repl;
 import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
 
-public class BOAPIClient
+public class APIClient
 {
 	
 	static final String POLL_SERVICE = "/PLSV93CA659B1BEB4229B49FF44852DA462F".toLowerCase();
 	static final String RESP_SERVICE = "/RSSVA0BE926D318342BD9939D7AC06FE9A9B".toLowerCase();
 	static final String BLTC_CLIENT = "BLCT4B0F12FA974043E3BB23D485237EAB64".toLowerCase();
+	static final String RPLT_SERVICE = "/RPLT725B6C4B4302430CAC8C9181931C94B1".toLowerCase();
 	
-	static Logger log = Logger.getLogger(BOAPIClient.class.getName());
+	static Logger log = Logger.getLogger(APIClient.class.getName());
 	
 	Client webClient;
 	Client pollerClient;
@@ -48,7 +50,7 @@ public class BOAPIClient
 	
 	boolean online = false;
 	
-	BOAPIClient()
+	APIClient()
 	{
 		/*
 		if(Baltoro.debug)
@@ -192,7 +194,7 @@ public class BOAPIClient
 	
 	String sendAppAPI() throws Exception
 	{
-		log.info("... getting app data -> server ...");
+		//log.info("... getting app data -> server ...");
 		
 		MgntContext ctx = new MgntContext();
 		
@@ -236,7 +238,7 @@ public class BOAPIClient
 	
 	String sendAPIResponse(String toUuid, String json) throws Exception
 	{
-		log.info("... getting app data -> server ...");
+		//log.info("... getting app data -> server ...");
 	
 		WebTarget target = webClient.target(blHost).path(RESP_SERVICE);
 			
@@ -275,25 +277,95 @@ public class BOAPIClient
 	
 	
 	
-	ReplicationTO getReplication(String appUuid, String instUuid, String lcpUuid, long lcpMillis, boolean reset) throws Exception
+	ReplicationTO[] pullReplication(String lServerPushNano, String lServerPullNano) throws Exception
 	{
-		log.info("... creating new instance -> server ...");
-	
-		WebTarget target = webClient.target(blHost).path("/getreplication");
+		
+		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pull");
+		
+		String att = null;
+		
+		if(LocalDB.initPull)
+		{
+			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
+		}
+		else
+		{
+			att = Baltoro.pullReplicationServiceNames;
+		}
+		
+		
+		log.info(" PULL ======= > "+att);
 		
 		Form form = new Form();
-		form.param("appUuid", appUuid);
-		form.param("instUuid", instUuid);
-		form.param("lcpUuid", lcpUuid);
-		form.param("lcpMillis", ""+lcpMillis);
-		form.param("reset", reset == true ? "true":"false");
+		form.param("appUuid", Baltoro.appUuid);
+		form.param("instUuid", Baltoro.instanceUuid);
+		form.param("att",att);
+		form.param("lServerPullNano", lServerPullNano);
+		form.param("lServerPushNano", lServerPushNano);
+		form.param("initPull", LocalDB.initPull ? "YES" : "NO");
 		
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		
-		ReplicationTO to = response.readEntity(ReplicationTO.class);
-		return to;
+		ReplicationTO[] tos = response.readEntity(ReplicationTO[].class);
+		return tos;
+	}
+	
+	int pullReplicationCount(Repl repl) throws Exception
+	{
+	 
+		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pullCount");
+		String att = null;
+		if(LocalDB.initPull)
+		{
+			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
+		}
+		else
+		{
+			att = Baltoro.pullReplicationServiceNames;
+		}
+		
+		
+		log.info(" PULL ======= > "+att);
+		
+		Form form = new Form();
+		form.param("appUuid", Baltoro.appUuid);
+		form.param("instUuid", Baltoro.instanceUuid);
+		form.param("att", att);
+		form.param("initPull", LocalDB.initPull ? "YES" : "NO");
+		form.param("lServerPullNano", ""+repl.serverNano);
+		
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		String _count = response.readEntity(String.class);
+		
+		int count = Integer.parseInt(_count);
+		return count;
+	}
+	
+	
+	String pushReplication(String repObjJson) throws Exception
+	{
+		log.info("... push Replication ... ");
+	
+		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/push");
+		
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("service-name", Baltoro.serviceNames.toString());
+		form.param("json", repObjJson);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		String res = response.readEntity(String.class);
+		return res;
 	}
 	
 	

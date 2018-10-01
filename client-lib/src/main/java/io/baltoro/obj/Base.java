@@ -2,7 +2,6 @@ package io.baltoro.obj;
 
 import java.sql.Timestamp;
 
-import io.baltoro.domain.BODefaults;
 
 public class Base
 {

@@ -13,6 +13,10 @@ public class ObjectUtil
 		return bytes;
 	}
 
+	public static String getType(String objUuid)
+	{
+		return objUuid.substring(objUuid.length()-4,objUuid.length());
+	}
 	
 	public static <T> T toObject(Class<?> clazz, byte[] bytes)
 	{

@@ -20,7 +20,7 @@ public class RequestFilter implements ClientRequestFilter
 	public void filter(ClientRequestContext requestContext) 
 	throws IOException
 	{
-		requestContext.getHeaders().add("BLT_INST_SERVER_HOST", BOAPIClient.BLTC_CLIENT);
+		requestContext.getHeaders().add("BLT_INST_SERVER_HOST", APIClient.BLTC_CLIENT);
 		
 		requestContext.getHeaders().add("BLT_APP_UUID", Baltoro.appUuid);
 		requestContext.getHeaders().add("BLT_INSTANCE_UUID", Baltoro.instanceUuid);

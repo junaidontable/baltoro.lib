@@ -12,7 +12,7 @@ import junit.framework.TestSuite;
 public class DBTest extends TestCase
 {
     
-	private static LocalDB db = LocalDB.instance(true, false);
+	private static LocalDB db = LocalDB.instance();
 	
 	private static String uuidObj1;
 	private static String uuidObj2;
