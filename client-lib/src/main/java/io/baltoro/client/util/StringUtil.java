@@ -77,7 +77,14 @@ public class StringUtil
 		
 		for (int i=0;i<objs.length;i++) 
 		{
-			uuids[i] = objs[i].getBaseUuid();
+			if(objs[i] == null)
+			{
+				uuids[i] = null;
+			}
+			else
+			{
+				uuids[i] = objs[i].getBaseUuid();
+			}
 		}
 	
 		

@@ -26,6 +26,7 @@ import io.baltoro.db.Connection;
 import io.baltoro.db.PreparedStatement;
 import io.baltoro.db.Statement;
 import io.baltoro.domain.BODefaults;
+import io.baltoro.exception.BaltoroException;
 import io.baltoro.exception.ServiceException;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
@@ -175,7 +176,7 @@ public class LocalDB
 			while(count < 10000)
 			{
 				count++;
-				System.out.println( " init pull loop count ====>    "+count+", sqlCount="+repl.sqlCount+" , lcpSqlCount="+repl.lcpSqlCount);
+				System.out.println( " Replication pull loop count ====>    "+count+", sqlCount="+repl.sqlCount+" , lcpSqlCount="+repl.lcpSqlCount);
 				repl = pullReplication(repl);	
 				
 				if(repl.lcpSqlCount >= repl.sqlCount)
@@ -702,7 +703,7 @@ public class LocalDB
 		return objList;
 	}
 	
-	public <T extends Base> T findFirstLinked(Class<T> _class, Base... objs)
+	public <T extends Base> T getLinked(Class<T> _class, Base... objs)
 	{
 		List<T> list = findLinked(_class, objs);
 		if(list != null && !list.isEmpty())
@@ -718,6 +719,7 @@ public class LocalDB
 	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
 	{
 		String[] uuids = StringUtil.toUuids(objs);
+		
 		return findLinked(_class, true, null, uuids);
 	}
 	
@@ -1546,14 +1548,17 @@ public class LocalDB
 					+" where nano="+repl.nano);
 			
 			//lastTo = to;
-			/*
-			System.out.print("-");
 			
-			if(i % 100 == 0)
+			if(i % 10 == 0)
 			{
-				System.out.println("\n");
+				System.out.print(".");
 			}
-			*/
+			
+			if(i % 1000 == 0)
+			{
+				System.out.print("\n");
+			}
+			
 			
 		}
 		//System.out.println("]");

@@ -278,6 +278,7 @@ public class Baltoro
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.userName = name;
+		userSession.setAuthenticated(true);
 		userSession.sendSession();
 		
 	}
@@ -391,6 +392,10 @@ public class Baltoro
 		String[] _packageNames = new String[packageNames.length+1];
 		_packageNames[_packageNames.length-1] = "io.baltoro.client.APITest";
 		
+		for (int i = 0; i < packageNames.length; i++)
+		{
+			_packageNames[i] = packageNames[i];
+		}
 		ServicePackage sp = new ServicePackage(serviceName, _packageNames);
 		serviceList.add(sp);
 		
@@ -442,7 +447,14 @@ public class Baltoro
 			{
 				log.info("=====================================================");
 				log.info("=====================================================");
-				log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
+				if(Baltoro.env == Env.LOC)
+				{
+					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld?appName="+Baltoro.appName);
+				}
+				else
+				{
+					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
+				}
 				log.info("=====================================================");
 				log.info("=====================================================");
 				

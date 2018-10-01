@@ -20,6 +20,7 @@ public class UserSession
 	Set<String> roles = new HashSet<>();
 	String userName;
 	boolean invlaidateSession;
+	private boolean authenticated;
 	
 	UserSession(String sessionId)
 	{
@@ -71,6 +72,18 @@ public class UserSession
 		//sendSession();
 	}
 	
+	
+	
+	boolean isAuthenticated()
+	{
+		return authenticated;
+	}
+
+	void setAuthenticated(boolean authenticated)
+	{
+		this.authenticated = authenticated;
+	}
+
 	void sendSession()
 	{
 		WSTO to = new WSTO();

@@ -17,6 +17,7 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
@@ -419,6 +420,11 @@ public class CryptoUtil
         
         return new String(buf);
     }
+	
+	public static String genSalt(int len)
+	{
+		return UUID.randomUUID().toString().substring(0, len).toUpperCase();	
+	}
 	
 	/*
 	public static void sign(ReqTO to, String privateKey)

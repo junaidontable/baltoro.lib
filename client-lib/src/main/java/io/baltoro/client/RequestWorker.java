@@ -400,8 +400,7 @@ public class RequestWorker extends Thread
 			throw new AuthException("session object is null, cannot execute " + path);
 		}
 
-		String userName = userSession.getUserName();
-		if (userName == null)
+		if (!userSession.isAuthenticated())
 		{
 			throw new AuthException("no auth user in session, cannot execute " + path);
 		}
