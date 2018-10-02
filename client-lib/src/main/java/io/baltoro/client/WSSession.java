@@ -1,11 +1,9 @@
 package io.baltoro.client;
 
-import io.baltoro.to.WSTO;
-import io.baltoro.to.WebSocketContext;
-
 public class WSSession
 {
 	
+	/*
 	WSTO to = new WSTO();
 	
 	public WSSession(WSTO to)
@@ -43,19 +41,7 @@ public class WSSession
 		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
 		_to.webSocketContext = ctx;
 		
-		/*
-		try
-		{
-			
-			bytes = ObjectUtil.toJason(_to);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
-			return;
-		}
-		*/
+	
 		
 		//ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		ResponseQueue.instance().addToResponseQueue(_to);
@@ -76,22 +62,9 @@ public class WSSession
 		ctx.setWsSessionUuid(to.webSocketContext.getWsSessionUuid());
 		_to.webSocketContext = ctx;
 		
-		/*
-		byte[] bytes = null;
-		try
-		{
-			bytes = ObjectUtil.toJason(_to);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.out.println("CANNOT CONVERT TO JSON , !!!! CHECK !");
-			return;
-		}
-		
-		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		*/
+	
 		
 		ResponseQueue.instance().addToResponseQueue(_to);
 	}
+	*/
 }

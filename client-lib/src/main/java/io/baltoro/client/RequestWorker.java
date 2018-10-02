@@ -1,6 +1,5 @@
 package io.baltoro.client;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -8,9 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.websocket.OnClose;
-import javax.websocket.OnOpen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,9 +17,8 @@ import io.baltoro.features.Param;
 import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
-import io.baltoro.to.UserSessionContext;
+import io.baltoro.to.SessionUserTO;
 import io.baltoro.to.WSTO;
-import io.baltoro.to.WebSocketContext;
 
 public class RequestWorker extends Thread
 {
@@ -231,37 +226,25 @@ public class RequestWorker extends Thread
 		RequestContext req = to.requestContext;
 		ResponseContext res = to.responseContext;
 		
+		
 		if (StringUtil.isNotNullAndNotEmpty(req.getSessionId()))
 		{
 			String reqSessionId = req.getSessionId();
 			userSession = SessionManager.getSession(reqSessionId);
-			UserSessionContext uctx = to.userSessionContext;
-			if(uctx != null)
+			if(userSession == null)
 			{
-				String userName = uctx.getPrincipalName();
-				userSession.userName = userName;
 				
-				Map<String, String> attMap = new HashMap<>();
-				try
+				SessionUserTO to = Baltoro.cs.pullSession(reqSessionId);
+				if(to != null)
 				{
-					if(uctx.getAttJson() != null)
-					{
-						attMap = mapper.readValue(uctx.getAttJson(), Map.class);
-					}
-					
-				} 
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					userSession = SessionManager.createSession(reqSessionId);
+					userSession.roles = to.roles;
+					userSession.attMap = to.att;
+					userSession.userName = to.userName;
+					userSession.setAuthenticated(to.authenticated);
 				}
 				
-				for (String key : attMap.keySet())
-				{
-					String val = attMap.get(key);
-					userSession.attMap.put(key, val);
-				}
 			}
-			
 			
 		}
 		
@@ -410,6 +393,7 @@ public class RequestWorker extends Thread
 	{
 		RequestContext reqCtx = to.requestContext;
 		ResponseContext resCtx = to.responseContext;
+		/*
 		WebSocketContext wsCtx = to.webSocketContext;
 		WSSession wssession = null;
 		if(wsCtx != null)
@@ -420,7 +404,7 @@ public class RequestWorker extends Thread
 				wssession = new WSSession(to);
 			}
 		}
-		
+		*/
 		
 		Map<String, String[]> requestParam = reqCtx == null ? null : reqCtx.getRequestParams();
 		if (requestParam == null || requestParam.size() == 0)
@@ -489,20 +473,23 @@ public class RequestWorker extends Thread
 				{
 					methodInputData[i] = resCtx;
 				}
-				else if (paramClass == WebSocketContext.class)
-				{
-					methodInputData[i] = wsCtx;
-				}
 				else if (paramClass == UserSession.class)
 				{
 					methodInputData[i] = userSession;
+				}
+				/*
+				else if (paramClass == WebSocketContext.class)
+				{
+					methodInputData[i] = wsCtx;
 				}
 				else if (paramClass == WSSession.class)
 				{
 					methodInputData[i] = wssession;
 				}
+				*/
 			}
 			
+			/*
 			if (paramClass == byte[].class && wsCtx != null && wsCtx.getApiPath().endsWith("onmessage"))
 			{
 				methodInputData[i] = wsCtx.getData();
@@ -512,7 +499,7 @@ public class RequestWorker extends Thread
 			{
 				methodInputData[i] = wsCtx.getMessage();
 			}
-
+			*/
 		}
 		
 
@@ -520,7 +507,7 @@ public class RequestWorker extends Thread
 		
 		if(wMethod.isWebSocket())
 		{
-		
+			/*
 			if(method.isAnnotationPresent(OnOpen.class))
 			{
 				classInstance = _class.newInstance();
@@ -542,6 +529,7 @@ public class RequestWorker extends Thread
 				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSSession.class);
 				WSAPIClassInstance.get().remove(wsCtx.getInitRequestUuid(),WSTO.class);
 			}
+			*/
 		}
 		else
 		{
@@ -550,7 +538,7 @@ public class RequestWorker extends Thread
 		
 		if(classInstance == null)
 		{
-			System.out.println("classInstance is null why ? "+wsCtx.getInitRequestUuid()+" - "+_class);
+			System.out.println("classInstance is null why ?  - "+_class);
 			return null;
 		}
 	

@@ -5,21 +5,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.baltoro.to.UserSessionContext;
-import io.baltoro.to.WSTO;
+import io.baltoro.to.SessionUserTO;
 
 public class UserSession
 {
 
-	
+	//private static ObjectMapper mapper = new ObjectMapper();
 	private final String sessionId;
 	Map<String, String> attMap = new HashMap<String, String>(200);
 	Set<String> roles = new HashSet<>();
 	String userName;
-	boolean invlaidateSession;
 	private boolean authenticated;
 	
 	UserSession(String sessionId)
@@ -56,24 +51,6 @@ public class UserSession
 	}
 	
 	
-
-	public boolean isInvlaidateSession()
-	{
-		return invlaidateSession;
-	}
-
-
-
-	public void setUserName(String userName)
-	{
-		this.userName = userName;
-		Baltoro.setUserToSession(userName);
-		//this.userName = userName;
-		//sendSession();
-	}
-	
-	
-	
 	boolean isAuthenticated()
 	{
 		return authenticated;
@@ -84,39 +61,25 @@ public class UserSession
 		this.authenticated = authenticated;
 	}
 
+	
+	
 	void sendSession()
 	{
-		WSTO to = new WSTO();
-		to.appUuid = Baltoro.appUuid;
-		to.instanceUuid = Baltoro.instanceUuid;
+		SessionUserTO to = new SessionUserTO();
+		to.sessionUuid = getSessionId();
+		to.userName = getUserName();
+		to.authenticated = authenticated;
+		to.roles = roles;
+		to.att = attMap;
 		
-		UserSessionContext uctx = new UserSessionContext();
-		uctx.setSessionUuid(getSessionId());
-		uctx.setPrincipalName(getUserName());
-		uctx.setInvalidateSession(invlaidateSession);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		String json = null;
-		byte[] toBytes = null;
 		try
 		{
-			json = mapper.writeValueAsString(attMap);
-			
-			System.out.println("------------");
-			System.out.println(json);
-			System.out.println("------------");
-			
-			uctx.setAttJson(json);
-			to.userSessionContext = uctx;
-			//toBytes = mapper.writeValueAsBytes(to);
+			Baltoro.cs.validateSession(getSessionId(), to);
 		} 
-		catch (JsonProcessingException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		
-		
-		//ByteBuffer byteBuffer = ByteBuffer.wrap(toBytes);
-		ResponseQueue.instance().addToResponseQueue(to);
 	}
+	
 }

@@ -14,8 +14,8 @@ public class WSTO
 	
 	public RequestContext requestContext;
 	public ResponseContext responseContext;
-	public UserSessionContext userSessionContext;
-	public WebSocketContext webSocketContext;
+	//public SessionUserTO userSessionContext;
+	//public WebSocketContext webSocketContext;
 
 	
 }

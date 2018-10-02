@@ -26,6 +26,8 @@ import io.baltoro.client.LocalDB.Repl;
 import io.baltoro.to.MgntContext;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
+import io.baltoro.to.SessionUserTO;
+import io.baltoro.util.StringUtil;
 
 public class APIClient
 {
@@ -34,6 +36,9 @@ public class APIClient
 	static final String RESP_SERVICE = "/RSSVA0BE926D318342BD9939D7AC06FE9A9B".toLowerCase();
 	static final String BLTC_CLIENT = "BLCT4B0F12FA974043E3BB23D485237EAB64".toLowerCase();
 	static final String RPLT_SERVICE = "/RPLT725B6C4B4302430CAC8C9181931C94B1".toLowerCase();
+	static final String SESS_SERVICE = "/SESS5BE92DC6053640A08CCC123F68DD2F43".toLowerCase();
+	static final String INST_SERVICE = "/INSTC9F9C186C0E34BB48E4E5864EF4F88E7".toLowerCase();
+	static final String BLTC_SERVICE = "/BLSVA40D8A20683E4918A03DCF3461D04923".toLowerCase();
 	
 	static Logger log = Logger.getLogger(APIClient.class.getName());
 	
@@ -114,7 +119,7 @@ public class APIClient
 	{
 		log.info("... Are you There ..."+blHost);
 	
-		WebTarget target = webClient.target(blHost).path("/areyouthere");	
+		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		String str = response.readEntity(String.class);
@@ -125,7 +130,7 @@ public class APIClient
 	{
 		log.info("... getInsanceThreadsCount ...");
 	
-		WebTarget target = webClient.target(blHost).path("/getRemainingInsanceThreadsCount");
+		WebTarget target = webClient.target(blHost).path(INST_SERVICE+"/getRemainingInsanceThreadsCount");
 		
 		Form form = new Form();
 		form.param("appUuid", appUuid);
@@ -145,12 +150,16 @@ public class APIClient
 	{
 		log.info("... creating new instance -> server ...");
 	
-		WebTarget target = webClient.target(blHost).path("/createinstance");
+		WebTarget target = webClient.target(blHost).path(INST_SERVICE+"/createinstance");
 		
 		Form form = new Form();
-		form.param("appUuid", appUuid);
-		form.param("serviceName", serviceName);
-		form.param("inst-uud", instUuid);
+		form.param("app-uuid", appUuid);
+		form.param("service-name", serviceName);
+		if(StringUtil.isNullOrEmpty(instUuid) || !instUuid.startsWith("INST"))
+		{
+			instUuid = null;
+		}
+		form.param("inst-uuid", instUuid);
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
@@ -164,7 +173,7 @@ public class APIClient
 	{
 		log.info("... getting app uuid -> server ...");
 	
-		WebTarget target = webClient.target(blHost).path("/getAppUuidByName");
+		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/getAppUuidByName");
 		
 		Form form = new Form();
 		form.param("app-name", appName);
@@ -172,15 +181,15 @@ public class APIClient
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-		String instUuid = response.readEntity(String.class);
-		return instUuid;
+		String appUuid = response.readEntity(String.class);
+		return appUuid;
 	}
 	
 	String getAppData(String appUuid) throws Exception
 	{
 		log.info("... getting app data -> server ...");
 	
-		WebTarget target = webClient.target(blHost).path("/getAppData");
+		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/getAppData");
 		
 		Form form = new Form();
 		form.param("app-uuid", appUuid);
@@ -220,7 +229,7 @@ public class APIClient
 		
 		ctx.setPathTOs(pathList);
 	
-		WebTarget target = webClient.target(blHost).path("/setappapi");
+		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/setappapi");
 		
 		String json = mapper.writeValueAsString(pathList);
 		
@@ -366,6 +375,73 @@ public class APIClient
 		
 		String res = response.readEntity(String.class);
 		return res;
+	}
+	
+	
+	String validateSession(String sessionId, SessionUserTO to) throws Exception
+	{
+		log.info("... push create session ... ");
+	
+		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/validate");
+		
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("session-id", sessionId);
+		String json = mapper.writeValueAsString(to);
+		form.param("json", json);
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		String res = response.readEntity(String.class);
+		return res;
+	}
+	
+	String inValidateSession(String sessionId) throws Exception
+	{
+		log.info("... push remove session ... ");
+	
+		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/invalidate");
+		
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("session-id", sessionId);
+		
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		String res = response.readEntity(String.class);
+		return res;
+	}
+	
+	SessionUserTO pullSession(String sessionId) throws Exception
+	{
+		log.info("... pull session ... ");
+	
+		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/pull");
+		
+		Form form = new Form();
+		form.param("app-uuid", Baltoro.appUuid);
+		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("session-id", sessionId);
+		
+		
+		
+		Invocation.Builder ib =	getIB(target);
+		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+		
+		String res = response.readEntity(String.class);
+		if(StringUtil.isNotNullAndNotEmpty(res))
+		{
+			return mapper.readValue(res, SessionUserTO.class);
+		}
+		
+		return null;
 	}
 	
 	

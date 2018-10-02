@@ -15,15 +15,17 @@ class SessionManager
 		return session;
 	}
 	
+	
 	static UserSession getSession(String sessionId)
 	{
 		UserSession session = sessionMap.get(sessionId);
+		/*
 		if(session == null)
 		{
 			session = new UserSession(sessionId);
 			sessionMap.put(sessionId, session);
 		}
-		
+		*/
 		return session;
 	}
 	

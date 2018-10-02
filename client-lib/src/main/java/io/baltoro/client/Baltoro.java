@@ -267,9 +267,8 @@ public class Baltoro
 	}
 	
 	
-	public static void setUserToSession(String name)
+	public static void validateSession(String userName)
 	{
-		//RequestContext rc = RequestWorker.requestCtx.get();
 		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
 		{
@@ -277,7 +276,7 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
-		userSession.userName = name;
+		userSession.userName = userName;
 		userSession.setAuthenticated(true);
 		userSession.sendSession();
 		
@@ -308,7 +307,7 @@ public class Baltoro
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.userName = null;
-		userSession.invlaidateSession = true;
+		//userSession.invlaidateSession = true;
 		
 		SessionManager.removeUserSession(userSessionId);
 		userSession.sendSession();
@@ -455,6 +454,7 @@ public class Baltoro
 				{
 					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
 				}
+				log.info("INST UUID ====> "+instanceUuid);
 				log.info("=====================================================");
 				log.info("=====================================================");
 				
