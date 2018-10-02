@@ -45,7 +45,7 @@ public class RequestPoller extends Thread
 			{
 				json = Baltoro.cs.poll(cpu, freeMem);
 			} 
-			catch (ConnectException e)
+			catch (Exception e)
 			{
 				e.printStackTrace();
 				System.exit(1);

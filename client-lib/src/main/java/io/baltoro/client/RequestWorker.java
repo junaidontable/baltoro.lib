@@ -374,18 +374,18 @@ public class RequestWorker extends Thread
 		String sessionId = to.requestContext.getSessionId();
 		if (sessionId == null)
 		{
-			throw new AuthException("sessionId is null, cannot execute " + path);
+			throw new AuthException("Authentiction required for " + path);
 		}
 
 		UserSession userSession = Baltoro.getUserSession();
 		if (userSession == null)
 		{
-			throw new AuthException("session object is null, cannot execute " + path);
+			throw new AuthException("Authentiction required for " + path);
 		}
 
 		if (!userSession.isAuthenticated())
 		{
-			throw new AuthException("no auth user in session, cannot execute " + path);
+			throw new AuthException("Authentiction required for " + path);
 		}
 	}
 
