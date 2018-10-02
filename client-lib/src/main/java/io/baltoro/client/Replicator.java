@@ -296,7 +296,7 @@ public class Replicator
 					long lServerPullNano = db.getLastPull();
 					
 					
-					System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
+					//System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
 				
 				} 
 				catch (Exception e)

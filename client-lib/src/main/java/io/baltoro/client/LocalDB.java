@@ -193,7 +193,7 @@ public class LocalDB
 			long lServerPushNano = getLastPush();
 			long lServerPullNano = getLastPull();
 			
-			System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
+			//System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
 			
 		
 			Replicator.start();
