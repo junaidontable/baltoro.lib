@@ -4,7 +4,6 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
 
-import io.baltoro.domain.BO;
 import io.baltoro.obj.Base;
 
 public class StringUtil 
@@ -155,22 +154,5 @@ public class StringUtil
 		return buffer.toString();
 	}
 	
-	public static String toInClauseFromBO(Collection<BO> col)
-	{
-		if(col==null || col.isEmpty())
-		{
-			return "";
-		}
-		
-		StringBuilder buffer = new StringBuilder(col.size() * 10); 
-		Iterator<BO> it = col.iterator();
-		while(it.hasNext())
-		{
-			BO val = it.next();
-			buffer.append("'"+val.getBaseUuid()+"',");
-		}
-		buffer.deleteCharAt(buffer.length()-1);
-		
-		return buffer.toString();
-	}
+	
 }

@@ -1,19 +1,9 @@
 package io.baltoro.client;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import io.baltoro.to.MgntContext;
-import io.baltoro.to.PathTO;
-import io.baltoro.to.WSTO;
-
-public class BaltoroWSHeartbeat extends Thread
+public class BaltoroWSHeartbeat_old extends Thread
 {
 
+	/*
 	int count=0;
 	OperatingSystemMXBean os;
 	MemoryMXBean mem;
@@ -85,22 +75,10 @@ public class BaltoroWSHeartbeat extends Thread
 				ctx.setHeartBeatCount(count);
 				//to.mgntContext = ctx;
 				
-				/*
-				byte[]  bytes = ObjectUtil.toJason(to);
-					
-				ByteBuffer  msg = ByteBuffer.wrap(bytes);
-				*/
 				
 				ResponseQueue.instance().addToResponseQueue(to);
 				
-				/*
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				System.out.println("sending monitoring "+count);
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-				*/
-				
+			
 				
 				Thread.sleep(30000);
 			} 
@@ -112,6 +90,6 @@ public class BaltoroWSHeartbeat extends Thread
 		}
 	
 	}
-	
+	*/
 	
 }

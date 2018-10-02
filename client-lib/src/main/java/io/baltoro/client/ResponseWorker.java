@@ -2,8 +2,8 @@ package io.baltoro.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.to.WSTO;
-import io.baltoro.util.ObjectUtil;
 
 public class ResponseWorker extends  Thread
 {
@@ -82,7 +82,7 @@ public class ResponseWorker extends  Thread
 				
 				to.requestContext = null;
 				
-				String json = ObjectUtil.toJason(to);
+				String json = ObjectUtil.toJasonStr(to);
 				//ByteBuffer byteBuffer = ByteBuffer.wrap(json);
 				//session.getBasicRemote().sendBinary(byteBuffer);
 				Baltoro.cs.sendAPIResponse(to.uuid, json);

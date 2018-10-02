@@ -23,11 +23,10 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.LocalDB.Repl;
-import io.baltoro.to.MgntContext;
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
 import io.baltoro.to.SessionUserTO;
-import io.baltoro.util.StringUtil;
 
 public class APIClient
 {
@@ -123,6 +122,11 @@ public class APIClient
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		String str = response.readEntity(String.class);
+		if(StringUtil.isNullOrEmpty(str))
+		{
+			System.out.println("can't reach server .. shutting down");
+			System.exit(1);
+		}
 		log.info("response ==>"+str);
 	}
 	
@@ -205,8 +209,6 @@ public class APIClient
 	{
 		//log.info("... getting app data -> server ...");
 		
-		MgntContext ctx = new MgntContext();
-		
 		Map<String, WebMethod> map = WebMethodMap.getInstance().getMap();
 		List<PathTO> pathList = new ArrayList<>(200);
 		
@@ -227,7 +229,6 @@ public class APIClient
 			//System.out.println("PATH ADDING TO LIST -> "+key+" --> "+map.get(key));
 		} 
 		
-		ctx.setPathTOs(pathList);
 	
 		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/setappapi");
 		

@@ -17,12 +17,11 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.NewCookie;
 
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
-import io.baltoro.to.SessionUserTO;
-import io.baltoro.util.StringUtil;
 
 
 public class Baltoro 

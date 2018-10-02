@@ -19,6 +19,7 @@ import org.reflections.Reflections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Filter;
 import io.baltoro.features.NoAuth;
@@ -27,7 +28,6 @@ import io.baltoro.features.Param;
 import io.baltoro.features.Path;
 import io.baltoro.features.Timeout;
 import io.baltoro.features.WS;
-import io.baltoro.util.StringUtil;
 
 public class AnnotationProcessor
 {

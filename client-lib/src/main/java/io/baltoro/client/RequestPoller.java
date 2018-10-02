@@ -3,12 +3,11 @@ package io.baltoro.client;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
-import java.net.ConnectException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.WSTO;
-import io.baltoro.util.StringUtil;
 
 public class RequestPoller extends Thread
 {

@@ -15,7 +15,6 @@ import java.util.Set;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
-import org.apache.derby.tools.sysinfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,10 +24,8 @@ import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.db.Connection;
 import io.baltoro.db.PreparedStatement;
 import io.baltoro.db.Statement;
-import io.baltoro.domain.BODefaults;
-import io.baltoro.exception.BaltoroException;
-import io.baltoro.exception.ServiceException;
 import io.baltoro.features.Store;
+import io.baltoro.obj.BODefaults;
 import io.baltoro.obj.Base;
 import io.baltoro.to.ReplicationTO;
 
@@ -623,7 +620,7 @@ public class LocalDB
 	}
 	
 	
-	public <T extends Base> T findOne(String name, Class<T> _class)
+	public <T extends Base> T getByName(String name, Class<T> _class)
 	{
 		//String type = getType(_class);
 		List<T> objList = findByName(name, _class);
@@ -1358,7 +1355,7 @@ public class LocalDB
 				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
 				+ " values(?,?,?,?,?,?,?,?,?) ");
 	
-		String uuid = io.baltoro.util.UUIDGenerator.uuid("LINK");
+		String uuid = UUIDGenerator.uuid("LINK");
 		
 		int seq = 0;
 		
@@ -1366,7 +1363,7 @@ public class LocalDB
 		{
 			if(StringUtil.isNullOrEmpty(base.getBaseUuid()))
 			{
-				throw new ServiceException(base.getName() + "object has no UUID, make sure that the save meathod on this object has been called ");
+				throw new Exception(base.getName() + "object has no UUID, make sure that the save meathod on this object has been called ");
 			}
 					
 			seq++;

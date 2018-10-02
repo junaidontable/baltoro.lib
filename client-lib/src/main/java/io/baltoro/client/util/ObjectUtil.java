@@ -12,6 +12,12 @@ public class ObjectUtil
 		byte[] bytes = mappper.writeValueAsBytes(obj);
 		return bytes;
 	}
+	
+	public static String toJasonStr(Object obj) throws Exception
+	{
+		return mappper.writeValueAsString(obj);
+		
+	}
 
 	public static String getType(String objUuid)
 	{

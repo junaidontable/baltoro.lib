@@ -114,7 +114,7 @@ public class DBTest extends TestCase
     	
     	System.out.println("............. begin find test ............. ");
     	
-    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	TestObj1 obj1 = db.getByName("name1", TestObj1.class);
     	assertNotNull(obj1);
     	
     	assertEquals("name1", obj1.getName());
@@ -122,7 +122,7 @@ public class DBTest extends TestCase
     	assertEquals(12, obj1.getAtt2());
     	assertEquals("att13", obj1.getAtt3());
     	
-    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	TestObj2 obj2 = db.getByName("name2", TestObj2.class);
     	assertNotNull(obj2);
     	
     	assertEquals("name2", obj2.getName());
@@ -130,7 +130,7 @@ public class DBTest extends TestCase
     	assertEquals(22, obj2.getAtt2());
     	assertEquals("att23", obj2.getAtt3());
     	
-    	TestObj3 obj3 = db.findOne("name3", TestObj3.class);
+    	TestObj3 obj3 = db.getByName("name3", TestObj3.class);
     	assertNotNull(obj3);
     	assertEquals("name3", obj3.getName());
     	assertEquals("att31", obj3.getAtt1());
@@ -149,10 +149,10 @@ public class DBTest extends TestCase
     	
     	
     	
-    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	TestObj1 obj1 = db.getByName("name1", TestObj1.class);
     	assertNotNull(obj1);
     	
-    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	TestObj2 obj2 = db.getByName("name2", TestObj2.class);
     	assertNotNull(obj2);
     	
     	
@@ -217,13 +217,13 @@ public class DBTest extends TestCase
     	
     	System.out.println("............. begin link get test ....... 2 ...... ");
     	
-    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	TestObj1 obj1 = db.getByName("name1", TestObj1.class);
     	assertNotNull(obj1);
     	
-    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	TestObj2 obj2 = db.getByName("name2", TestObj2.class);
     	assertNotNull(obj2);
     	
-    	TestObj3 obj3 = db.findOne("name3", TestObj3.class);
+    	TestObj3 obj3 = db.getByName("name3", TestObj3.class);
     	assertNotNull(obj2);
     	
     	
@@ -246,13 +246,13 @@ public class DBTest extends TestCase
     	
     	System.out.println("............. begin link get test ....... 2 ...... ");
     	
-    	TestObj1 obj1 = db.findOne("name1", TestObj1.class);
+    	TestObj1 obj1 = db.getByName("name1", TestObj1.class);
     	assertNotNull(obj1);
     	
-    	TestObj2 obj2 = db.findOne("name2", TestObj2.class);
+    	TestObj2 obj2 = db.getByName("name2", TestObj2.class);
     	assertNotNull(obj2);
     	
-    	TestObj3 obj3 = db.findOne("name3", TestObj3.class);
+    	TestObj3 obj3 = db.getByName("name3", TestObj3.class);
     	assertNotNull(obj2);
     	
     	

@@ -101,11 +101,11 @@
 
 
 	
-	<dependency>
+	<!--  dependency>
 		<groupId>javax.websocket</groupId>
 		<artifactId>javax.websocket-api</artifactId>
 		<version>1.1</version>
-	</dependency>
+	</dependency -->
 	
 	<dependency>
 	    <groupId>org.bouncycastle</groupId>
@@ -127,6 +127,7 @@
   
   <build>
     <finalName>baltoro-lib</finalName>
+    <sourceDirectory>src/main/java</sourceDirectory>
 	<plugins>
 	
 	
@@ -134,7 +135,8 @@
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>build-helper-maven-plugin</artifactId>
     
-    <executions>
+    <!--  
+    <executions> 
         <execution>
         <id>add-source-server</id>
         <phase>generate-sources</phase>
@@ -148,7 +150,8 @@
             </configuration>
         </execution>
    	 </executions>
-   	 
+   	  
+   	 --> 
    	 
  	</plugin>
 
@@ -160,6 +163,7 @@
 		    <source>1.8</source>
 		    <target>1.8</target>
 		    
+		    <!--  
 		    <excludes>
             	<exclude>**/remote/**/*.java</exclude>
         	</excludes>
@@ -173,7 +177,7 @@
 		    	<include>**/db/**/*.java</include>
 		    	<include>**/obj/**/*.java</include>
 		    </includes>
-		    
+		    -->
 		    
 		    </configuration>
 		</plugin>
