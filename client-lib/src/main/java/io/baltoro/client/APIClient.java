@@ -291,18 +291,16 @@ public class APIClient
 	{
 		
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pull");
-		
 		String att = null;
 		
-		if(LocalDB.initPull)
+		if(Baltoro.pullReplicationServiceNames == null)
 		{
-			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
+			att = Baltoro.serviceNames.toString();
 		}
 		else
 		{
-			att = Baltoro.pullReplicationServiceNames;
+			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
 		}
-		
 		
 		log.info(" PULL ======= > "+att);
 		

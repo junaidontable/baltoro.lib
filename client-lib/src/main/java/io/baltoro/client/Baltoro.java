@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
@@ -267,7 +268,7 @@ public class Baltoro
 	}
 	
 	
-	public static void validateSession(String userName)
+	public static void validateSession(String userName, Set<String> roleNames)
 	{
 		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
@@ -283,6 +284,8 @@ public class Baltoro
 		}
 		userSession.userName = userName;
 		userSession.setAuthenticated(true);
+		userSession.roles = roleNames;
+		
 		userSession.sendSession();
 		
 	}
