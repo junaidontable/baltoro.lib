@@ -21,6 +21,7 @@ import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
+import io.baltoro.to.SessionUserTO;
 import io.baltoro.util.StringUtil;
 
 
@@ -276,6 +277,11 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
+		if(userSession == null)
+		{
+			userSession = SessionManager.createSession(userSessionId);
+		
+		}
 		userSession.userName = userName;
 		userSession.setAuthenticated(true);
 		userSession.sendSession();
@@ -292,6 +298,7 @@ public class Baltoro
 			return null;
 		}
 		UserSession userSession = SessionManager.getSession(userSessionId);
+		
 		return userSession;
 	}
 	
