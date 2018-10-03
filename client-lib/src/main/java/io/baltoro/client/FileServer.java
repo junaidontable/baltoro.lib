@@ -15,26 +15,30 @@ public class FileServer
 	{
 		String path = null;
 		
-		//ResponseContext res = RequestWorker.responseCtx.get();
-		//RequestContext req = RequestWorker.requestCtx.get();
-		
-		if(req.getRelativePath() == null)
+		File file = new File(dirPath);
+		if(file.isFile())
 		{
 			path = dirPath;
 		}
-		else if(dirPath.endsWith("/"))
-		{
-			path = dirPath+req.getRelativePath();
-		}
 		else
 		{
-			path = dirPath+"/"+req.getRelativePath();
+			if(req.getRelativePath() == null)
+			{
+				path = dirPath;
+			}
+			else if(dirPath.endsWith("/"))
+			{
+				path = dirPath+req.getRelativePath();
+			}
+			else
+			{
+				path = dirPath+"/"+req.getRelativePath();
+			}
+			file = new File(path);
 		}
 		
 		
-		File file = new File(path);
-		
-		System.out.println(" ---- > file : "+file.getName()+", "+file.length());
+		System.out.println(" loading ---- > file : "+file.getName()+", "+file.length());
 		try
 		{
 		

@@ -447,14 +447,16 @@ public class APIClient
 	String poll(int cpu, int memoryGB)
 	throws ConnectException
 	{
-		//log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
+		log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
 	
 	
 		WebTarget target = pollerClient.target(blHost)
 				.path(POLL_SERVICE)
 				.queryParam("BLT_CPU", cpu)
 				.queryParam("BLT_MEMORY_GB", memoryGB);
-	
+				
+		
+		
 		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
@@ -358,23 +357,28 @@ public class Baltoro
 			env = Env.PRD;
 		}
 		
+		Baltoro.appName = appName;
 		
 		switch (env)
 		{
 			case PRD:
-				serverURL = serverProtocol+"://"+appName+"."+serverDomain+":"+serverPort;
+				Baltoro.appName = appName;
+				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;	
 				break;
 				
 			case STG:
-				serverURL = serverProtocol+"://"+appName+"-stg."+serverDomain+":"+serverPort;
+				Baltoro.appName = appName+"-envsg";
+				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;
 				
 			case QA:
-				serverURL = serverProtocol+"://"+appName+"-qa."+serverDomain+":"+serverPort;
+				Baltoro.appName = appName+"-envqa";
+				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 				
 			case DEV:
-				serverURL = serverProtocol+"://"+appName+"-dev."+serverDomain+":"+serverPort;
+				Baltoro.appName = appName+"-envdv";
+				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 
 			case LOC:
@@ -387,7 +391,7 @@ public class Baltoro
 		}
 		
 		
-		Baltoro.appName = appName;
+		
 	}
 	
 	public static void register(String serviceName, String ... packageNames)
@@ -462,7 +466,10 @@ public class Baltoro
 				else
 				{
 					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
+					String hostUrl = Baltoro.serverURL.substring(0,serverURL.indexOf('.'))+"-hid"+hostId+""+Baltoro.serverURL.substring(serverURL.indexOf('.'));
+					log.info("Host URL --> "+hostUrl+"/"+sp.serviceName+"/helloworld");
 				}
+				log.info("HOST ID ====> "+hostId);
 				log.info("INST UUID ====> "+instanceUuid);
 				log.info("=====================================================");
 				log.info("=====================================================");
@@ -534,13 +541,9 @@ public class Baltoro
 			System.exit(1);
 		}
 		
-		hostId = props.getProperty("app.host.id");
-		if(StringUtil.isNullOrEmpty(hostId))
-		{
-			
-			hostId = ""+(999+new Random().nextInt(8999));
-			props.put("app.host.id", hostId);
-		}
+		hostId = instanceUuid.substring(5,9);
+		props.put("app.host.id", hostId);
+		
 		
 		
 		props.put("app.name", appName);
