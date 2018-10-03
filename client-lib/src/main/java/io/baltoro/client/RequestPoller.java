@@ -62,10 +62,12 @@ public class RequestPoller extends Thread
 			{
 			
 				WSTO to = tos[i];
-				//System.out.println(" ===========> to "+to);
-			
-			
-			//System.out.println("Request >>  WorkerPool : "+WorkerPool.info());
+				if(to.requestContext != null &&  to.requestContext.isInvalidateSession())
+				{
+					System.out.println(" @@@@@@@@@@@@@@@@@@ invalidating session : "+to.requestContext.getSessionId());
+					SessionManager.removeSession(to.requestContext.getSessionId());
+					continue;
+				}
 			
 				RequestWorker worker = WorkerPool.getRequestWorker();
 				if(worker == null)

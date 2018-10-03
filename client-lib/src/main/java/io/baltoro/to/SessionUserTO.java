@@ -10,6 +10,9 @@ public class SessionUserTO
 	public Set<String> roles;
 	public Map<String, String> att;
 	public boolean authenticated;
+	public long authenticatedOn;
+	public long createdOn;
+	public int timeoutMin;
 	
 	
 

@@ -267,7 +267,7 @@ public class Baltoro
 	}
 	
 	
-	public static void validateSession(String userName, Set<String> roleNames)
+	public static void validateSession(String userName, Set<String> roleNames, int sessionTimeoutMin)
 	{
 		String userSessionId = userSessionIdCtx.get();
 		if(userSessionId == null)
@@ -276,15 +276,10 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
-		if(userSession == null)
-		{
-			userSession = SessionManager.createSession(userSessionId);
-		
-		}
-		userSession.userName = userName;
+		userSession.setUserName(userName);
 		userSession.setAuthenticated(true);
 		userSession.roles = roleNames;
-		
+		userSession.setTimeoutMin(sessionTimeoutMin);
 		userSession.sendSession();
 		
 	}
@@ -314,10 +309,12 @@ public class Baltoro
 		}
 		
 		UserSession userSession = SessionManager.getSession(userSessionId);
-		userSession.userName = null;
-		//userSession.invlaidateSession = true;
+		userSession.setUserName(null);
+		userSession.setAuthenticated(false);
+		userSession.roles = null;
+		userSession.attMap = null;
 		
-		SessionManager.removeUserSession(userSessionId);
+		SessionManager.removeSession(userSessionId);
 		userSession.sendSession();
 	}
 	

@@ -8,6 +8,7 @@ public class RequestContext
 	private String url;
 	private String ip;
 	private String sessionId;
+	private boolean invalidateSession = false;
 	private String method;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
@@ -125,5 +126,15 @@ public class RequestContext
 	{
 		this.ifModifiedSince = ifModifiedSince;
 	}
+	public boolean isInvalidateSession()
+	{
+		return invalidateSession;
+	}
+	public void setInvalidateSession(boolean invalidateSession)
+	{
+		this.invalidateSession = invalidateSession;
+	}
+	
+	
 
 }

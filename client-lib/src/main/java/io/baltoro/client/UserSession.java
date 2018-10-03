@@ -10,12 +10,15 @@ import io.baltoro.to.SessionUserTO;
 public class UserSession
 {
 
-	//private static ObjectMapper mapper = new ObjectMapper();
+
 	private final String sessionId;
 	Map<String, String> attMap = new HashMap<String, String>(200);
 	Set<String> roles = new HashSet<>();
-	String userName;
+	private String userName;
 	private boolean authenticated;
+	private long createdOn;
+	private long authenticatedOn;
+	private int timeoutMin = 20;
 	
 	UserSession(String sessionId)
 	{
@@ -49,8 +52,13 @@ public class UserSession
 	{
 		return userName;
 	}
+
 	
-	
+	void setUserName(String userName)
+	{
+		this.userName = userName;
+	}
+
 	boolean isAuthenticated()
 	{
 		return authenticated;
@@ -59,10 +67,33 @@ public class UserSession
 	void setAuthenticated(boolean authenticated)
 	{
 		this.authenticated = authenticated;
+		this.authenticatedOn = System.currentTimeMillis();
 	}
 
 	
 	
+	public long getCreatedOn()
+	{
+		return createdOn;
+	}
+
+	void setCreatedOn(long createdOn)
+	{
+		this.createdOn = createdOn;
+	}
+	
+	
+
+	public int getTimeoutMin()
+	{
+		return timeoutMin;
+	}
+
+	void setTimeoutMin(int timeoutMin)
+	{
+		this.timeoutMin = timeoutMin;
+	}
+
 	void sendSession()
 	{
 		SessionUserTO to = new SessionUserTO();
@@ -71,10 +102,20 @@ public class UserSession
 		to.authenticated = authenticated;
 		to.roles = roles;
 		to.att = attMap;
+		to.createdOn = createdOn;
+		to.authenticatedOn = authenticatedOn;
+		to.timeoutMin = timeoutMin;
 		
 		try
 		{
-			Baltoro.cs.validateSession(getSessionId(), to);
+			if(isAuthenticated())
+			{
+				Baltoro.cs.validateSession(getSessionId(), to);
+			}
+			else
+			{
+				Baltoro.cs.inValidateSession(getSessionId());
+			}
 		} 
 		catch (Exception e)
 		{

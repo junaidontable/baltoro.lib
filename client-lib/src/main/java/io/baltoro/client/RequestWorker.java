@@ -132,8 +132,6 @@ public class RequestWorker extends Thread
 		Baltoro.userSessionIdCtx.set(req.getSessionId());
 		Baltoro.serviceNameCtx.set(to.serviceName);
 		//responseCtx.set(res);
-	
-		
 		
 		try
 		{
@@ -230,18 +228,24 @@ public class RequestWorker extends Thread
 		if (StringUtil.isNotNullAndNotEmpty(req.getSessionId()))
 		{
 			String reqSessionId = req.getSessionId();
+			
 			userSession = SessionManager.getSession(reqSessionId);
-			if(userSession == null)
+			if(!userSession.isAuthenticated())
 			{
-				
-				SessionUserTO to = Baltoro.cs.pullSession(reqSessionId);
-				if(to != null)
+				long t0 = System.currentTimeMillis();
+				long tc = userSession.getCreatedOn();
+				long dif = t0-tc;
+				if(dif > 59000)
 				{
-					userSession = SessionManager.createSession(reqSessionId);
-					userSession.roles = to.roles;
-					userSession.attMap = to.att;
-					userSession.userName = to.userName;
-					userSession.setAuthenticated(to.authenticated);
+					SessionUserTO to = Baltoro.cs.pullSession(reqSessionId);
+					if(to != null)
+					{
+						userSession = SessionManager.getSession(reqSessionId);
+						userSession.roles = to.roles;
+						userSession.attMap = to.att;
+						userSession.setUserName(to.userName);
+						userSession.setAuthenticated(to.authenticated);
+					}
 				}
 				
 			}
