@@ -278,7 +278,7 @@ public class Baltoro
 		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.setUserName(userName);
 		userSession.setAuthenticated(true);
-		userSession.roles = roleNames;
+		userSession.setRoles(roleNames);
 		userSession.setTimeoutMin(sessionTimeoutMin);
 		userSession.sendSession();
 		
@@ -311,7 +311,7 @@ public class Baltoro
 		UserSession userSession = SessionManager.getSession(userSessionId);
 		userSession.setUserName(null);
 		userSession.setAuthenticated(false);
-		userSession.roles = null;
+		userSession.setRoles(null);;
 		userSession.attMap = null;
 		
 		SessionManager.removeSession(userSessionId);

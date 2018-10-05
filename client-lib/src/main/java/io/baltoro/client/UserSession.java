@@ -13,7 +13,7 @@ public class UserSession
 
 	private final String sessionId;
 	Map<String, String> attMap = new HashMap<String, String>(200);
-	Set<String> roles = new HashSet<>();
+	private Set<String> roles = new HashSet<>();
 	private String userName;
 	private boolean authenticated;
 	private long createdOn;
@@ -92,6 +92,18 @@ public class UserSession
 	void setTimeoutMin(int timeoutMin)
 	{
 		this.timeoutMin = timeoutMin;
+	}
+	
+	
+
+	public Set<String> getRoles()
+	{
+		return roles;
+	}
+
+	void setRoles(Set<String> roles)
+	{
+		this.roles = roles;
 	}
 
 	void sendSession()

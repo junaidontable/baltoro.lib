@@ -241,7 +241,7 @@ public class RequestWorker extends Thread
 					if(to != null)
 					{
 						userSession = SessionManager.getSession(reqSessionId);
-						userSession.roles = to.roles;
+						userSession.setRoles(to.roles);
 						userSession.attMap = to.att;
 						userSession.setUserName(to.userName);
 						userSession.setAuthenticated(to.authenticated);
