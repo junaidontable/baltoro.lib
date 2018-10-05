@@ -3,54 +3,150 @@ package io.baltoro.client;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
+import java.net.SocketTimeoutException;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.WSTO;
 
-public class RequestPoller extends Thread
+public class RequestPoller// extends Thread
 {
 	
-	boolean run = true;
-	static ObjectMapper mapper = new ObjectMapper();
-	OperatingSystemMXBean os;
-	MemoryMXBean mem;
+	private static RequestPoller poller;
+	//boolean run = true;
+	private ObjectMapper mapper = new ObjectMapper();
+	private OperatingSystemMXBean os;
+	private MemoryMXBean mem;
+	private Timer pollTimer;
+	private Timer workerTimer;
+	
+	private ConcurrentLinkedQueue<String> q;
+	private String syncKey = "request-poll-worker";
 	
 	
-	public RequestPoller()
+	private RequestPoller()
 	{
 		os = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 		mem = ManagementFactory.getPlatformMXBean(MemoryMXBean.class);
+		q = new ConcurrentLinkedQueue<>();
 	}
 
-	@Override
-	public void run()
+	public static RequestPoller instance()
 	{
-		while(run)
+		if(poller == null)
+		{
+			poller = new RequestPoller();
+			poller.init();
+		}
+		
+		return poller;
+	}
+	
+	public void init()
+	{
+		
+		
+		pollTimer = new Timer();
+		pollTimer.schedule(new TimerTask()
 		{
 			
-			int cpu = (int) os.getSystemLoadAverage();
-			
-			long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
-			long usedMem = (int) mem.getHeapMemoryUsage().getUsed();
-			
-			int freeMem = (int) (maxMem - usedMem)/1000000;
-			
-		
-		
-			String json = null;
-			try
+			public void run()
 			{
-				json = Baltoro.cs.poll(cpu, freeMem);
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				System.exit(1);
+				System.out.println("############################### poll timer "+new Date());
+				int cpu = (int) os.getSystemLoadAverage();
+				
+				long maxMem = (int) mem.getHeapMemoryUsage().getCommitted();
+				long usedMem = (int) mem.getHeapMemoryUsage().getUsed();
+				
+				int freeMem = (int) (maxMem - usedMem)/1000000;
+				
+			
+			
+				String json = null;
+				try
+				{
+					json = Baltoro.cs.poll(cpu, freeMem);
+					if(StringUtil.isNotNullAndNotEmpty(json))
+					{
+						q.add(json);
+						synchronized(syncKey.intern())
+						{
+							syncKey.notify();
+						}
+					}
+				} 
+				catch (Exception e)
+				{
+					//System.out.println(e.getCause());
+					if(e.getCause() instanceof  SocketTimeoutException)
+					{
+						System.out.println("Read timeout, will try again ... "+e);
+					}
+					else
+					{
+						e.printStackTrace();
+						System.exit(1);
+					}
+					
+				}
+					
 			}
+		}, 0,1);
+		
+		workerTimer = new Timer();
+		workerTimer.schedule(new TimerTask()
+		{
 			
+			public void run()
+			{
+				try
+				{
+					System.out.println("############################### worker timer "+new Date());
+					String json = q.poll();
+					if(json == null)
+					{
+						synchronized(syncKey.intern())
+						{
+							syncKey.wait(10000);
+							return;
+						}
+					}
+					WSTO[] tos = mapper.readValue(json, WSTO[].class);
+					for (WSTO wsto : tos)
+					{
+						if(wsto.requestContext != null && wsto.requestContext.isInvalidateSession())
+						{
+							SessionManager.removeSession(wsto.requestContext.getSessionId());
+						}
+						else
+						{
+							RequestWorker worker = WorkerPool.getRequestWorker();
+							worker.set(wsto);
+						}
+					}
+					
+				
+				} 
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+					
+			}
+		}, 0,1);
+		
+	}
+	
+	
+	
+}
 			
+			/*
 			if(StringUtil.isNullOrEmpty(json))
 			{
 				continue;
@@ -134,4 +230,6 @@ public class RequestPoller extends Thread
 		return tos;
 	}
 	
+		
 }
+*/

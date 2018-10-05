@@ -2,6 +2,7 @@ package io.baltoro.client;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+
 public class WorkerPool
 {
 
@@ -17,7 +18,11 @@ public class WorkerPool
 	{
 		if(freeReq.size() == 0)
 		{
-			return null;
+			RequestWorker worker = new RequestWorker();
+			worker.setName("RequestWorker-"+worker.getName());
+			worker.start();
+			busyReq.add(worker);
+			return worker;
 		}
 		
 		

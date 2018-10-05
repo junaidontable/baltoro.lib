@@ -1,18 +1,13 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-
-
-
-public class RequestQueue
+public class RequestQueue_old
 {
 	
+	/*
 	private static RequestQueue requestQueue;
-	private ConcurrentLinkedQueue q;
+	private ConcurrentLinkedQueue<String> q;
 	
-	private RequestQueue()
+	private RequestQueue_old()
 	{
 		q = new ConcurrentLinkedQueue<>();
 	}
@@ -28,10 +23,10 @@ public class RequestQueue
 		return requestQueue;
 	}
 	
-	void addToRequestQueue(ByteBuffer byteBuffer)
+	void addToRequestQueue(String json)
 	{
 		
-		q.add(byteBuffer);
+		q.add(json);
 		
 		String sync = "request-queue";
 		synchronized (sync.intern())
@@ -41,9 +36,9 @@ public class RequestQueue
 		
 	}
 	
-	ConcurrentLinkedQueue getQueue()
+	ConcurrentLinkedQueue<String> getQueue()
 	{
 		return q;
 	}
-
+	*/
 }

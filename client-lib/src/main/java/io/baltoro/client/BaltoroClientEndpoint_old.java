@@ -12,7 +12,7 @@ import javax.websocket.Session;
 import org.glassfish.tyrus.client.ClientManager;
 
 
-public class BaltoroClientEndpoint extends Endpoint
+public class BaltoroClientEndpoint_old
 {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
@@ -23,7 +23,7 @@ public class BaltoroClientEndpoint extends Endpoint
 	private String url;
 	
 	
-	public BaltoroClientEndpoint(String appUuid, ClientManager clientManager, ClientEndpointConfig config, String url)
+	public BaltoroClientEndpoint_old(String appUuid, ClientManager clientManager, ClientEndpointConfig config, String url)
 	{
 		this.appUuid = appUuid;
 		this.clientManager = clientManager;
@@ -38,7 +38,7 @@ public class BaltoroClientEndpoint extends Endpoint
 		log.info(" ******** Connected ... " + session.getId());
 		
 		session.addMessageHandler(new BaltoroTextMessageHandler(this.appUuid, this.instanceUuid,session));
-		session.addMessageHandler(new BaltoroByteBufferMessageHandler(this.appUuid, this.instanceUuid, session));
+		session.addMessageHandler(new BaltoroByteBufferMessageHandler_old(this.appUuid, this.instanceUuid, session));
 		//session.addMessageHandler(new BaltoroPingMessageHandler(this.appUuid, this.instanceUuid, session));
 	}
 	

@@ -1,17 +1,10 @@
 package io.baltoro.client;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import javax.websocket.ClientEndpointConfig;
-import javax.websocket.HandshakeResponse;
-import javax.ws.rs.core.NewCookie;
 
-public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
+public class BaltoroClientConfig_old extends ClientEndpointConfig.Configurator
 {
-	
+	/*
 	static Logger log = Logger.getLogger(BaltoroClientConfig.class.getName());
 	
     static volatile boolean called = false;
@@ -62,4 +55,5 @@ public class BaltoroClientConfig extends ClientEndpointConfig.Configurator
         //assertEquals(HEADER_VALUE[2], headers.get(HEADER_NAME).get(2));
         //assertEquals("myOrigin", headers.get("origin").get(0));
     }
+    */
 }

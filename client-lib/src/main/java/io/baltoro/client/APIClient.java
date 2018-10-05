@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,6 +83,8 @@ public class APIClient
 				.register(reqFilter)
 				.register(responseFilter)
 				.build();
+		webClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
+		webClient.property(ClientProperties.READ_TIMEOUT, 60000);
 		
 		
 		
@@ -89,6 +92,9 @@ public class APIClient
 				.register(JacksonFeature.class)
 				.register(reqFilter)
 				.build();
+		
+		pollerClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
+		pollerClient.property(ClientProperties.READ_TIMEOUT, 60000);
 		
 	
 		try
@@ -447,7 +453,7 @@ public class APIClient
 	String poll(int cpu, int memoryGB)
 	throws ConnectException
 	{
-		log.info("... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
+		//log.info("1... polling data  -> server ... "+Baltoro.appName+" ,,,, "+Baltoro.serviceNames.toString());
 	
 	
 		WebTarget target = pollerClient.target(blHost)
@@ -461,7 +467,6 @@ public class APIClient
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		String json = response.readEntity(String.class);
-		//log.info("response ==>"+json);
 		
 		
 		return json;

@@ -1,15 +1,8 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.baltoro.to.WSTO;
-
-public class WSRequestPoller extends Thread
+public class WSRequestPoller_old
 {
-	
+	/*
 	boolean run = true;
 	static ObjectMapper mapper = new ObjectMapper();
 	
@@ -106,5 +99,6 @@ public class WSRequestPoller extends Thread
 		
 		return to;
 	}
+	*/
 	
 }

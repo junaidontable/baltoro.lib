@@ -73,7 +73,7 @@ public class Baltoro
 	
 	static String pullReplicationServiceNames;
 	
-	static RequestPoller requestPoller;
+	//static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	
 	private static boolean running = false;
@@ -443,8 +443,8 @@ public class Baltoro
 			
 			cs.sendAppAPI();
 			
-			requestPoller = new RequestPoller();
-			requestPoller.start();
+			RequestPoller.instance();
+			//requestPoller.start();
 			
 			
 			responsePoller = new ResponsePoller();
