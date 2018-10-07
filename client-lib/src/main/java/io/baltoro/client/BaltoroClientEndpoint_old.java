@@ -1,20 +1,9 @@
 package io.baltoro.client;
 
-import java.util.logging.Logger;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.OnClose;
-import javax.websocket.Session;
-
-import org.glassfish.tyrus.client.ClientManager;
-
-
 public class BaltoroClientEndpoint_old
 {
 
+	/*
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	private String appUuid;
 	private String instanceUuid;
@@ -66,6 +55,6 @@ public class BaltoroClientEndpoint_old
 		} 
 	}
 	
-	
+	*/
 
 }

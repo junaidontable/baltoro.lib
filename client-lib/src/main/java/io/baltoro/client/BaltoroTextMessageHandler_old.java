@@ -1,11 +1,8 @@
 package io.baltoro.client;
 
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
-
-public class BaltoroTextMessageHandler implements MessageHandler.Whole<String>
+public class BaltoroTextMessageHandler_old
 {
-	
+	/*
 	private Session session;
 	private String appUuid;
 	private String instanceUuid;
@@ -23,4 +20,5 @@ public class BaltoroTextMessageHandler implements MessageHandler.Whole<String>
 		System.out.println(" *** **** * got ping back -> "+message);
 		
 	}
+	*/
 }

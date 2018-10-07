@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
@@ -538,11 +539,30 @@ public class Baltoro
 			System.exit(1);
 		}
 		
-		hostId = instanceUuid.substring(5,9);
-		props.put("app.host.id", hostId);
+		//hostId = instanceUuid.substring(5,9);
+		//props.put("app.host.id", hostId);
 		
+		Properties hostProps = new Properties();
+		String hostPropFileName = System.getProperty("user.home")+"/baltoro_host.env";
+		File hostPropFile = new File(hostPropFileName);
+		if(!hostPropFile.exists())
+		{
+			hostPropFile.createNewFile();
+		}
+		hostProps.load(new FileInputStream(hostPropFile));
 		
+		hostId = hostProps.getProperty("baltoro.host.id");
+		if(StringUtil.isNullOrEmpty(hostId))
+		{
+			
+			hostId = ""+(999+new Random().nextInt(8999));
+			hostProps.put("baltoro.host.id", hostId);
+			FileOutputStream output = new FileOutputStream(hostPropFile);
+			hostProps.store(output,"");
+			
+		}
 		
+	
 		props.put("app.name", appName);
 		props.put("app.env", Baltoro.env.toString());
 		props.put("app.service.names", Baltoro.serviceNames.toString());

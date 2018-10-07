@@ -27,6 +27,7 @@ public class RequestFilter implements ClientRequestFilter
 		requestContext.getHeaders().add("BLT_TOKEN", Baltoro.hostId);
 		requestContext.getHeaders().add("BLT_APP_NAME", Baltoro.appName);
 		requestContext.getHeaders().add("BLT_SERVICE_NAME", Baltoro.serviceNames.toString());
+		requestContext.getHeaders().add("BLT_HOST_ID", Baltoro.hostId);
 	}
 	
 

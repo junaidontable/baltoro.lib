@@ -156,7 +156,7 @@ public class DBTest extends TestCase
     	assertNotNull(obj2);
     	
     	
-    	String linkUuid = db.link(obj1, obj2);
+    	String linkUuid = db.link(obj1.getBaseUuid(), obj2.getBaseUuid());
     	
     	System.out.println("link uuid = "+linkUuid);
     	
@@ -172,7 +172,7 @@ public class DBTest extends TestCase
     		obj.setAtt3("att3"+i);
     		db.save(obj);
     		
-    		linkUuid = db.link(obj1, obj);
+    		linkUuid = db.link(obj1.getBaseUuid(), obj.getBaseUuid());
     		
     		System.out.println("link obj1 to "+obj.getName()+" = "+linkUuid);
         	
@@ -188,7 +188,7 @@ public class DBTest extends TestCase
     	
     	System.out.println("............. begin link get test ............. ");
     	
-    	List<TestObj2> list = db.findLinkedByUuids(TestObj2.class, uuidObj1);
+    	List<TestObj2> list = db.getChildren(TestObj2.class, uuidObj1);
     	
     	
     	System.out.println("list size : "+list.size());
@@ -201,7 +201,7 @@ public class DBTest extends TestCase
     	assertEquals(TestObj2.class, obj2.getClass());
     	
     	
-    	List<TestObj3> list1 = db.findLinkedByUuids(TestObj3.class, uuidObj1);
+    	List<TestObj3> list1 = db.getChildren(TestObj3.class, uuidObj1);
     	
     	
     	System.out.println("list size obj3 : "+list1.size());
@@ -227,11 +227,11 @@ public class DBTest extends TestCase
     	assertNotNull(obj2);
     	
     	
-    	String linkUuid = db.link(obj1, obj2, obj3);
+    	String linkUuid = db.link(obj1.getBaseUuid(), obj2.getBaseUuid(), obj3);
     	
     	System.out.println(linkUuid);
     	
-    	List<TestObj2> list = db.findLinked(TestObj2.class, obj1, obj3);
+    	List<TestObj2> list = null;//db.findLinked(TestObj2.class, obj1, obj3);
     	
     	System.out.println("obj found = "+list.get(0));
     	
@@ -264,19 +264,17 @@ public class DBTest extends TestCase
     	obj23.setName("name2-3");
     	db.save(obj23);
     	
-    	String linkUuid = db.link("linkType22",obj1, obj22);
+    	String linkUuid = db.link(obj1.getBaseUuid(), obj22.getBaseUuid());
     	System.out.println(linkUuid);
     	
     	
-    	linkUuid = db.link("linkType23",obj1, obj23);
-    	System.out.println(linkUuid);
     	
     	
-    	List<TestObj2> list = db.findLinked(TestObj2.class, "linkType22",obj1);
+    	List<TestObj2> list = db.getChildren(TestObj2.class,obj1);
     	
     	System.out.println(" ------------> linkType22 obj found = "+list.get(0));
     	
-    	list = db.findLinked(TestObj2.class, "linkType23",obj1);
+    	list = db.getChildren(TestObj2.class,obj1);
     	
     	System.out.println("-------------> linkType23 obj found = "+list.get(0));
     	

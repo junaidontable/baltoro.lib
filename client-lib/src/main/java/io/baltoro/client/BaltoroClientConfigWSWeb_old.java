@@ -1,15 +1,8 @@
 package io.baltoro.client;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.HandshakeResponse;
-
-public class BaltoroClientConfigWSWeb extends ClientEndpointConfig.Configurator
+public class BaltoroClientConfigWSWeb_old
 {
+	/*
 	
 	static Logger log = Logger.getLogger(BaltoroClientConfigWSWeb.class.getName());
 	
@@ -42,4 +35,5 @@ public class BaltoroClientConfigWSWeb extends ClientEndpointConfig.Configurator
     {
         final Map<String, List<String>> headers = handshakeResponse.getHeaders();
     }
+    */
 }

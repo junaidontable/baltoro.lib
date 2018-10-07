@@ -19,6 +19,7 @@ import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolation
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.CryptoUtil;
+import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.db.Connection;
@@ -234,6 +235,10 @@ public class LocalDB
 			st.execute("delete from link", false);
 			st.close();
 			
+			st = con.createStatement();
+			st.execute("delete from link_att", false);
+			st.close();
+			
 			
 			st = con.createStatement();
 			st.execute("delete from permission", false);
@@ -285,6 +290,10 @@ public class LocalDB
 		
 		st = con.createStatement();
 		st.execute("drop table link", false);
+		st.close();
+		
+		st = con.createStatement();
+		st.execute("drop table link_att", false);
 		st.close();
 		
 		
@@ -383,7 +392,7 @@ public class LocalDB
 		
 		System.out.println("Metadata Table Created");
 		
-			
+		/*
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE link (");
 		sql.append("link_uuid varchar(42) NOT NULL,");
@@ -397,6 +406,7 @@ public class LocalDB
 		sql.append("created_on timestamp NOT NULL)");
 		//sql.append("PRIMARY KEY (uuid, ctx_uuid))");
 		
+		
 		st = con.createStatement();
 		st.execute(sql.toString(), false);
 		st.close();
@@ -409,6 +419,50 @@ public class LocalDB
 		createIndex("link", "created_on");
 		
 		System.out.println("Link Table Created");
+		*/
+		
+		sql = new StringBuffer();
+		sql.append("CREATE TABLE link (");
+		sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("p_uuid varchar(42) NOT NULL,");
+		sql.append("c_uuid varchar(42) NOT NULL,");
+		sql.append("p_obj_type varchar(5) NOT NULL,");
+		sql.append("c_obj_type varchar(5) NOT NULL,");
+		sql.append("sort smallint NOT NULL DEFAULT 50,");
+		sql.append("created_by varchar(42) NOT NULL, ");
+		sql.append("created_on timestamp NOT NULL,");
+		sql.append("PRIMARY KEY (uuid))");
+		
+		st = con.createStatement();
+		st.execute(sql.toString(), false);
+		st.close();
+		
+		createIndex("link", "p_uuid");
+		createIndex("link", "c_uuid");
+		createIndex("link", "p_obj_type");
+		createIndex("link", "c_obj_type");
+		createIndex("link", "created_on");
+		
+		System.out.println("Link Table Created");
+		
+		sql = new StringBuffer();
+		sql.append("CREATE TABLE link_att (");
+		sql.append("uuid varchar(42) NOT NULL,");
+		sql.append("link_uuid varchar(42) NOT NULL,");
+		sql.append("name varchar(64) NOT NULL,");
+		sql.append("value varchar(256) NOT NULL,");
+		sql.append("PRIMARY KEY (uuid))");
+		
+		st = con.createStatement();
+		st.execute(sql.toString(), false);
+		st.close();
+		
+		createIndex("link_att", "link_uuid");
+		createIndex("link_att", "name");
+		createIndex("link_att", "value");
+		
+		System.out.println("Link_att Table Created");
+		
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE permission (");
@@ -551,7 +605,7 @@ public class LocalDB
 	
 	
 		
-	public List<Base> find(String[] baseUuids)
+	public List<Base> get(String[] baseUuids)
 	{
 		
 		List<Base> objList = new ArrayList<>(200);
@@ -702,19 +756,140 @@ public class LocalDB
 		return objList;
 	}
 	
-	public <T extends Base> T getLinked(Class<T> _class, Base... objs)
+	
+	public <T extends Base> Base getChild(Class<T> _class, String pUuid)
 	{
-		List<T> list = findLinked(_class, objs);
-		if(list != null && !list.isEmpty())
-		{
-			return list.get(0);
-		}
-		else
-		{
-			return null;
-		}
+		String uuid = findChildrenUuid(pUuid).get(0);
+		Base base = get(uuid, _class);
+		return _class.cast(base);
 	}
 	
+	public <T extends Base> T getChild(Class<T> _class, Base obj)
+	{
+		String uuid = findChildrenUuid(obj.getBaseUuid()).get(0);
+		Base base = get(uuid, _class);
+		return _class.cast(base);
+	}
+	
+	public <T extends Base> List<T> getChildren(Class<T> _class, String pUuid)
+	{
+		
+		List<String> uuids = findChildrenUuid(pUuid);
+		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		return objs;
+	}
+	
+	public <T extends Base> List<T> getChildren(Class<T> _class, Base obj)
+	{
+		
+		List<String> uuids = findChildrenUuid(obj.getBaseUuid());
+		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		return objs;
+	}
+	
+	public String getChildUuid(String pUuid)
+	{
+		return findChildrenUuid(pUuid).get(0);
+	}
+	
+	public List<String> findChildrenUuid(String pUuid)
+	{
+		List<String> uuidList = new ArrayList<>(500);
+		try
+		{
+	
+			PreparedStatement st = con.prepareStatement("select c_uuid from link where p_uuid = ? order by sort");
+			st.setString(1, pUuid);
+			ResultSet rs = st.executeQuery();
+			
+			uuidList = new ArrayList<>(500);
+			
+			while(rs.next())
+			{
+				String uuid = rs.getString(1);
+				uuidList.add(uuid);
+			}
+			
+			rs.close();
+			st.close();
+			
+			return uuidList;
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return uuidList;
+	}
+	
+	public List<String> findChildrenUuid(String pUuid, String cObjType)
+	{
+		List<String> uuidList = new ArrayList<>(500);
+		try
+		{
+	
+			PreparedStatement st = con.prepareStatement("select c_uuid from link where p_uuid=? and c_obj_type=? order by sort");
+			st.setString(1, pUuid);
+			st.setString(2, cObjType);
+			ResultSet rs = st.executeQuery();
+			
+			uuidList = new ArrayList<>(500);
+			
+			while(rs.next())
+			{
+				String uuid = rs.getString(1);
+				uuidList.add(uuid);
+			}
+			
+			rs.close();
+			st.close();
+			
+			return uuidList;
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return uuidList;
+	}
+	
+	public List<String> findParents(String cUuid)
+	{
+		List<String> uuidList = new ArrayList<>(500);
+		try
+		{
+	
+			PreparedStatement st = con.prepareStatement("select p_uuid from link where c_uuid = ? order by sort");
+			st.setString(1, cUuid);
+			ResultSet rs = st.executeQuery();
+			
+			uuidList = new ArrayList<>(500);
+			
+			while(rs.next())
+			{
+				String uuid = rs.getString(1);
+				uuidList.add(uuid);
+			}
+			
+			rs.close();
+			st.close();
+			
+			return uuidList;
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return uuidList;
+	}
+	
+	/*
 	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
 	{
 		String[] uuids = StringUtil.toUuids(objs);
@@ -800,7 +975,7 @@ public class LocalDB
 		return new ArrayList<>();
 	}
 	
-	
+	*/
 	
 	private Base selectBase(String baseUuid, Base obj)
 	throws Exception
@@ -1320,11 +1495,11 @@ public class LocalDB
 	}
 
 	
-	public String link(Base... objs)
+	public String link(String pUuid, String cUuid, Base... objs)
 	{
 		try
 		{
-			return insertLink(null,50, objs);
+			return insertLink(pUuid, cUuid,10, objs);
 		} 
 		catch (Exception e)
 		{
@@ -1334,51 +1509,47 @@ public class LocalDB
 		return null;
 	}
 	
-	public String link(String type, Base... objs)
-	{
-		try
-		{
-			return insertLink(type,50, objs);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		
-		//return null;
-	}
+	
 
 		
-	private String insertLink(String linkType, int sort, Base... objs) throws Exception
+	private String insertLink(String p_uuid, String c_uuid, int sort, Base... objs) throws Exception
 	{
-		
+		/*
 		PreparedStatement st = con.prepareStatement("insert into link"
 				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
 				+ " values(?,?,?,?,?,?,?,?,?) ");
-	
-		String uuid = UUIDGenerator.uuid("LINK");
+		*/
 		
-		int seq = 0;
+		PreparedStatement st = con.prepareStatement("insert into link"
+				+ "(uuid, p_uuid, c_uuid, p_obj_type,c_obj_type,sort, created_by, created_on) "
+				+ " values(?,?,?,?,?,?,?,?) ");
+		String linkUuid = UUIDGenerator.uuid("LINK");
+		
+		st.setString(1, linkUuid);
+		st.setString(2, p_uuid);
+		st.setString(3, c_uuid);
+		st.setString(4, ObjectUtil.getType(p_uuid));
+		st.setString(5, ObjectUtil.getType(c_uuid));
+		st.setInt(6, sort);
+		st.setString(7, BODefaults.BASE_USER);
+		st.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+		
+		boolean a = st.execute(null);
+		st.close();
+		
+		st = con.prepareStatement("insert into link_att"
+				+ "(uuid, link_uuid, name, value) "
+				+ " values(?,?,?,?) ");
+		
+		String linkAttUuid = UUIDGenerator.uuid("LNAT");
 		
 		for (Base base : objs)
 		{
-			if(StringUtil.isNullOrEmpty(base.getBaseUuid()))
-			{
-				throw new Exception(base.getName() + "object has no UUID, make sure that the save meathod on this object has been called ");
-			}
-					
-			seq++;
-			st.setString(1, uuid);
-			st.setString(2, StringUtil.isNullOrEmpty(linkType) ? "default" : linkType);
-			st.setString(3, base.getType());
-			st.setString(4, base.getBaseUuid());
 			
-			st.setInt(5, sort);
-			st.setInt(6, seq);
-			st.setInt(7, objs.length);
-			st.setString(8, BODefaults.BASE_USER);
-			st.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+			st.setString(1, linkAttUuid);
+			st.setString(2, linkUuid);
+			st.setString(3, "obj");
+			st.setString(4, base.getBaseUuid());
 			st.addbatch(base);
 			
 		}
@@ -1387,7 +1558,7 @@ public class LocalDB
 	
 		st.close();
 		
-		return uuid;
+		return linkUuid;
 	}
 	
 	
