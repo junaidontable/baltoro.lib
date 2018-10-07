@@ -66,7 +66,8 @@ public class LocalDB
 				{
 			
 					//String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.serviceNames.toString().replaceAll(",", "-").replaceAll("/", "-");
-					dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.hostId;
+					String serviceName = Baltoro.serviceNames.toString().replaceAll(",","");
+					dbName = "LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
 					
 					System.out.println("[[[[[[[[[[[ local db name = "+dbName+" ]]]]]]]]]]]]]]]");
 					db = new LocalDB(dbName);
