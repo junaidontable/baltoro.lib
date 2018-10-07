@@ -362,6 +362,7 @@ public class RequestWorker extends Thread
 		} 
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			throw e;
 		}
 

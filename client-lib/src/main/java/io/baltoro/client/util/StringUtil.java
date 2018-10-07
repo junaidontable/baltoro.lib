@@ -93,6 +93,11 @@ public class StringUtil
 	
 	public static String toInClause(String[] array)
 	{
+		if(array == null || array.length == 0)
+		{
+			return "";
+		}
+		
 		StringBuilder buffer = new StringBuilder(array.length * 10); 
 		for (String val : array) 
 		{

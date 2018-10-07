@@ -760,19 +760,29 @@ public class LocalDB
 	
 	public String getChildUuid(String pUuid)
 	{
-		return findLinkedUuid(pUuid,Direction.CHILD).get(0);
+		return findLinkedUuid(pUuid,null,Direction.CHILD).get(0);
 	}
 	
 	public <T extends Base> Base getChild(Class<T> _class, String pUuid)
 	{
-		String uuid = findLinkedUuid(pUuid,Direction.CHILD).get(0);
+		
+		String uuid = findLinkedUuid(pUuid,_class,Direction.CHILD).get(0);
+		if(StringUtil.isNullOrEmpty(uuid))
+		{
+			return null;
+		}
+		
 		Base base = get(uuid, _class);
 		return _class.cast(base);
 	}
 	
 	public <T extends Base> T getChild(Class<T> _class, Base obj)
 	{
-		String uuid = findLinkedUuid(obj.getBaseUuid(),Direction.CHILD).get(0);
+		String uuid = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD).get(0);
+		if(StringUtil.isNullOrEmpty(uuid))
+		{
+			return null;
+		}
 		Base base = get(uuid, _class);
 		return _class.cast(base);
 	}
@@ -780,35 +790,52 @@ public class LocalDB
 	public <T extends Base> List<T> getChildren(Class<T> _class, String pUuid)
 	{
 		
-		List<String> uuids = findLinkedUuid(pUuid,Direction.CHILD);
-		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		List<String> uuids = findLinkedUuid(pUuid,_class,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(uuids))
+		{
+			return new ArrayList<>();
+		}
+		
+		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
 		return objs;
 	}
 	
 	public <T extends Base> List<T> getChildren(Class<T> _class, Base obj)
 	{
-		
-		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),Direction.CHILD);
-		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(uuids))
+		{
+			return new ArrayList<>();
+		}
+		String[] _uuids = uuids.toArray(new String[uuids.size()]);
+		List<T> objs = (List<T>) get(_uuids);
 		return objs;
 	}
 	
 	
 	public String getParentUuid(String pUuid)
 	{
-		return findLinkedUuid(pUuid,Direction.PARENT).get(0);
+		return findLinkedUuid(pUuid,null,Direction.PARENT).get(0);
 	}
 	
 	public <T extends Base> Base getParent(Class<T> _class, String pUuid)
 	{
-		String uuid = findLinkedUuid(pUuid,Direction.PARENT).get(0);
+		String uuid = findLinkedUuid(pUuid,_class,Direction.PARENT).get(0);
+		if(StringUtil.isNullOrEmpty(uuid))
+		{
+			return null;
+		}
 		Base base = get(uuid, _class);
 		return _class.cast(base);
 	}
 	
 	public <T extends Base> T getParent(Class<T> _class, Base obj)
 	{
-		String uuid = findLinkedUuid(obj.getBaseUuid(),Direction.PARENT).get(0);
+		String uuid = findLinkedUuid(obj.getBaseUuid(),_class, Direction.PARENT).get(0);
+		if(StringUtil.isNullOrEmpty(uuid))
+		{
+			return null;
+		}
 		Base base = get(uuid, _class);
 		return _class.cast(base);
 	}
@@ -816,16 +843,26 @@ public class LocalDB
 	public <T extends Base> List<T> getParents(Class<T> _class, String cUuid)
 	{
 		
-		List<String> uuids = findLinkedUuid(cUuid,Direction.PARENT);
-		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		List<String> uuids = findLinkedUuid(cUuid,_class,Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(uuids))
+		{
+			return new ArrayList<>();
+		}
+		
+		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
 		return objs;
 	}
 	
 	public <T extends Base> List<T> getParents(Class<T> _class, Base obj)
 	{
 		
-		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),Direction.PARENT);
-		List<T> objs = (List<T>) get((String[])uuids.toArray());
+		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),_class,Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(uuids))
+		{
+			return new ArrayList<>();
+		}
+		
+		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
 		return objs;
 	}
 	
@@ -836,7 +873,7 @@ public class LocalDB
 	}
 	
 	
-	private List<String> findLinkedUuid(String uuid, Direction direction)
+	private List<String> findLinkedUuid(String uuid, Class<?> cObjType, Direction direction)
 	{
 		List<String> uuidList = new ArrayList<>(500);
 		try
@@ -844,11 +881,29 @@ public class LocalDB
 			PreparedStatement st = null;
 			if(direction == Direction.CHILD)
 			{
-				st = con.prepareStatement("select c_uuid from link where p_uuid = ? order by sort");
+				if(cObjType != null)
+				{
+					st = con.prepareStatement("select c_uuid from link where p_uuid = ? and c_obj_type=? order by sort");
+					String type = getType(cObjType);
+					st.setString(2, type);
+				}
+				else
+				{
+					st = con.prepareStatement("select c_uuid from link where p_uuid = ? order by sort");
+				}
 			}
 			else
 			{
-				st = con.prepareStatement("select p_uuid from link where c_uuid = ? order by sort");
+				if(cObjType != null)
+				{
+					st = con.prepareStatement("select p_uuid from link where c_uuid = ? and p_obj_type=? order by sort");
+					String type = getType(cObjType);
+					st.setString(2, type);
+				}
+				else
+				{
+					st = con.prepareStatement("select p_uuid from link where c_uuid = ? order by sort");
+				}
 			}
 				
 				
