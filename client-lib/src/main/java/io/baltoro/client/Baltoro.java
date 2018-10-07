@@ -491,6 +491,27 @@ public class Baltoro
     private static void processEnv() throws Exception
     {
     	  
+    	Properties hostProps = new Properties();
+		String hostPropFileName = System.getProperty("user.home")+"/baltoro_host.env";
+		File hostPropFile = new File(hostPropFileName);
+		if(!hostPropFile.exists())
+		{
+			hostPropFile.createNewFile();
+		}
+		hostProps.load(new FileInputStream(hostPropFile));
+		
+		hostId = hostProps.getProperty("baltoro.host.id");
+		if(StringUtil.isNullOrEmpty(hostId))
+		{
+			
+			hostId = ""+(999+new Random().nextInt(8999));
+			hostProps.put("baltoro.host.id", hostId);
+			FileOutputStream output = new FileOutputStream(hostPropFile);
+			hostProps.store(output,"");
+			
+		}
+		
+		
     	cs = new APIClient();
 		props = new Properties();
 		
@@ -542,25 +563,7 @@ public class Baltoro
 		//hostId = instanceUuid.substring(5,9);
 		//props.put("app.host.id", hostId);
 		
-		Properties hostProps = new Properties();
-		String hostPropFileName = System.getProperty("user.home")+"/baltoro_host.env";
-		File hostPropFile = new File(hostPropFileName);
-		if(!hostPropFile.exists())
-		{
-			hostPropFile.createNewFile();
-		}
-		hostProps.load(new FileInputStream(hostPropFile));
 		
-		hostId = hostProps.getProperty("baltoro.host.id");
-		if(StringUtil.isNullOrEmpty(hostId))
-		{
-			
-			hostId = ""+(999+new Random().nextInt(8999));
-			hostProps.put("baltoro.host.id", hostId);
-			FileOutputStream output = new FileOutputStream(hostPropFile);
-			hostProps.store(output,"");
-			
-		}
 		
 	
 		props.put("app.name", appName);
