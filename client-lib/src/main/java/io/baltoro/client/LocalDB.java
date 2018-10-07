@@ -1585,31 +1585,34 @@ public class LocalDB
 		st.setString(5, ObjectUtil.getType(c_uuid));
 		st.setInt(6, sort);
 		st.setString(7, BODefaults.BASE_USER);
-		st.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+		st.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
 		
 		boolean a = st.execute(null);
 		st.close();
 		
-		st = con.prepareStatement("insert into link_att"
-				+ "(uuid, link_uuid, name, value) "
-				+ " values(?,?,?,?) ");
-		
-		String linkAttUuid = UUIDGenerator.uuid("LNAT");
-		
-		for (Base base : objs)
+		if(objs != null && objs.length > 0)
 		{
+			st = con.prepareStatement("insert into link_att"
+					+ "(uuid, link_uuid, name, value) "
+					+ " values(?,?,?,?) ");
 			
-			st.setString(1, linkAttUuid);
-			st.setString(2, linkUuid);
-			st.setString(3, "obj");
-			st.setString(4, base.getBaseUuid());
-			st.addbatch(base);
+			String linkAttUuid = UUIDGenerator.uuid("LNAT");
 			
-		}
+			for (Base base : objs)
+			{
+				
+				st.setString(1, linkAttUuid);
+				st.setString(2, linkUuid);
+				st.setString(3, "obj");
+				st.setString(4, base.getBaseUuid());
+				st.addbatch(base);
+				
+			}
+			
+			st.executeBatch();
 		
-		st.executeBatch();
-	
-		st.close();
+			st.close();
+		}
 		
 		return linkUuid;
 	}
