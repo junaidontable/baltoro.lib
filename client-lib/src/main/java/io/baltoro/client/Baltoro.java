@@ -334,6 +334,11 @@ public class Baltoro
 		init(appName, null);
 	}
 	
+	public static String getServerUrl()
+	{
+		return serverURL;
+	}
+	
 	public static void init(String appName, Env env)
 	{
 		

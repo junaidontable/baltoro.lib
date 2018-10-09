@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
-import io.baltoro.client.Env;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
@@ -40,7 +39,7 @@ public class CloudServer
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
 	static ObjectMapper mapper = new ObjectMapper();
 	Client client;
-	String host;// = "http://127.0.0.1:8080";
+	//String serverUrl;// = "http://127.0.0.1:8080";
 	static Map<String, Map<String, NewCookie>> cookieMap = new HashMap<>();
 	static Map<String, Client> cientMap = new HashMap<>();
 	String appName;
@@ -62,7 +61,7 @@ public class CloudServer
 		
 		CheckResponseFilter responseFilter = new CheckResponseFilter(appName,map);
 	
-		
+		/*
 		this.host = "http://"+appName+".baltoro.io";
 		
 		
@@ -70,7 +69,7 @@ public class CloudServer
 		{
 			host = "http://localhost:8080";
 		}
-		
+		*/
 		
 		client = cientMap.get(appName);
 		if(client == null)
@@ -105,7 +104,7 @@ public class CloudServer
 	{
 		log.info("... Are you There ...");
 	
-		WebTarget target = client.target(host).path("/areyouthere");	
+		WebTarget target = client.target(Baltoro.getServerUrl()).path("/areyouthere");	
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.get();
 		
@@ -145,7 +144,7 @@ public class CloudServer
 
 	public <T> T execute(String path, EPData data, Class<T> returnType, Class<?> returnSubType)
 	{
-		WebTarget target = client.target(host).path(path);	
+		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
 	
 		log.info("url --> "+target);
 		
@@ -214,7 +213,7 @@ public class CloudServer
 	
 	public <T> T call(String path, EPData data, Class<T> returnType)
 	{
-		WebTarget target = client.target(host).path(path);	
+		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
 	
 		log.info("url --> "+target);
 		
@@ -260,7 +259,7 @@ public class CloudServer
 	
 	public Future<?> callAsyn(String path, EPData data, Class<?> returnType)
 	{
-		WebTarget target = client.target(host).path(path);	
+		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
 	
 		log.info("url --> "+target);
 		
