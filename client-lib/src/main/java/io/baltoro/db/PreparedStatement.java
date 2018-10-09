@@ -30,25 +30,23 @@ public class PreparedStatement
 	}
 	
 	
-	public boolean execute(Base obj) throws SQLException
+	public boolean executeAndReplicate(String ... att) throws SQLException
 	{
 		boolean x = stmt.execute();
+	
+		Replicator.push(stmt, att);
 		
-		if(obj == null)
-		{
-			return x;
-		}
-		
-		NoReplication repAnno = obj.getClass().getAnnotation(NoReplication.class);
-		if(repAnno == null)
-		{
-			Replicator.push(stmt, obj.getBaseUuid());
-		}
 		
 		return x;
 	}
 	
+	public boolean executeNoReplicate() throws SQLException
+	{
+		boolean x = stmt.execute();
+		return x;
+	}
 	
+	/*
 	public int executeUpdate(boolean doPush, Base obj) throws SQLException
 	{
 		
@@ -64,7 +62,7 @@ public class PreparedStatement
 		}
 		return x;
 	}
-	
+	*/
 
 	public ResultSet executeQuery() throws SQLException
 	{
@@ -97,22 +95,18 @@ public class PreparedStatement
 		stmt.setTimestamp(parameterIndex, x);
 	}
 	
-	public void addbatch(Base obj) throws SQLException
+	public void addbatch(String ... att) throws SQLException
 	{
-		if(obj != null)
+
+		if(repList == null)
 		{
-			NoReplication repAnno = obj.getClass().getAnnotation(NoReplication.class);
-			if(repAnno == null)
-			{
-				if(repList == null)
-				{
-					repList = new ArrayList<>();
-				}
-				
-				ReplicationTO repTO = Replicator.create(obj.getBaseUuid(), Replicator.getSQL(stmt));
-				repList.add(repTO);
-			}
+			repList = new ArrayList<>();
 		}
+		
+		ReplicationTO repTO = Replicator.create(Replicator.getSQL(stmt), att);
+		repList.add(repTO);
+			
+		
 		
 		stmt.addBatch();
 

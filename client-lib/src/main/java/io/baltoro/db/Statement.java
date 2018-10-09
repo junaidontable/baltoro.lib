@@ -15,12 +15,9 @@ public class Statement
 		this.stmt = stmt;
 	}
 	
-	public boolean execute(String sql, boolean replicate) throws SQLException
+	public boolean executeAndReplicate(String sql) throws SQLException
 	{
-		if(replicate)
-		{
-			Replicator.push(sql, null);
-		}
+		Replicator.push(sql, null);
 		
 		return stmt.execute(sql);
 	}

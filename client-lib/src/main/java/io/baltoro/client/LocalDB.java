@@ -156,7 +156,7 @@ public class LocalDB
 			if(repl == null)
 			{
 				initPull = true;
-				con.createStatement().execute("insert into repl_pull(nano, init_on, comp_on, server_nano, lcp_sql_count) values (0,"+System.currentTimeMillis()+",0,0,0)", false);
+				con.createStatement().executeNoReplication("insert into repl_pull(nano, init_on, comp_on, server_nano, lcp_sql_count) values (0,"+System.currentTimeMillis()+",0,0,0)");
 				repl = getRepPull(0);
 			}
 			
@@ -169,7 +169,7 @@ public class LocalDB
 			{
 				int count = Baltoro.cs.pullReplicationCount(repl);
 				con.createStatement().executeNoReplication("update repl_pull set sql_count="+count+", lcp_on="+System.currentTimeMillis()+" where nano="+repl.nano);
-				System.out.println( "count -- > "+count );
+				System.out.println( "Replication init pull totla count -- > "+count );
 				repl = getRepPull(0);
 			}
 			
@@ -221,33 +221,33 @@ public class LocalDB
 			Statement st = con.createStatement();
 			
 			st = con.createStatement();
-			st.execute("delete from base", false);
+			st.executeNoReplication("delete from base");
 			st.close();
 			
 			st = con.createStatement();
-			st.execute("delete from version", false);
+			st.executeNoReplication("delete from version");
 			st.close();
 			
 			st = con.createStatement();
-			st.execute("delete from metadata", false);
+			st.executeNoReplication("delete from metadata");
 			st.close();
 			
 			st = con.createStatement();
-			st.execute("delete from link", false);
+			st.executeNoReplication("delete from link");
 			st.close();
 			
 			st = con.createStatement();
-			st.execute("delete from link_att", false);
-			st.close();
-			
-			
-			st = con.createStatement();
-			st.execute("delete from permission", false);
+			st.executeNoReplication("delete from link_att");
 			st.close();
 			
 			
 			st = con.createStatement();
-			st.execute("delete from type", false);
+			st.executeNoReplication("delete from permission");
+			st.close();
+			
+			
+			st = con.createStatement();
+			st.executeNoReplication("delete from type");
 			st.close();
 			
 			
@@ -258,11 +258,11 @@ public class LocalDB
 			*/
 			
 			st = con.createStatement();
-			st.execute("delete from rep_pull", false);
+			st.executeNoReplication("delete from rep_pull");
 			st.close();
 			
 			st = con.createStatement();
-			st.execute("delete from rep_push", false);
+			st.executeNoReplication("delete from rep_push");
 			st.close();
 		
 			
@@ -278,33 +278,33 @@ public class LocalDB
 		Statement st = con.createStatement();
 		
 		st = con.createStatement();
-		st.execute("drop table base", false);
+		st.executeNoReplication("drop table base");
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table version", false);
+		st.executeNoReplication("drop table version");
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table metadata", false);
+		st.executeNoReplication("drop table metadata");
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table link", false);
+		st.executeNoReplication("drop table link");
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table link_att", false);
-		st.close();
-		
-		
-		st = con.createStatement();
-		st.execute("drop table permission", false);
+		st.executeNoReplication("drop table link_att");
 		st.close();
 		
 		
 		st = con.createStatement();
-		st.execute("drop table type", false);
+		st.executeNoReplication("drop table permission");
+		st.close();
+		
+		
+		st = con.createStatement();
+		st.executeNoReplication("drop table type");
 		st.close();
 		
 		
@@ -315,11 +315,11 @@ public class LocalDB
 		*/
 		
 		st = con.createStatement();
-		st.execute("drop table rep_pull", false);
+		st.executeNoReplication("drop table rep_pull");
 		st.close();
 		
 		st = con.createStatement();
-		st.execute("drop table rep_push", false);
+		st.executeNoReplication("drop table rep_push");
 		st.close();
 	}
 	
@@ -341,7 +341,7 @@ public class LocalDB
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("base", "name");
@@ -363,7 +363,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("version", "name");
@@ -384,7 +384,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (base_uuid,version_uuid,name))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("metadata", "name");
@@ -435,7 +435,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("link", "p_uuid");
@@ -455,7 +455,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("link_att", "link_uuid");
@@ -480,7 +480,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (uuid))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("permission", "base_uuid");
@@ -498,7 +498,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (class))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("type", "type");
@@ -517,7 +517,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (nano))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("repl_pull", "init_on");
@@ -536,7 +536,7 @@ public class LocalDB
 		sql.append("PRIMARY KEY (nano))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), false);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("repl_push", "init_on");
@@ -578,10 +578,11 @@ public class LocalDB
 	
 		String sql = "CREATE INDEX IDX_"+tableName+"_"+indexName.toUpperCase()+" on "+tableName+"("+cols+")";
 		//System.out.println(sql);
-		st.execute(sql, false);
+		st.executeNoReplication(sql);
 		st.close();
 	}
 	
+
 	
 	public <T extends Base> T get(String baseUuid, Class<T> _class)
 	{
@@ -1272,7 +1273,7 @@ public class LocalDB
 			st.setString(9, obj.getCreatedBy());
 			st.setTimestamp(10, obj.getCreatedOn());
 			
-			st.execute(obj);
+			st.executeAndReplicate(obj.getType());
 				
 			st.close();
 		} 
@@ -1298,7 +1299,7 @@ public class LocalDB
 			st.setString(4, obj.getBaseUuid());
 			
 			
-			st.execute(obj);
+			st.executeAndReplicate(obj.getType());
 			st.close();
 		} 
 		catch (Exception e)
@@ -1334,7 +1335,7 @@ public class LocalDB
 			st.setString(5, obj.getCreatedBy());
 			st.setTimestamp(6, obj.getCreatedOn());
 			
-			st.execute(obj);
+			st.executeAndReplicate(obj.getType());
 			
 			st.close();
 		} 
@@ -1497,7 +1498,7 @@ public class LocalDB
 				st.setString(5, obj.getCreatedBy());
 				st.setTimestamp(6, obj.getCreatedOn());
 				
-				st.addbatch(obj);
+				st.addbatch(obj.getType());
 				
 			}
 			
@@ -1540,7 +1541,7 @@ public class LocalDB
 				st.setString(2, type);
 				st.setString(3, BODefaults.BASE_USER);
 				st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-				st.execute(null);
+				st.executeAndReplicate(type);
 				
 				st.close();
 				
@@ -1603,6 +1604,49 @@ public class LocalDB
 	}
 
 	
+
+	public String link(Base pObj, Base cOobj, Base... objs)
+	{
+		try
+		{
+			return insertLink(pObj.getBaseUuid(), cOobj.getBaseUuid(),10, objs);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public String link(Base pObj, Base cOobj)
+	{
+		try
+		{
+			return insertLink(pObj.getBaseUuid(), cOobj.getBaseUuid(),10);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public String link(String pUuid, String cUuid)
+	{
+		try
+		{
+			return insertLink(pUuid, cUuid,10);
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public String link(String pUuid, String cUuid, Base... objs)
 	{
 		try
@@ -1632,17 +1676,19 @@ public class LocalDB
 				+ "(uuid, p_uuid, c_uuid, p_obj_type,c_obj_type,sort, created_by, created_on) "
 				+ " values(?,?,?,?,?,?,?,?) ");
 		String linkUuid = UUIDGenerator.uuid("LINK");
+		String pObjType = ObjectUtil.getType(p_uuid);
+		String cObjType = ObjectUtil.getType(c_uuid);
 		
 		st.setString(1, linkUuid);
 		st.setString(2, p_uuid);
 		st.setString(3, c_uuid);
-		st.setString(4, ObjectUtil.getType(p_uuid));
-		st.setString(5, ObjectUtil.getType(c_uuid));
+		st.setString(4, pObjType);
+		st.setString(5, cObjType);
 		st.setInt(6, sort);
 		st.setString(7, BODefaults.BASE_USER);
 		st.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
 		
-		boolean a = st.execute(null);
+		boolean a = st.executeAndReplicate(pObjType, cObjType);
 		st.close();
 		
 		if(objs != null && objs.length > 0)
@@ -1660,7 +1706,7 @@ public class LocalDB
 				st.setString(2, linkUuid);
 				st.setString(3, "obj");
 				st.setString(4, base.getBaseUuid());
-				st.addbatch(base);
+				st.addbatch(null);
 				
 			}
 			
@@ -1670,6 +1716,27 @@ public class LocalDB
 		}
 		
 		return linkUuid;
+	}
+	
+	private boolean deletLink(String uuid) throws Exception
+	{
+		/*
+		PreparedStatement st = con.prepareStatement("insert into link"
+				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
+				+ " values(?,?,?,?,?,?,?,?,?) ");
+		*/
+		
+		PreparedStatement st = con.prepareStatement("delete from link where uuid = ?");
+		st.setString(1, uuid);
+		boolean a = st.executeAndReplicate();
+		st.close();
+		
+		st = con.prepareStatement("delete from link_att where link_uuid = ?");
+		st.setString(1, uuid);
+		a = st.executeAndReplicate("LNAT");
+		st.close();
+		
+		return a;
 	}
 	
 	
@@ -1705,7 +1772,7 @@ public class LocalDB
 		st.setLong(1, nano);
 		st.setLong(2, System.currentTimeMillis());
 		st.setInt(3, 0);
-		st.execute(null);
+		st.executeNoReplicate();
 		st.close();
 		
 		return nano;
@@ -1718,7 +1785,7 @@ public class LocalDB
 		st.setLong(1, System.currentTimeMillis());
 		st.setLong(2, serverNano);
 		st.setLong(3, nano);
-		st.execute(null);
+		st.executeNoReplicate();
 		st.close();
 		
 	}
@@ -1731,7 +1798,7 @@ public class LocalDB
 		st.setLong(1, nano);
 		st.setLong(2, System.currentTimeMillis());
 		st.setInt(3, sqlCount);
-		st.execute(null);
+		st.executeNoReplicate();
 		st.close();
 		
 		return nano;
@@ -1744,7 +1811,7 @@ public class LocalDB
 		st.setLong(1, System.currentTimeMillis());
 		st.setLong(2, serverNano);
 		st.setLong(3, nano);
-		st.execute(null);
+		st.executeNoReplicate();
 		st.close();
 		
 	}
@@ -1791,7 +1858,7 @@ public class LocalDB
 		
 		ReplicationTO[] tos = Baltoro.cs.pullReplication("0",""+repl.serverNano);
 		
-		System.out.println(" ===========> tos count "+tos.length);
+		System.out.println(" ===========> pulling replicated records total "+tos.length);
 		
 		//System.out.print("[");
 		//ReplicationTO lastTo = null;

@@ -15,6 +15,7 @@ import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.ObjectUtil;
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.ReplicationTO;
 
 public class Replicator
@@ -109,6 +110,7 @@ public class Replicator
 				} 
 				catch (StandardException se)
 				{
+					se.printStackTrace();
 					/* non-string parameter */
 				}
 				
@@ -148,7 +150,7 @@ public class Replicator
 		
 	}
 	
-	public static void push(PreparedStatement st, String objUuid)
+	public static void push(PreparedStatement st, String ... att)
 	{
 
 		String sql = getSQL(st);
@@ -156,7 +158,7 @@ public class Replicator
 		ReplicationTO obj = new ReplicationTO();
 		obj.nano = System.nanoTime();
 		obj.cmd = sql;
-		obj.att = getAtt(objUuid, sql);
+		obj.att = getAtt(sql, att);
 				
 		pushQueue.add(obj);
 	}
@@ -172,57 +174,73 @@ public class Replicator
 		pushQueue.add(obj);
 	}
 	
-	public static void push(String sql, String objUuid)
+	public static void push(String sql, String att)
 	{
 
 		ReplicationTO obj = new ReplicationTO();
 		obj.nano = System.nanoTime();
-		obj.att = getAtt(objUuid, sql);
+		obj.att = att;
 		obj.cmd = sql;
 				
 		pushQueue.add(obj);
 	}
 	
-	public static ReplicationTO create(String objUuid, String sql)
+	public static ReplicationTO create(String sql, String ... att)
 	{
 		
 		ReplicationTO to = new ReplicationTO();
 		to.nano = System.nanoTime();
-		to.att = getAtt(objUuid, sql);
+		to.att = getAtt(sql, att);
 		to.cmd = sql;
 		
 		return to;
 	}
 	
 	
-	private static String getAtt(String objUuid, String sql)
+	
+	private static String getAtt(String sql, String ... att)
 	{
-		String type = "";
-		if(sql.startsWith("insert into link"))
+		StringBuffer token = new StringBuffer();
+		
+		if(sql.startsWith("insert into link_att"))
 		{
-			type = "LINK";
+			token.append("LKAT");
+		}
+		else if(sql.startsWith("insert into link"))
+		{
+			token.append("LINK");
 		}
 		else if(sql.startsWith("insert into base"))
 		{
-			type = "BASE";
+			token.append("BASE");
 		}
 		else if(sql.startsWith("insert into version"))
 		{
-			type = "VERN";
+			token.append("VERN");
 		}
 		else if(sql.startsWith("insert into metadata("))
 		{
-			type = "MTDT";
+			token.append("MTDT");
 		}
 		else if(sql.startsWith("insert into permission"))
 		{
-			type = "PERM";
+			token.append("PERM");
 		}
 		
-		String sNames = Baltoro.serviceNames.toString().replaceAll(",", " ").toUpperCase();
-		String objType = ObjectUtil.getType(objUuid);
 		
-		return type+" "+sNames+" "+ objType+" "+ objUuid;
+		String sNames = Baltoro.serviceNames.toString().replaceAll(",", " ").toUpperCase();
+		token.append(" "+sNames+" ");
+		
+		if(StringUtil.isNotNullAndNotEmpty(att))
+		{
+			for (int i = 0; i < att.length; i++)
+			{
+				token.append(att[i]+" ");
+			}
+		}
+		
+		
+		return token.toString();
 			
 	}
 	
