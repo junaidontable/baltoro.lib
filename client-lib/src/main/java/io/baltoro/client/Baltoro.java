@@ -208,12 +208,17 @@ public class Baltoro
 		
 	}
 	
-	public static <T> T callSync(String appName, String path, Class<T> returnType)
+	public static <T> T callSync(String path, Class<T> returnType, ParamInput input)
 	{
-		return callSync(appName, path, returnType, null);
+		return callSync(Baltoro.appName, path, returnType, input);
 	}
 	
-	public static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
+	public static <T> T callSync(String path, Class<T> returnType)
+	{
+		return callSync(Baltoro.appName, path, returnType, null);
+	}
+	
+	private static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
@@ -238,7 +243,12 @@ public class Baltoro
 	}
 	
 	
-	public static Future<?> callAsync(String appName, String path, Class<?> returnType)
+	public static Future<?> callAsync(String path, Class<?> returnType, ParamInput input)
+	{
+		return callAsync(appName, path, returnType, input);
+	}
+	
+	public static Future<?> callAsync(String path, Class<?> returnType)
 	{
 		return callAsync(appName, path, returnType, null);
 	}

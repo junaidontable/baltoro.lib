@@ -23,6 +23,11 @@ public class Base
 		return baseUuid;
 	}
 	
+	public void setUuid(String uuid)
+	{
+		this.baseUuid = uuid;
+	}
+	
 	public String getContainerUuid()
 	{
 		return containerUuid;

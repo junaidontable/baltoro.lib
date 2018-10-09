@@ -761,13 +761,29 @@ public class LocalDB
 	
 	public String getChildUuid(String pUuid)
 	{
-		return findLinkedUuid(pUuid,null,Direction.CHILD).get(0);
+		List<String> list = findLinkedUuid(pUuid,null,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		return list.get(0);
+	}
+	
+	public List<String> getChildrenUuids(String pUuid)
+	{
+		return findLinkedUuid(pUuid,null,Direction.CHILD);
 	}
 	
 	public <T extends Base> Base getChild(Class<T> _class, String pUuid)
 	{
+		List<String> list = findLinkedUuid(pUuid,_class,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
 		
-		String uuid = findLinkedUuid(pUuid,_class,Direction.CHILD).get(0);
+		String uuid = list.get(0);
 		if(StringUtil.isNullOrEmpty(uuid))
 		{
 			return null;
@@ -779,7 +795,13 @@ public class LocalDB
 	
 	public <T extends Base> T getChild(Class<T> _class, Base obj)
 	{
-		String uuid = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD).get(0);
+		List<String> list = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		String uuid = list.get(0);
 		if(StringUtil.isNullOrEmpty(uuid))
 		{
 			return null;
@@ -816,12 +838,29 @@ public class LocalDB
 	
 	public String getParentUuid(String pUuid)
 	{
-		return findLinkedUuid(pUuid,null,Direction.PARENT).get(0);
+		List<String> list = findLinkedUuid(pUuid,null,Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		return list.get(0);
+	}
+	
+	public List<String> getParentUuids(String pUuid)
+	{
+		return findLinkedUuid(pUuid,null,Direction.PARENT);
 	}
 	
 	public <T extends Base> Base getParent(Class<T> _class, String pUuid)
 	{
-		String uuid = findLinkedUuid(pUuid,_class,Direction.PARENT).get(0);
+		List<String> list = findLinkedUuid(pUuid,null,Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		String uuid = list.get(0);
 		if(StringUtil.isNullOrEmpty(uuid))
 		{
 			return null;
@@ -832,7 +871,12 @@ public class LocalDB
 	
 	public <T extends Base> T getParent(Class<T> _class, Base obj)
 	{
-		String uuid = findLinkedUuid(obj.getBaseUuid(),_class, Direction.PARENT).get(0);
+		List<String> list = findLinkedUuid(obj.getBaseUuid(),_class, Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		String uuid = list.get(0);
 		if(StringUtil.isNullOrEmpty(uuid))
 		{
 			return null;
@@ -1212,6 +1256,7 @@ public class LocalDB
 		obj.setPermissionType(rs.getString("permission_type"));
 		obj.setCreatedBy(rs.getString("created_by"));
 		obj.setCreatedOn(rs.getTimestamp("created_on"));
+		obj.setVersionUuid(rs.getString("latest_version_uuid"));
 		
 	}
 	

@@ -253,6 +253,7 @@ public class CloudServer
 		}
 	
 		Object obj = ObjectUtil.toObject(returnType, json.getBytes());
+		
 		return returnType.cast(obj);
 	
 	}

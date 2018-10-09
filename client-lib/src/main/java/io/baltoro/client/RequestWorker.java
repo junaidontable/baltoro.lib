@@ -355,6 +355,7 @@ public class RequestWorker extends Thread
 				} 
 				else
 				{
+					//String json = mapper.writeValueAsString(returnObj);
 					to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
 				}
 			}
