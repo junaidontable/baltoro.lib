@@ -348,6 +348,7 @@ public class LocalDB
 		createIndex("base", "created_on");
 		createIndex("base", "container_uuid");
 		createIndex("base", "type");
+		createIndex("base", "latest_version_uuid");
 		createIndex("base", "name,container_uuid,type");
 		
 		System.out.println("Base Table Created");
@@ -689,6 +690,77 @@ public class LocalDB
 		
 		return objList.get(0);
 		
+	}
+	
+	public <T extends Base> T getByProperty(Class<T> _class, String name, String value)
+	{
+		//String type = getType(_class);
+		String type = getType(_class);
+		List<String> list = findByProperty(type, name, value);
+		if(list == null || list.isEmpty())
+		{
+			return null;
+		}
+		
+		List<Base> objList = get(list.toArray(new String[list.size()]));
+		if(StringUtil.isNullOrEmpty(objList))
+		{
+			return null;
+		}
+		
+		return _class.cast(objList.get(0));
+		
+	}
+	
+	public <T extends Base> List<T> findByProperty(Class<T> _class, String name, String value)
+	{
+		//String type = getType(_class);
+		String type = getType(_class);
+		List<String> list = findByProperty(type, name, value);
+		if(list == null || list.isEmpty())
+		{
+			return null;
+		}
+		
+		List<Base> objList = get(list.toArray(new String[list.size()]));
+		if(StringUtil.isNullOrEmpty(objList))
+		{
+			return null;
+		}
+		
+		return (List<T>) objList;
+		
+	}
+	
+	public List<String> findByProperty(String type, String name, String value)
+	{
+		
+		List<String> list = new ArrayList<>(200);
+		try
+		{
+			PreparedStatement st = con.prepareStatement("select uuid from base "
+					+ "where latest_version_uuid in (select uuid from version where name=? and value=?) "
+					+ "and type = ?");
+			st.setString(1, name);
+			st.setString(2, value);
+			st.setString(3, type);
+			
+			ResultSet rs = st.executeQuery();
+			while(rs.next())
+			{
+				list.add(rs.getString(1));
+			}
+			rs.close();
+			st.close();
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return list;
 	}
 		
 	
