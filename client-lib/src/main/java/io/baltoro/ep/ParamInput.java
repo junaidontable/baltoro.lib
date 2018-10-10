@@ -18,6 +18,12 @@ public interface ParamInput
 		return this;
 	}
 	
+	default ParamInput add(String name, Object value)
+	{
+		epData.add(name, value);
+		return this;
+	}
+	
 	default EPData getEPData()
 	{
 		get(this);

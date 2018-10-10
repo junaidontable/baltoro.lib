@@ -443,6 +443,10 @@ public class RequestWorker extends Thread
 				{
 					methodInputData[i] = requestValue;
 				} 
+				else
+				{
+					methodInputData[i] = mapper.readValue(requestValue[0], paramClass);
+				}
 			}
 			else
 			{
