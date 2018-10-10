@@ -131,6 +131,8 @@ public class RequestWorker extends Thread
 		
 		Baltoro.userSessionIdCtx.set(req.getSessionId());
 		Baltoro.serviceNameCtx.set(to.serviceName);
+		Baltoro.userRequestCtx.set(req);
+		Baltoro.userResponseCtx.set(res);
 		//responseCtx.set(res);
 		
 		try
@@ -176,40 +178,13 @@ public class RequestWorker extends Thread
 		finally 
 		{
 			
-			/*
-			if(to.webSocketContext == null)
-			{
-				to.requestContext = null;
-			}
 			
-			
-			byte[] bytes = null;
-			try
-			{
-				bytes = ObjectUtil.toJason(to);
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				System.out.println("RESPONSE CANNOT CONVERT TO JSON , !!!! CHECK !");
-				//return;
-			}
-			
-			
-			if(bytes != null)
-			{
-				System.out.println("** >>>>>>>>>>>>>>>> executing "+path+" return json len : "+bytes.length);
-				ByteBuffer buffer = ByteBuffer.wrap(bytes);
-				WSSessions.get().addToResponseQueue(buffer);
-			}
-			*/
-			
-			//System.out.println("** >>>>>>>>>>>>>>>> executing "+to.requestContext.getApiPath());
 			ResponseQueue.instance().addToResponseQueue(to);
-			//WorkerPool.done(this);
 			
-			//requestCtx.set(null);
-			//wsCtx.set(null);
+			Baltoro.userSessionIdCtx.set(null);
+			Baltoro.serviceNameCtx.set(null);
+			Baltoro.userRequestCtx.set(null);
+			Baltoro.userResponseCtx.set(null);
 			
 		
 		}

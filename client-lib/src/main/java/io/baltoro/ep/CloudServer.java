@@ -16,21 +16,26 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
+import org.bouncycastle.asn1.cms.SCVPReqRes;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.Baltoro;
+import io.baltoro.client.CSRequestFilter;
+import io.baltoro.client.CSResponseFilter;
 import io.baltoro.client.CheckRequestFilter;
 import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
+import io.baltoro.to.RequestContext;
 
 public class CloudServer
 {
@@ -39,7 +44,6 @@ public class CloudServer
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
 	static ObjectMapper mapper = new ObjectMapper();
 	Client client;
-	//String serverUrl;// = "http://127.0.0.1:8080";
 	static Map<String, Map<String, NewCookie>> cookieMap = new HashMap<>();
 	static Map<String, Client> cientMap = new HashMap<>();
 	String appName;
@@ -48,35 +52,30 @@ public class CloudServer
 	
 	
 	
-	public CloudServer(String appName)
+	public CloudServer(String appName, RequestContext req)
 	{
 		this.appName = appName;
 		
-		Map<String, NewCookie> map = cookieMap.get(appName);
-		if(map == null)
+		Map<String, NewCookie> cMap = cookieMap.get(appName);
+		if(cMap == null)
 		{
-			map = new HashMap<>(50);
-			cookieMap.put(appName, map);
+			cMap = new HashMap<>(50);
+			cookieMap.put(appName, cMap);
 		}
 		
-		CheckResponseFilter responseFilter = new CheckResponseFilter(appName,map);
+		cMap.put("BLT_SESSION_ID", new NewCookie("BLT_SESSION_ID", req.getSessionId()));
+		
+		
+		CSResponseFilter responseFilter = new CSResponseFilter(cMap);
+		CSRequestFilter requestFilter = new CSRequestFilter(cMap);
 	
-		/*
-		this.host = "http://"+appName+".baltoro.io";
-		
-		
-		if(Baltoro.getEnv() == Env.LOC)
-		{
-			host = "http://localhost:8080";
-		}
-		*/
 		
 		client = cientMap.get(appName);
 		if(client == null)
 		{
 			client = ClientBuilder.newBuilder()
 					.register(JacksonFeature.class)
-					.register(CheckRequestFilter.class)
+					.register(requestFilter)
 					.register(responseFilter)
 					.build();
 			
@@ -84,36 +83,8 @@ public class CloudServer
 		}
 		
 		
-		
-
-	
-		try
-		{
-			//areYouThere();
-			online = true;
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			online = false;
-		}
 	}
 	
-	
-	void areYouThere() throws Exception
-	{
-		log.info("... Are you There ...");
-	
-		WebTarget target = client.target(Baltoro.getServerUrl()).path("/areyouthere");	
-		Invocation.Builder ib =	getIB(target);
-		Response response = ib.get();
-		
-		//String sessionId = response.readEntity(String.class);
-		//this.sessionCookie = new Cookie("JSESSIONID", sessionId,"/", null);
-		//handleSessionCookie(response);
-	}
-	
-
 
 	
 	

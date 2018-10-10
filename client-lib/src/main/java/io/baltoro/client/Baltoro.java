@@ -23,6 +23,8 @@ import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
+import io.baltoro.to.RequestContext;
+import io.baltoro.to.ResponseContext;
 
 
 public class Baltoro 
@@ -36,6 +38,9 @@ public class Baltoro
 	}
 	
 	static ThreadLocal<String> userSessionIdCtx = new ThreadLocal<>();
+	static ThreadLocal<RequestContext> userRequestCtx = new ThreadLocal<>();
+	static ThreadLocal<ResponseContext> userResponseCtx = new ThreadLocal<>();
+	
 	static ThreadLocal<String> serviceNameCtx = new ThreadLocal<>();
 	
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
@@ -210,19 +215,19 @@ public class Baltoro
 	
 	public static <T> T callSync(String path, Class<T> returnType, ParamInput input)
 	{
-		return callSync(Baltoro.appName, path, returnType, input);
+		return callSync(Baltoro.appName, Baltoro.userRequestCtx.get(), path, returnType, input);
 	}
 	
 	public static <T> T callSync(String path, Class<T> returnType)
 	{
-		return callSync(Baltoro.appName, path, returnType, null);
+		return callSync(Baltoro.appName, Baltoro.userRequestCtx.get(), path, returnType, null);
 	}
 	
-	private static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
+	private static <T> T callSync(String appName, RequestContext req, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
-			CloudServer cServer = new CloudServer(appName);
+			CloudServer cServer = new CloudServer(appName, req);
 			EPData epData = null;
 			if(input != null)
 			{
@@ -245,19 +250,19 @@ public class Baltoro
 	
 	public static Future<?> callAsync(String path, Class<?> returnType, ParamInput input)
 	{
-		return callAsync(appName, path, returnType, input);
+		return callAsync(appName, Baltoro.userRequestCtx.get(), path, returnType, input);
 	}
 	
 	public static Future<?> callAsync(String path, Class<?> returnType)
 	{
-		return callAsync(appName, path, returnType, null);
+		return callAsync(appName, Baltoro.userRequestCtx.get(), path, returnType, null);
 	}
 	
-	public static Future<?> callAsync(String appName, String path, Class<?> returnType, ParamInput input)
+	public static Future<?> callAsync(String appName, RequestContext req, String path, Class<?> returnType, ParamInput input)
 	{
 		try
 		{
-			CloudServer cServer = new CloudServer(appName);
+			CloudServer cServer = new CloudServer(appName, req);
 			EPData epData = null;
 			if(input != null)
 			{
