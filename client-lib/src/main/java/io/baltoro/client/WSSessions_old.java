@@ -1,17 +1,9 @@
 package io.baltoro.client;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.websocket.Session;
-
-import io.baltoro.client.util.StringUtil;
-
-
-public class WSSessions
+public class WSSessions_old
 {
 
+	/*
 	private static WSSessions sessions;
 	private Set<Session> set;
 	
@@ -106,4 +98,5 @@ public class WSSessions
 		
 		
 	}
+	*/
 }

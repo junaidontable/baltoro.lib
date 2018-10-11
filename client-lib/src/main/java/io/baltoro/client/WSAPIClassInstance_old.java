@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class WSAPIClassInstance
+public class WSAPIClassInstance_old
 {
 
+	/*
 	private static WSAPIClassInstance instances;
 	private Map<String, Object> map;
 	
@@ -42,4 +43,5 @@ public class WSAPIClassInstance
 	{
 		map.remove(reqUuid+_class.getName());
 	}
+	*/
 }

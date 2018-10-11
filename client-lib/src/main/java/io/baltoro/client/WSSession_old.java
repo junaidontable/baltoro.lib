@@ -1,6 +1,6 @@
 package io.baltoro.client;
 
-public class WSSession
+public class WSSession_old
 {
 	
 	/*

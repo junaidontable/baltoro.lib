@@ -1,11 +1,11 @@
 package io.baltoro.client;
 
-import io.baltoro.to.AppTO;
-import io.baltoro.to.BaseTO;
-import io.baltoro.to.UserTO;
 import io.baltoro.features.EPReturnType;
 import io.baltoro.features.Endpoint;
 import io.baltoro.features.Param;
+import io.baltoro.to.AppTO;
+import io.baltoro.to.BaseTO;
+import io.baltoro.to.UserTO;
 
 public interface AdminEP
 {

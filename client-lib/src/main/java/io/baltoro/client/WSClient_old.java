@@ -1,18 +1,10 @@
 package io.baltoro.client;
 
-import java.net.URI;
-import java.util.concurrent.Callable;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.Session;
-
-import org.glassfish.tyrus.client.ClientManager;
-
-class WSClient //implements Callable<Session>
+class WSClient_old
 {
 	
 	 
-	WSClient()
+	WSClient_old()
 	{
 		
 	}

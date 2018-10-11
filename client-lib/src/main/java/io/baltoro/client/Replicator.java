@@ -14,7 +14,6 @@ import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.ReplicationTO;
 
