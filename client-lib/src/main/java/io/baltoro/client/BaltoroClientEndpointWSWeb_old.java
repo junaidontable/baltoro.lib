@@ -1,19 +1,9 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-import java.util.logging.Logger;
-
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
-import javax.websocket.OnClose;
-import javax.websocket.Session;
-
-
-public class BaltoroClientEndpointWSWeb extends Endpoint
+public class BaltoroClientEndpointWSWeb_old
 {
 
+	/*
 	private static Logger log = Logger.getLogger(BaltoroClientEndpointWSWeb.class.getName());
 	private String appName;
 	private String path;
@@ -61,7 +51,7 @@ public class BaltoroClientEndpointWSWeb extends Endpoint
 			e.printStackTrace();
 		} 
 	}
-	
+	*/
 	
 
 }

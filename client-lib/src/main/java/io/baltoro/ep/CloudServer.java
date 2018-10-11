@@ -44,8 +44,7 @@ public class CloudServer
 	static Logger log = Logger.getLogger(CloudServer.class.getName());
 	static ObjectMapper mapper = new ObjectMapper();
 	Client client;
-	static Map<String, Map<String, NewCookie>> cookieMap = new HashMap<>();
-	static Map<String, Client> cientMap = new HashMap<>();
+	static Map<String, Client> appMap = new HashMap<>();
 	String appName;
 	
 	boolean online = false;
@@ -56,21 +55,12 @@ public class CloudServer
 	{
 		this.appName = appName;
 		
-		Map<String, NewCookie> cMap = cookieMap.get(appName);
-		if(cMap == null)
-		{
-			cMap = new HashMap<>(50);
-			cookieMap.put(appName, cMap);
-		}
 		
-		cMap.put("BLT_SESSION_ID", new NewCookie("BLT_SESSION_ID", req.getSessionId()));
-		
-		
-		CSResponseFilter responseFilter = new CSResponseFilter(cMap);
-		CSRequestFilter requestFilter = new CSRequestFilter(cMap);
+		CSResponseFilter responseFilter = new CSResponseFilter(appName);
+		CSRequestFilter requestFilter = new CSRequestFilter(appName);
 	
 		
-		client = cientMap.get(appName);
+		client = appMap.get(appName);
 		if(client == null)
 		{
 			client = ClientBuilder.newBuilder()
@@ -79,7 +69,7 @@ public class CloudServer
 					.register(responseFilter)
 					.build();
 			
-			cientMap.put(appName, client);
+			appMap.put(appName, client);
 		}
 		
 		
@@ -93,6 +83,8 @@ public class CloudServer
 	
 		
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
+		
+		/*
 		Map<String, NewCookie> map = cookieMap.get(appName);
 		
 		Set<String> cookieNames = map.keySet();
@@ -108,7 +100,8 @@ public class CloudServer
 		}
 		
 		ib.header("Cookie", buffer.toString());
-	
+		*/
+		
 		return ib;
 	}
 	

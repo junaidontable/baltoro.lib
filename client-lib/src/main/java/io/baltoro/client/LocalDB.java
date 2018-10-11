@@ -908,9 +908,9 @@ public class LocalDB
 	}
 	
 	
-	public String getParentUuid(String pUuid)
+	public String getParentUuid(String cUuid)
 	{
-		List<String> list = findLinkedUuid(pUuid,null,Direction.PARENT);
+		List<String> list = findLinkedUuid(cUuid,null,Direction.PARENT);
 		if(StringUtil.isNullOrEmpty(list))
 		{
 			return null;
@@ -919,14 +919,14 @@ public class LocalDB
 		return list.get(0);
 	}
 	
-	public List<String> getParentUuids(String pUuid)
+	public List<String> getParentUuids(String cUuid)
 	{
-		return findLinkedUuid(pUuid,null,Direction.PARENT);
+		return findLinkedUuid(cUuid,null,Direction.PARENT);
 	}
 	
-	public <T extends Base> Base getParent(Class<T> _class, String pUuid)
+	public <T extends Base> Base getParent(Class<T> _class, String cUuid)
 	{
-		List<String> list = findLinkedUuid(pUuid,null,Direction.PARENT);
+		List<String> list = findLinkedUuid(cUuid,null,Direction.PARENT);
 		if(StringUtil.isNullOrEmpty(list))
 		{
 			return null;
@@ -1850,6 +1850,29 @@ public class LocalDB
 		
 		st = con.prepareStatement("delete from link_att where link_uuid = ?");
 		st.setString(1, uuid);
+		a = st.executeAndReplicate("LNAT");
+		st.close();
+		
+		return a;
+	}
+	
+	private boolean deletLink(String pUuid, String cUuid) throws Exception
+	{
+		/*
+		PreparedStatement st = con.prepareStatement("insert into link"
+				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
+				+ " values(?,?,?,?,?,?,?,?,?) ");
+		*/
+		
+		PreparedStatement st = con.prepareStatement("delete from link where p_uuid = ? and c_uuid=?");
+		st.setString(1, pUuid);
+		st.setString(2, cUuid);
+		
+		boolean a = st.executeAndReplicate();
+		st.close();
+		
+		st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ? and c_uuid=?) ?");
+		st.setString(1, pUuid);
 		a = st.executeAndReplicate("LNAT");
 		st.close();
 		

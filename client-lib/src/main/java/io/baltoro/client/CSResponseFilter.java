@@ -16,14 +16,12 @@ public class CSResponseFilter implements ClientResponseFilter
 {
  
 	static Logger log = Logger.getLogger(CSResponseFilter.class.getName());
+	private String appName;
 	
 	
-	protected Map<String, NewCookie> cookieMap;
-	
-	
-	public CSResponseFilter(Map<String, NewCookie> cookieMap)
+	public CSResponseFilter(String appName)
 	{
-		this.cookieMap = cookieMap;
+		this.appName = appName;
 	}
 	
 	public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) 
@@ -48,12 +46,15 @@ public class CSResponseFilter implements ClientResponseFilter
 	void receiveCookies(ClientResponseContext context)
 	{
 			
+		UserSession userSession = Baltoro.getUserSession();
+		
+		
 		Map<String, NewCookie> map = context.getCookies();
 		for (String key : map.keySet())
 		{
 			NewCookie cookie = map.get(key);
 			//log.info("received ======<"+this.appName+">======= >>>["+map.hashCode()+"]>> 111 >>>>>> "+key+" : "+cookie);
-			cookieMap.put(key, cookie);
+			userSession.addCookie(cookie.getName(), cookie.getValue());
 		}	
 	}
 	
