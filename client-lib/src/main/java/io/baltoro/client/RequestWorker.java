@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
@@ -330,6 +331,8 @@ public class RequestWorker extends Thread
 			
 			if (returnObj != null)
 			{
+				to.responseContext.setReturnObject(returnObj);
+				/*
 				if(returnObj instanceof String)
 				{
 					to.responseContext.setData(((String) returnObj).getBytes());
@@ -340,9 +343,11 @@ public class RequestWorker extends Thread
 				} 
 				else
 				{
+					//byte[] bytes = ObjectUtil.convertToBytes(returnObj);
+					//to.responseContext.setData(bytes);
 					//String json = mapper.writeValueAsString(returnObj);
-					to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
-				}
+					//to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
+				}*/
 			}
 
 		} 

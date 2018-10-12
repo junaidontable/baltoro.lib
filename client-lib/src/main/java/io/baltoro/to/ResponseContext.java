@@ -11,9 +11,9 @@ public class ResponseContext
 	private String mimeType;
 	private Map<String, String> headers; 
 	private Map<String, String> cookies;
-	private byte[] data;
 	private long lastModifiedOn;
 	private boolean sendNotModified; 
+	private Object returnObject;
 	
 	public String getRedirect()
 	{
@@ -56,14 +56,7 @@ public class ResponseContext
 		this.cookies = cookies;
 	}
 
-	public byte[] getData()
-	{
-		return data;
-	}
-	public void setData(byte[] data)
-	{
-		this.data = data;
-	}
+
 	public String getMimeType()
 	{
 		return mimeType;
@@ -87,6 +80,14 @@ public class ResponseContext
 	public void setSendNotModified(boolean sendNotModified)
 	{
 		this.sendNotModified = sendNotModified;
+	}
+	public Object getReturnObject()
+	{
+		return returnObject;
+	}
+	public void setReturnObject(Object returnObject)
+	{
+		this.returnObject = returnObject;
 	}
 
 	
