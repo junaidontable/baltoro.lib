@@ -95,7 +95,7 @@ public class LocalDB
 			{
 				System.out.println("free local db connections =====> "+connectionQueue.size()+", to change call Baltoro.setDBConnectionPoolSize(int size) ");
 			}
-		}, 1000, 10000);
+		}, 1000, 1000);
 		
 		
 		try
@@ -1188,6 +1188,10 @@ public class LocalDB
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			con.close();
 		}
 	
 		

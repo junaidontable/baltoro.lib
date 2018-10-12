@@ -282,7 +282,17 @@ public class RequestWorker extends Thread
 					System.out.println("no index found / error path="+path);
 				}
 				
-				path = path.substring(0, lIndex);
+				try
+				{
+					path = path.substring(0, lIndex);
+				} 
+				catch (StringIndexOutOfBoundsException e)
+				{
+					String error = "Can't find API path["+url+", "+path+"] on hostid="+Baltoro.hostId+", serviceNames="+Baltoro.serviceNames.toString();
+					System.out.println(error);
+					e.printStackTrace();
+					throw new Exception(error);
+				}
 				
 				
 				String lPath = req.getApiPath().substring(lIndex + 1);
