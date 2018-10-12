@@ -23,7 +23,6 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.client.LocalDB.Repl;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
@@ -308,7 +307,7 @@ public class APIClient
 			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
 		}
 		
-		log.info(" PULL ======= > "+att);
+		//log.info(" PULL ======= > "+att);
 		
 		Form form = new Form();
 		form.param("appUuid", Baltoro.appUuid);
@@ -316,7 +315,7 @@ public class APIClient
 		form.param("att",att);
 		form.param("lServerPullNano", lServerPullNano);
 		form.param("lServerPushNano", lServerPushNano);
-		form.param("initPull", LocalDB.initPull ? "YES" : "NO");
+		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");
 		
 		
 		Invocation.Builder ib =	getIB(target);
@@ -326,11 +325,12 @@ public class APIClient
 		return tos;
 	}
 	
-	int pullReplicationCount(Repl repl) throws Exception
+	int pullReplicationCount(String lServerPushNano, String lServerPullNano) throws Exception
 	{
 	 
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pullCount");
-		String att = null;
+		String att = Baltoro.serviceNames.toString();
+		/*
 		if(LocalDB.initPull)
 		{
 			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
@@ -339,7 +339,7 @@ public class APIClient
 		{
 			att = Baltoro.pullReplicationServiceNames;
 		}
-		
+		*/
 		
 		log.info(" PULL ======= > "+att);
 		
@@ -347,8 +347,9 @@ public class APIClient
 		form.param("appUuid", Baltoro.appUuid);
 		form.param("instUuid", Baltoro.instanceUuid);
 		form.param("att", att);
-		form.param("initPull", LocalDB.initPull ? "YES" : "NO");
-		form.param("lServerPullNano", ""+repl.serverNano);
+		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");
+		form.param("lServerPullNano", lServerPullNano);
+		form.param("lServerPushNano", lServerPushNano);
 		
 		
 		

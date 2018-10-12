@@ -1,4 +1,4 @@
-package io.baltoro.db;
+package io.baltoro.client;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,12 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.baltoro.client.Replicator;
-import io.baltoro.features.NoReplication;
-import io.baltoro.obj.Base;
 import io.baltoro.to.ReplicationTO;
 
-public class PreparedStatement
+class PreparedStatement
 {
 
 	private java.sql.PreparedStatement stmt;
@@ -24,13 +21,13 @@ public class PreparedStatement
 	
 	List<ReplicationTO> repList = null;
 	
-	public PreparedStatement(java.sql.PreparedStatement stmt)
+	PreparedStatement(java.sql.PreparedStatement stmt)
 	{
 		this.stmt = stmt;
 	}
 	
 	
-	public boolean executeAndReplicate(String ... att) throws SQLException
+	boolean executeAndReplicate(String ... att) throws SQLException
 	{
 		boolean x = stmt.execute();
 	
@@ -40,14 +37,14 @@ public class PreparedStatement
 		return x;
 	}
 	
-	public boolean executeNoReplicate() throws SQLException
+	boolean executeNoReplicate() throws SQLException
 	{
 		boolean x = stmt.execute();
 		return x;
 	}
 	
 	/*
-	public int executeUpdate(boolean doPush, Base obj) throws SQLException
+	int executeUpdate(boolean doPush, Base obj) throws SQLException
 	{
 		
 		int x = stmt.executeUpdate();
@@ -64,38 +61,38 @@ public class PreparedStatement
 	}
 	*/
 
-	public ResultSet executeQuery() throws SQLException
+	ResultSet executeQuery() throws SQLException
 	{
 		return stmt.executeQuery();
 	}
 	
-	public void close() throws SQLException
+	void close() throws SQLException
 	{
 		stmt.close();
 	}
 	
 	
-	public void setString(int parameterIndex, String x) throws SQLException
+	void setString(int parameterIndex, String x) throws SQLException
 	{
 		stmt.setString(parameterIndex, x);
 	}
 	
-	public void setInt(int parameterIndex, int x) throws SQLException
+	void setInt(int parameterIndex, int x) throws SQLException
 	{
 		stmt.setInt(parameterIndex, x);
 	}
 	
-	public void setLong(int parameterIndex, long x) throws SQLException
+	void setLong(int parameterIndex, long x) throws SQLException
 	{
 		stmt.setLong(parameterIndex, x);
 	}
 	
-	public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException
+	void setTimestamp(int parameterIndex, Timestamp x) throws SQLException
 	{
 		stmt.setTimestamp(parameterIndex, x);
 	}
 	
-	public void addbatch(String ... att) throws SQLException
+	void addbatch(String ... att) throws SQLException
 	{
 
 		if(repList == null)
@@ -112,7 +109,7 @@ public class PreparedStatement
 
 	}
 	
-	public void executeBatch() throws SQLException
+	void executeBatch() throws SQLException
 	{
 		
 		Set<String> attSet = new HashSet<>();
@@ -145,7 +142,7 @@ public class PreparedStatement
 	}
 
 
-	public java.sql.PreparedStatement getStmt()
+	java.sql.PreparedStatement getStmt()
 	{
 		return stmt;
 	}

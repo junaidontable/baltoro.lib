@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,13 +24,9 @@ import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
-import io.baltoro.db.Connection;
-import io.baltoro.db.PreparedStatement;
-import io.baltoro.db.Statement;
 import io.baltoro.features.Store;
 import io.baltoro.obj.BODefaults;
 import io.baltoro.obj.Base;
-import io.baltoro.to.ReplicationTO;
 
 
 public class LocalDB
@@ -41,10 +39,12 @@ public class LocalDB
 	private String protocol = "jdbc:derby:";
 
 	private String instUuid;
-	private Connection con;
+	//private Connection con;
 	private static String dbName;
 	
-	static boolean initPull = false;
+	static ConcurrentLinkedQueue<Connection> connectionQueue = new ConcurrentLinkedQueue<>();
+	
+	//static boolean initPull = false;
 	
 	
 	Map<String, String> typeClassMap = new HashMap<>(100);
@@ -53,6 +53,7 @@ public class LocalDB
 	Map<String, MDFieldMap> classFieldMap = new HashMap<>(1000);
 	
 	public static LocalDBBinary binary;
+	static private Timer freeCon;
 	
 	
 	static LocalDB instance()
@@ -71,7 +72,8 @@ public class LocalDB
 					
 					System.out.println("[[[[[[[[[[[ local db name = "+dbName+" ]]]]]]]]]]]]]]]");
 					db = new LocalDB(dbName);
-					db.startReplication();
+					//db.startReplication();
+					Replicator.start();
 				}
 			}
 		}
@@ -83,6 +85,17 @@ public class LocalDB
 	private LocalDB(String instUuid)
 	{
 		this.instUuid = instUuid;
+		
+		freeCon = new Timer();
+		freeCon.schedule(new TimerTask()
+		{
+			
+			@Override
+			public void run()
+			{
+				System.out.println("free local db connections =====> "+connectionQueue.size()+", to change call Baltoro.setDBConnectionPoolSize(int size) ");
+			}
+		}, 1000, 10000);
 		
 		
 		try
@@ -108,9 +121,16 @@ public class LocalDB
 		try
 		{
 			DriverManager.registerDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-			EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
-			_con.setAutoCommit(true);
-			con = new Connection(_con);
+			
+			System.out.println("init connection pool =====> "+Baltoro.dbConnectionPoolSize);
+			for (int i = 0; i < Baltoro.dbConnectionPoolSize; i++)
+			{
+				EmbedConnection _con = (EmbedConnection)DriverManager.getConnection(protocol + instUuid + ";create=true");
+				_con.setAutoCommit(true);
+				Connection con = new Connection(_con);
+				connectionQueue.add(con);
+			}
+			
 		} 
 		catch (SQLException e)
 		{
@@ -126,7 +146,7 @@ public class LocalDB
 			System.exit(1);
 		}
 		
-		
+		Connection con = getConnection();
 		try
 		{
 	
@@ -141,71 +161,26 @@ public class LocalDB
 			setupTables();
 			
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 				
 	}
 	
 	
-	void startReplication()
+	
+	
+	Connection getConnection()
 	{
-		try
+		Connection con = connectionQueue.poll();
+		if(con == null)
 		{
-			
-			Repl repl = getRepPull(0);
-			
-			if(repl == null)
-			{
-				initPull = true;
-				con.createStatement().executeNoReplication("insert into repl_pull(nano, init_on, comp_on, server_nano, lcp_sql_count) values (0,"+System.currentTimeMillis()+",0,0,0)");
-				repl = getRepPull(0);
-			}
-			
-			if(repl.compOn <= 0)
-			{
-				initPull = true;
-			}
-			
-			if(initPull)
-			{
-				int count = Baltoro.cs.pullReplicationCount(repl);
-				con.createStatement().executeNoReplication("update repl_pull set sql_count="+count+", lcp_on="+System.currentTimeMillis()+" where nano="+repl.nano);
-				System.out.println( "Replication init pull totla count -- > "+count );
-				repl = getRepPull(0);
-			}
-			
-			int count = 0;
-			while(count < 10000)
-			{
-				count++;
-				System.out.println( " Replication pull loop count ====>    "+count+", sqlCount="+repl.sqlCount+" , lcpSqlCount="+repl.lcpSqlCount);
-				repl = pullReplication(repl);	
-				
-				if(repl.lcpSqlCount >= repl.sqlCount)
-				{
-					break;
-				}
-			}
-			
-			con.createStatement().executeNoReplication("update repl_pull set comp_on="+System.currentTimeMillis()+" where nano="+repl.nano);
-			repl = getRepPull(0);
-			
-			initPull = false;
-			
-			long lServerPushNano = getLastPush();
-			long lServerPullNano = getLastPull();
-			
-			//System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
-			
-		
-			Replicator.start();
-			//System.exit(1);
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.exit(1);
+			throw new RuntimeException("no connection avialbale ....");
 		}
-
+		
+		return con;
 	}
 
 	void cleanUp() throws Exception
@@ -216,6 +191,7 @@ public class LocalDB
 	
 	void cleanData()
 	{
+		Connection con = getConnection();
 		try
 		{
 			Statement st = con.createStatement();
@@ -271,10 +247,16 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 	}
 	
 	void deleteTables() throws Exception
 	{
+		Connection con = getConnection();
+		
 		Statement st = con.createStatement();
 		
 		st = con.createStatement();
@@ -321,10 +303,14 @@ public class LocalDB
 		st = con.createStatement();
 		st.executeNoReplication("drop table rep_push");
 		st.close();
+		
+		con.close();
 	}
 	
 	private void setupTables() throws Exception
 	{
+		Connection con = getConnection();
+		
 		Statement st = con.createStatement();
 		
 		StringBuffer sql = new StringBuffer();
@@ -514,7 +500,6 @@ public class LocalDB
 		sql.append("comp_on bigint,");
 		sql.append("server_nano bigint,");
 		sql.append("sql_count int,");
-		sql.append("lcp_sql_count int,");
 		sql.append("PRIMARY KEY (nano))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
@@ -568,12 +553,16 @@ public class LocalDB
 		**/
 		
 		
+		con.close();
+		
 	}
 	
 	
 	private void createIndex(String tableName, String cols)
 	throws Exception
 	{
+		Connection con = getConnection();
+		
 		Statement st = con.createStatement();
 		String indexName = UUIDGenerator.randomString(6);
 	
@@ -581,6 +570,8 @@ public class LocalDB
 		//System.out.println(sql);
 		st.executeNoReplication(sql);
 		st.close();
+		
+		con.close();
 	}
 	
 
@@ -610,8 +601,9 @@ public class LocalDB
 		
 	public List<Base> get(String[] baseUuids)
 	{
-		
 		List<Base> objList = new ArrayList<>(200);
+		
+		Connection con = getConnection();
 		try
 		{
 			
@@ -639,14 +631,19 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 		return objList;
 	}
 	
 	public Map<String, Base> findMap(String[] baseUuids)
 	{
-		
 		Map<String, Base> objMap = new HashMap<>(200);
+		
+		Connection con = getConnection();
 		try
 		{
 			
@@ -673,6 +670,10 @@ public class LocalDB
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			con.close();
 		}
 		
 		return objMap;
@@ -734,8 +735,9 @@ public class LocalDB
 	
 	public List<String> findByProperty(String type, String name, String value)
 	{
-		
 		List<String> list = new ArrayList<>(200);
+		
+		Connection con = getConnection();
 		try
 		{
 			PreparedStatement st = con.prepareStatement("select uuid from base "
@@ -759,6 +761,10 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 		return list;
 	}
@@ -768,6 +774,9 @@ public class LocalDB
 	{
 		String type = getType(_class);
 		List<T> objList = new ArrayList<>(200);
+		
+		Connection con = getConnection();
+		
 		try
 		{
 			
@@ -795,14 +804,20 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally
+		{
+			con.close();
+		}
 		
 		return objList;
 	}
 	
 	public <T extends Base> List<T> find(Class<T> _class)
 	{
+		
 		String type = getType(_class);
 		List<T> objList = new ArrayList<>(200);
+		Connection con = getConnection();
 		try
 		{
 			
@@ -825,6 +840,10 @@ public class LocalDB
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			con.close();
 		}
 		
 		return objList;
@@ -992,6 +1011,7 @@ public class LocalDB
 	
 	private List<String> findLinkedUuid(String uuid, Class<?> cObjType, Direction direction)
 	{
+		Connection con = getConnection();
 		List<String> uuidList = new ArrayList<>(500);
 		try
 		{
@@ -1044,168 +1064,20 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
-		
-		return uuidList;
-	}
-	
-	/*
-	public List<String> findChildrenUuid(String pUuid, String cObjType)
-	{
-		List<String> uuidList = new ArrayList<>(500);
-		try
+		finally 
 		{
-	
-			PreparedStatement st = con.prepareStatement("select c_uuid from link where p_uuid=? and c_obj_type=? order by sort");
-			st.setString(1, pUuid);
-			st.setString(2, cObjType);
-			ResultSet rs = st.executeQuery();
-			
-			uuidList = new ArrayList<>(500);
-			
-			while(rs.next())
-			{
-				String uuid = rs.getString(1);
-				uuidList.add(uuid);
-			}
-			
-			rs.close();
-			st.close();
-			
-			return uuidList;
-			
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
+			con.close();
 		}
 		
 		return uuidList;
 	}
 	
-	public List<String> findParents(String cUuid)
-	{
-		List<String> uuidList = new ArrayList<>(500);
-		try
-		{
 	
-			PreparedStatement st = con.prepareStatement("select p_uuid from link where c_uuid = ? order by sort");
-			st.setString(1, cUuid);
-			ResultSet rs = st.executeQuery();
-			
-			uuidList = new ArrayList<>(500);
-			
-			while(rs.next())
-			{
-				String uuid = rs.getString(1);
-				uuidList.add(uuid);
-			}
-			
-			rs.close();
-			st.close();
-			
-			return uuidList;
-			
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return uuidList;
-	}
-	
-	/*
-	public <T extends Base> List<T> findLinked(Class<T> _class, Base... objs)
-	{
-		String[] uuids = StringUtil.toUuids(objs);
-		
-		return findLinked(_class, true, null, uuids);
-	}
-	
-	public <T extends Base> List<T> findLinked(Class<T> _class, String linkType, Base... objs)
-	{
-		String[] uuids = StringUtil.toUuids(objs);
-		return findLinked(_class, true, linkType, uuids);
-	}
-	
-	public <T extends Base> List<T> findLinkedByUuids(Class<T> _class, String... uuids)
-	{
-		return findLinked(_class, true, null, uuids);
-	}
-	
-	
-	public <T extends Base> List<T> findLinked(Class<T> _class, boolean directed, String linkType, String... uuids)
-	{
-		String type = getType(_class);
-		//List<T> objList = new ArrayList<>(200);
-		try
-		{
-			
-			String baseUuids = StringUtil.toInClause(uuids);
-			int count = uuids.length+1;
-			String _linkType = StringUtil.isNullOrEmpty(linkType) ? "" : " and link_type='"+linkType+"' ";
-			
-			StringBuffer query = new StringBuffer();
-			
-			query.append("select distinct obj_uuid from link \n");
-			query.append(" where link_uuid in ( select distinct link_uuid from link \n");
-			query.append(" where obj_uuid in ("+baseUuids+") and count>=? "+_linkType+")\n"); 
-			query.append(" and obj_type = ? and obj_uuid not in ("+baseUuids+") and seq>"+(directed ? "1" : "0"));
-			
-		
-			
-			PreparedStatement st = con.prepareStatement(query.toString());
-			st.setInt(1, count);
-			st.setString(2, type);
-		
-			 
-			//if(debug)
-			{
-				//System.out.println(Replicator.getSQL(st.getStmt()));
-				//System.out.println("type = "+type+" , count = "+count);
-			}
-			
-			List<String> uuidList = new ArrayList<>(200);
-			
-			ResultSet rs = st.executeQuery();
-			while(rs.next())
-			{
-				String uuid = rs.getString("obj_uuid");
-				uuidList.add(uuid);
-			}
-			
-			rs.close();
-			st.close();
-			
-			if(!uuidList.isEmpty())
-			{
-				Map<String, Base> foundObjs = findMap(uuidList.toArray(new String[]{})); 
-				List<T> objList = new ArrayList<T>(foundObjs.size());
-				
-				for(String uuid : uuidList)
-				{
-					Base obj = foundObjs.get(uuid);
-					objList.add((T) obj);
-				}
-				
-				return objList;
-			}
-			
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		return new ArrayList<>();
-	}
-	
-	*/
 	
 	private Base selectBase(String baseUuid, Base obj)
 	throws Exception
 	{
-		
+		Connection con = getConnection();
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try
@@ -1227,6 +1099,10 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 		
 		return null;
@@ -1240,6 +1116,8 @@ public class LocalDB
 		{
 			return;
 		}
+		
+		Connection con = getConnection();
 		
 		try
 		{
@@ -1373,6 +1251,8 @@ public class LocalDB
 	private void insertBase(Base obj)
 	{
 		PreparedStatement st = null;
+		
+		Connection con = getConnection();
 		try
 		{
 			st = con.prepareStatement("insert into base(uuid, name, state, type, container_uuid, latest_version_uuid, "
@@ -1398,12 +1278,18 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 	}
 	
 	private void updateBase(Base obj)
 	{
 		PreparedStatement st = null;
+		
+		Connection con = getConnection();
 		try
 		{
 			st = con.prepareStatement("update base set name=?, latest_version_uuid =?, "
@@ -1423,6 +1309,10 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 	}
 	
@@ -1431,6 +1321,8 @@ public class LocalDB
 		
 		
 		PreparedStatement st = null;
+		
+		Connection con = getConnection();
 		try
 		{
 			/*
@@ -1459,6 +1351,10 @@ public class LocalDB
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
 		}
 		
 	}
@@ -1542,6 +1438,7 @@ public class LocalDB
 		
 		
 		PreparedStatement st = null;
+		Connection con = getConnection();
 		try
 		{
 			
@@ -1627,6 +1524,10 @@ public class LocalDB
 		{
 			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
 		
 	}
 	
@@ -1650,6 +1551,7 @@ public class LocalDB
 		String objClass = getObjClass(type);
 		if(objClass == null)
 		{
+			Connection con = getConnection();
 			try
 			{
 			
@@ -1668,6 +1570,10 @@ public class LocalDB
 			catch (Exception e)
 			{
 				e.printStackTrace();
+			}
+			finally 
+			{
+				con.close();
 			}
 		}
 		
@@ -1694,6 +1600,8 @@ public class LocalDB
 		
 		PreparedStatement st = null;
 		ResultSet rs = null;
+		
+		Connection con = getConnection();
 		try
 		{
 			st = con.prepareStatement("select * from type where type = ?");
@@ -1715,6 +1623,10 @@ public class LocalDB
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
 		}
 		
 		return objClass;
@@ -1789,6 +1701,8 @@ public class LocalDB
 				+ " values(?,?,?,?,?,?,?,?,?) ");
 		*/
 		
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("insert into link"
 				+ "(uuid, p_uuid, c_uuid, p_obj_type,c_obj_type,sort, created_by, created_on) "
 				+ " values(?,?,?,?,?,?,?,?) ");
@@ -1832,6 +1746,7 @@ public class LocalDB
 			st.close();
 		}
 		
+		con.close();
 		return linkUuid;
 	}
 	
@@ -1843,6 +1758,8 @@ public class LocalDB
 				+ " values(?,?,?,?,?,?,?,?,?) ");
 		*/
 		
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("delete from link where uuid = ?");
 		st.setString(1, uuid);
 		boolean a = st.executeAndReplicate();
@@ -1853,6 +1770,7 @@ public class LocalDB
 		a = st.executeAndReplicate("LNAT");
 		st.close();
 		
+		con.close();
 		return a;
 	}
 	
@@ -1864,24 +1782,31 @@ public class LocalDB
 				+ " values(?,?,?,?,?,?,?,?,?) ");
 		*/
 		
-		PreparedStatement st = con.prepareStatement("delete from link where p_uuid = ? and c_uuid=?");
+		String pObjType = ObjectUtil.getType(pUuid);
+		String cObjType = ObjectUtil.getType(cUuid);
+		
+		Connection con = getConnection();
+		
+		PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ? and c_uuid=?) ?");
+		st.setString(1, pUuid);
+		boolean a = st.executeAndReplicate(pObjType, cObjType);
+		st.close();
+		
+		 st = con.prepareStatement("delete from link where p_uuid = ? and c_uuid=?");
 		st.setString(1, pUuid);
 		st.setString(2, cUuid);
 		
-		boolean a = st.executeAndReplicate();
+		a = st.executeAndReplicate(pObjType, cObjType);
 		st.close();
 		
-		st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ? and c_uuid=?) ?");
-		st.setString(1, pUuid);
-		a = st.executeAndReplicate("LNAT");
-		st.close();
-		
+		con.close();
 		return a;
 	}
 	
 	
 	Repl getRepPull(long nano) throws Exception
 	{
+		Connection con = getConnection();
 		PreparedStatement st = con.prepareStatement("select * from repl_pull where nano = ?");
 		st.setLong(1, nano);
 		
@@ -1901,12 +1826,15 @@ public class LocalDB
 		rs.close();
 		st.close();
 		
+		con.close();
 		return repl;
 	}
+	
 	
 	long startRepPull() throws Exception
 	{
 		
+		Connection con = getConnection();
 		PreparedStatement st = con.prepareStatement("insert into repl_pull (nano, init_on, sql_count) values (?,?,?) ");
 		long nano = System.nanoTime();
 		st.setLong(1, nano);
@@ -1915,24 +1843,33 @@ public class LocalDB
 		st.executeNoReplicate();
 		st.close();
 		
+		con.close();
 		return nano;
 	}
 	
-	void updateRepPull(long nano, long serverNano) throws Exception
+	void updateRepPull(long nano, long serverNano, int sqlCount) throws Exception
 	{
-		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_nano = ? where nano=? ");
+		Connection con = getConnection();
+		
+		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_nano = ?, sql_count=? where nano=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
 		st.setLong(2, serverNano);
-		st.setLong(3, nano);
+		st.setInt(3,  sqlCount);
+		st.setLong(4, nano);
 		st.executeNoReplicate();
 		st.close();
+		
+		con.close();
 		
 	}
 	
 	
 	long startRepPush(int sqlCount) throws Exception
 	{
+		
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("insert into repl_push (nano, init_on, sql_count) values (?,?,?) ");
 		long nano = System.nanoTime();
 		st.setLong(1, nano);
@@ -1941,11 +1878,14 @@ public class LocalDB
 		st.executeNoReplicate();
 		st.close();
 		
+		con.close();
 		return nano;
 	}
 	
 	void updateRepPush(long nano, long serverNano) throws Exception
 	{
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_nano = ? where nano=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
@@ -1954,6 +1894,8 @@ public class LocalDB
 		st.executeNoReplicate();
 		st.close();
 		
+		con.close();
+		
 	}
 	
 	
@@ -1961,6 +1903,9 @@ public class LocalDB
 	
 	long getLastPush() throws Exception
 	{
+		
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("select max(server_nano) from repl_push ");
 		long nano = 0;
 		ResultSet rs =  st.executeQuery();
@@ -1971,12 +1916,15 @@ public class LocalDB
 		rs.close();
 		st.close();
 		
+		con.close();
 		return nano;
 		
 	}
 	
 	long getLastPull() throws Exception
 	{
+		Connection con = getConnection();
+		
 		PreparedStatement st = con.prepareStatement("select max(server_nano) from repl_pull ");
 		long nano = 0;
 		ResultSet rs =  st.executeQuery();
@@ -1987,87 +1935,12 @@ public class LocalDB
 		rs.close();
 		st.close();
 		
+		
+		con.close();
 		return nano;
 		
 	}
 	
-
-	
-	private Repl pullReplication(Repl repl) throws Exception
-	{
-		
-		ReplicationTO[] tos = Baltoro.cs.pullReplication("0",""+repl.serverNano);
-		
-		System.out.println(" ===========> pulling replicated records total "+tos.length);
-		
-		//System.out.print("[");
-		//ReplicationTO lastTo = null;
-		
-		for (int i=0;i<tos.length;i++)
-		{
-			ReplicationTO to = tos[i];
-			String[] sqls = to.cmd.split(";");
-			Statement st = con.createStatement();
-			for (int j = 0; j < sqls.length; j++)
-			{
-				
-				st.addbatch(sqls[j]);
-			}
-			
-			try
-			{
-				st.executeBatch();
-			} 
-			catch (DerbySQLIntegrityConstraintViolationException e)
-			{
-				System.out.println("record already processed : "+to.nano);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			
-			st.close();
-			
-			con.createStatement().executeNoReplication("update repl_pull "
-					+ "set lcp_sql_count=(lcp_sql_count"+"+"+1+") "
-					+", lcp_on="+System.currentTimeMillis() 
-					+", server_nano="+to.nano
-					+" where nano="+repl.nano);
-			
-			//lastTo = to;
-			
-			if(i % 10 == 0)
-			{
-				System.out.print(".");
-			}
-			
-			if(i % 1000 == 0)
-			{
-				System.out.print("\n");
-			}
-			
-			
-		}
-		//System.out.println("]");
-		
-		repl = getRepPull(repl.nano);
-		return repl;
-		
-	}
-	
-	
-	class Repl
-	{
-		long nano;
-		long initOn;
-		long compOn;
-		long lcpOn;
-		long serverNano;
-		int sqlCount;
-		int lcpSqlCount;
-		
-	}
 	
 	private class MDFieldMap extends HashMap<String, Methods>
 	{

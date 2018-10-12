@@ -83,6 +83,7 @@ public class Baltoro
 	static ResponsePoller responsePoller;
 	
 	private static boolean running = false;
+	static int dbConnectionPoolSize = 10;
 	
 	
 	static LocalDB db;
@@ -127,6 +128,10 @@ public class Baltoro
 		return LocalDB.instance();
 	}
 	
+	public static void setDBConnectionPoolSize(int size)
+	{
+		Baltoro.dbConnectionPoolSize = size;
+	}
 	
 	public static String getMainClassName() 
 	{ 

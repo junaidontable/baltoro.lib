@@ -11,6 +11,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
+import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,14 +22,15 @@ public class Replicator
 {
 
 	//static boolean REPLICATION_ON = false;
-	static boolean INT_SYNC = false;
+	//static boolean INT_SYNC = false;
 	static boolean runnig = false;
 	static private Timer pusher;
 	static private Timer puller;
 	private static ConcurrentLinkedQueue<ReplicationTO> pushQueue = new ConcurrentLinkedQueue<>();
-	static ObjectMapper mapper = new ObjectMapper();
+	private static ObjectMapper mapper = new ObjectMapper();
 	
-	static LocalDB db = Baltoro.getDB();
+	private static LocalDB db = Baltoro.getDB();
+	private static boolean pullDone = false;
 	
 	static
 	{
@@ -254,8 +256,17 @@ public class Replicator
 			public void run()
 			{
 				
+				
 				try
 				{
+					if(!pullDone)
+					{
+						System.out.println("Replicator ====>   waiting for pull to finish ....... wait 5 secs ");
+						Thread.sleep(5000);
+						return;
+					}
+					
+					
 					boolean hasMore = true;
 			
 					List<ReplicationTO> list = new ArrayList<>(100);
@@ -309,11 +320,17 @@ public class Replicator
 				
 				try
 				{
+					
 					long lServerPushNano = db.getLastPush();
 					long lServerPullNano = db.getLastPull();
 					
+					//long nano = db.startRepPull();
+					
+					//ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushNano, ""+lServerPullNano);
 					
 					//System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
+					
+					pullReplication(lServerPushNano, lServerPullNano);
 				
 				} 
 				catch (Exception e)
@@ -325,5 +342,89 @@ public class Replicator
 			}
 		}, 1000, 1000);
 	}
+	
+	
+	private static long pullReplication(long lServerPushNano, long lServerPullNano) throws Exception
+	{
+		
+		ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushNano,""+lServerPullNano);
+		if(StringUtil.isNullOrEmpty(tos))
+		{
+			if(!pullDone)
+			{
+				System.out.println("INIT PULL finished ....... ");
+			}
+			pullDone = true;
+			
+			return 0;
+		}
+		
+		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length);
+		
+		long nano = db.startRepPull();
+		
+		System.out.print("[");
+		//ReplicationTO lastTo = null;
+		long lastServerNano = 0;
+		for (int i=0;i<tos.length;i++)
+		{
+			ReplicationTO to = tos[i];
+			String[] sqls = to.cmd.split(";");
+			Statement st = db.getConnection().createStatement();
+			for (int j = 0; j < sqls.length; j++)
+			{
+				
+				st.addbatch(sqls[j]);
+			}
+			
+			try
+			{
+				st.executeBatch();
+			} 
+			catch (DerbySQLIntegrityConstraintViolationException e)
+			{
+				System.out.println("record already processed : "+to.nano);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			lastServerNano = to.nano;
+			st.close();
+			
+			System.out.print(".");
+			
+			
+			if(i % 100 == 0)
+			{
+				System.out.print("\n");
+			}
+			
+			
+		}
+		System.out.println("]");
+		
+		
+		db.updateRepPull(nano, lastServerNano, tos.length);
+		
+		
+		return tos.length;
+		
+	}
+	
+	
 
+}
+
+class Repl
+{
+	long nano;
+	long initOn;
+	long compOn;
+	long lcpOn;
+	long serverNano;
+	int sqlCount;
+	int lcpSqlCount;
+	
 }

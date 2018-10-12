@@ -1,33 +1,36 @@
-package io.baltoro.db;
+package io.baltoro.client;
 
 import java.sql.SQLException;
 
-public class Connection
+class Connection
 {
 
 	private java.sql.Connection con;
 	
-	public Connection(java.sql.Connection con)
+	Connection(java.sql.Connection con)
 	{
 		this.con = con;
 	}
 	
 	
-	public Statement createStatement()
+	Statement createStatement()
 	throws SQLException
 	{
 		return new Statement(con.createStatement());
 	}
 	
 
-	public PreparedStatement prepareStatement(String sql)
+	PreparedStatement prepareStatement(String sql)
 	throws SQLException
 	{
 		return new PreparedStatement(con.prepareStatement(sql));
 	}
 	
 	
-	
+	void close()
+	{
+		LocalDB.connectionQueue.add(this);
+	}
 
 	
 }

@@ -19,9 +19,9 @@ public class StringUtil
 			
 	}
 	
-	public static boolean isNullOrEmpty(String[] str)
+	public static boolean isNullOrEmpty(Object[] objs)
 	{
-		if(str != null && str.length > 0)
+		if(objs != null && objs.length > 0)
 		{
 			return false;
 		}
