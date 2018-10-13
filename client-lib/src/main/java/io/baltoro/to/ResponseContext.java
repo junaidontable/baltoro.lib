@@ -13,7 +13,7 @@ public class ResponseContext
 	private Map<String, String> cookies;
 	private long lastModifiedOn;
 	private boolean sendNotModified; 
-	private Object returnObject;
+	private byte[] data;
 	
 	public String getRedirect()
 	{
@@ -81,14 +81,15 @@ public class ResponseContext
 	{
 		this.sendNotModified = sendNotModified;
 	}
-	public Object getReturnObject()
+	public byte[] getData()
 	{
-		return returnObject;
+		return data;
 	}
-	public void setReturnObject(Object returnObject)
+	public void setData(byte[] data)
 	{
-		this.returnObject = returnObject;
+		this.data = data;
 	}
+	
 
 	
 }

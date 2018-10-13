@@ -331,8 +331,8 @@ public class RequestWorker extends Thread
 			
 			if (returnObj != null)
 			{
-				to.responseContext.setReturnObject(returnObj);
-				/*
+			
+				
 				if(returnObj instanceof String)
 				{
 					to.responseContext.setData(((String) returnObj).getBytes());
@@ -346,8 +346,8 @@ public class RequestWorker extends Thread
 					//byte[] bytes = ObjectUtil.convertToBytes(returnObj);
 					//to.responseContext.setData(bytes);
 					//String json = mapper.writeValueAsString(returnObj);
-					//to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
-				}*/
+					to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
+				}
 			}
 
 		} 
