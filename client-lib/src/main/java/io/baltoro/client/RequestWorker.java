@@ -10,7 +10,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
@@ -456,6 +455,11 @@ public class RequestWorker extends Thread
 				} 
 				else if (paramClass == String[].class && requestValue != null)
 				{
+					methodInputData[i] = requestValue;
+				} 
+				else if (paramClass == UploadedFile.class && requestValue != null)
+				{
+					String uploadedFileUuid = requestValue.toString();
 					methodInputData[i] = requestValue;
 				} 
 				else

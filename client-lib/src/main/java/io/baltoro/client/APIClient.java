@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.StreamUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
@@ -38,11 +40,14 @@ public class APIClient
 	static final String SESS_SERVICE = "/SESS5BE92DC6053640A08CCC123F68DD2F43".toLowerCase();
 	static final String INST_SERVICE = "/INSTC9F9C186C0E34BB48E4E5864EF4F88E7".toLowerCase();
 	static final String BLTC_SERVICE = "/BLSVA40D8A20683E4918A03DCF3461D04923".toLowerCase();
+	static final String UPFL_SERVICE = "/UPFL4CC05B478C4B4975917BA14A92DFCBE3".toLowerCase();
 	
 	static Logger log = Logger.getLogger(APIClient.class.getName());
 	
 	Client webClient;
 	Client pollerClient;
+	Client rawClient;
+	
 	ObjectMapper mapper = new ObjectMapper();
 	
 	String host;
@@ -94,6 +99,13 @@ public class APIClient
 		
 		pollerClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
 		pollerClient.property(ClientProperties.READ_TIMEOUT, 60000);
+		
+		rawClient = ClientBuilder.newBuilder()
+					.register(reqFilter)
+					.build();
+		
+		rawClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
+		rawClient.property(ClientProperties.READ_TIMEOUT, 60000);
 		
 	
 		try
@@ -473,6 +485,21 @@ public class APIClient
 		return json;
 	}
 	
+	
+	byte[] pullUploadedFileData(String uuid) throws Exception
+	{
+		log.info("... pull uploaded file ... ");
+	
+		WebTarget target = rawClient.target(blHost).path(UPFL_SERVICE+"/pull").queryParam("uuid", uuid);
+		
+		byte[] bytes = null;
+		try (InputStream in = target.request(MediaType.APPLICATION_OCTET_STREAM).get(InputStream.class);) 
+		{
+           bytes = StreamUtil.toBytes(in);
+        }
+		
+		return bytes;
+	}
 	
 
 }
