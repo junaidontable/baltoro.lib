@@ -486,7 +486,7 @@ public class RequestWorker extends Thread
 						files[cnt].setUuid(cto.uuid);
 						files[cnt].setName(cto.fileName);
 						files[cnt].setSize(cto.size);
-						
+						files[cnt].setContentType(cto.type);
 						cnt++;
 					}
 					

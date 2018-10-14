@@ -495,7 +495,7 @@ public class APIClient
 		byte[] bytes = null;
 		try (InputStream in = target.request(MediaType.APPLICATION_OCTET_STREAM).get(InputStream.class);) 
 		{
-           bytes = StreamUtil.toBytes(in);
+			bytes = StreamUtil.toBytes(in);//ByteStreams.toByteArray(in);// StreamUtil.toBytes(in);
         }
 		
 		return bytes;

@@ -531,26 +531,27 @@ public class LocalDB
 		System.out.println("repl_push Table Created");
 		
 		
-		/*
+		
 		sql = new StringBuffer();
-		sql.append("CREATE TABLE binary (");
+		sql.append("CREATE TABLE content (");
 		sql.append("uuid varchar(42) NOT NULL,");
-		sql.append("base_uuid varchar(42) NOT NULL,");
-		sql.append("start_index interger NOT NULL,");
-		sql.append("len smallint NOT NULL,");
-		sql.append("data blob(100K) NOT NULL,");
+		sql.append("version_uuid varchar(42) NOT NULL,");
+		sql.append("content_type varchar(100) NOT NULL,");
+		sql.append("content_size bigint NOT NULL,");
+		sql.append("data blob(20M) NOT NULL,");
 		sql.append("created_on timestamp NOT NULL,");
+		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("PRIMARY KEY (uuid))");
 		
 		System.out.println(sql.toString());
 		st = con.createStatement();
-		st.execute(sql.toString(), null);
+		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("base_uuid", "base_uuid");
 		
 		System.out.println("binary Table Created");
-		**/
+	
 		
 		
 		con.close();

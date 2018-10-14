@@ -1,5 +1,9 @@
 package io.baltoro.client;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 public class UploadedFile
 {
 
@@ -7,12 +11,14 @@ public class UploadedFile
 	private String name;
 	private byte[] data;
 	private long size;
+	private String contentType;
 	
 	public String getUuid()
 	{
 		return uuid;
 	}
-	public void setUuid(String uuid)
+	
+	void setUuid(String uuid)
 	{
 		this.uuid = uuid;
 	}
@@ -20,22 +26,46 @@ public class UploadedFile
 	{
 		return name;
 	}
-	public void setName(String name)
+	
+	void setName(String name)
 	{
 		this.name = name;
 	}
-	public byte[] getData()
-	{
-		return data;
+
+	
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	
+	public Future<byte[]> getData() 
+	{       
+
+		return executor.submit(() -> 
+        {
+        	if(data != null)
+        	{
+        		return data;
+        	}
+            
+        	data = Baltoro.cs.pullUploadedFileData(uuid);
+            return data;
+        });
 	}
+
 	
 	public long getSize()
 	{
 		return size;
 	}
-	public void setSize(long size)
+	void setSize(long size)
 	{
 		this.size = size;
+	}
+	public String getContentType()
+	{
+		return contentType;
+	}
+	void setContentType(String contentType)
+	{
+		this.contentType = contentType;
 	}
 	
 	

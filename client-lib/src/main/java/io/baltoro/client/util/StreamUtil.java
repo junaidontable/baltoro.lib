@@ -1,7 +1,5 @@
 package io.baltoro.client.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -13,40 +11,24 @@ public class StreamUtil
 
 	public static byte[] toBytes(InputStream in) throws Exception
 	{
-		BufferedInputStream bis = new BufferedInputStream(in);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		BufferedOutputStream bos = new BufferedOutputStream(out);
-		
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		byte[] buffer = new byte[1024];
+		int len;
+
 		try
 		{
-			while(bis.available()>0) 
+			while ((len = in.read(buffer)) != -1) 
 			{
-				byte[] data = new byte[1024];
-	            
-	            int bytesRead=0;
-	           
-	            while( (bytesRead = bis.read(data)) != -1)
-	            {
-	            	bos.write(bytesRead);
-	            }
-	            
-	        }
-		} 
-		finally
-		{
-			try
-			{
-				bis.close();
-				bos.close();
-				out.close();
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
+				os.write(buffer, 0, len);
 			}
-			
 		}
-		return out.toByteArray();
+		catch(Exception e)
+		{
+			return null;
+		}
+
+		return os.toByteArray();
 	}
 	
 	public static byte[] toBytes(Object obj) throws Exception
