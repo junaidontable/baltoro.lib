@@ -6,6 +6,7 @@ public class UploadedFile
 	private String uuid;
 	private String name;
 	private byte[] data;
+	private long size;
 	
 	public String getUuid()
 	{
@@ -27,10 +28,16 @@ public class UploadedFile
 	{
 		return data;
 	}
-	public void setData(byte[] data)
+	
+	public long getSize()
 	{
-		this.data = data;
+		return size;
 	}
+	public void setSize(long size)
+	{
+		this.size = size;
+	}
+	
 	
 	
 	

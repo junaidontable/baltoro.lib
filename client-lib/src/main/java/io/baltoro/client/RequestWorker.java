@@ -15,6 +15,7 @@ import io.baltoro.exp.AuthException;
 import io.baltoro.features.AbstractFilter;
 import io.baltoro.features.Param;
 import io.baltoro.to.APIError;
+import io.baltoro.to.ContentTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 import io.baltoro.to.SessionUserTO;
@@ -459,8 +460,38 @@ public class RequestWorker extends Thread
 				} 
 				else if (paramClass == UploadedFile.class && requestValue != null)
 				{
-					String uploadedFileUuid = requestValue.toString();
-					methodInputData[i] = requestValue;
+					if(requestValue.length > 1)
+					{
+						new Exception("File upload, has multiple files coming in. use UploadedFile[] or fix the UI to receive one file .");
+					}
+					
+					
+					ContentTO cto = mapper.readValue(requestValue[0], ContentTO.class);
+					UploadedFile uploadedFile = new UploadedFile();
+					uploadedFile.setUuid(cto.uuid);
+					uploadedFile.setName(cto.fileName);
+					uploadedFile.setSize(cto.size);
+					
+					methodInputData[i] = uploadedFile;
+				} 
+				else if (paramClass == UploadedFile[].class && requestValue != null)
+				{
+					String[] filesJson = requestValue;
+					UploadedFile[] files = new UploadedFile[filesJson.length];
+					int cnt = 0;
+					for (String json : filesJson)
+					{
+						ContentTO cto = mapper.readValue(json, ContentTO.class);
+						files[cnt] = new UploadedFile();
+						files[cnt].setUuid(cto.uuid);
+						files[cnt].setName(cto.fileName);
+						files[cnt].setSize(cto.size);
+						
+						cnt++;
+					}
+					
+					
+					methodInputData[i] = files;
 				} 
 				else
 				{
