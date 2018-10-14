@@ -5,7 +5,7 @@ public class ContentTO
 
 	public String uuid;
 	public String fileName;
-	public int size;
+	public long size;
 	public String type;
 	
 }
