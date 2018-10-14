@@ -458,7 +458,7 @@ public class RequestWorker extends Thread
 				{
 					methodInputData[i] = requestValue;
 				} 
-				else if (paramClass == UploadedFile.class && requestValue != null)
+				else if (paramClass == Content.class && requestValue != null)
 				{
 					if(requestValue.length > 1)
 					{
@@ -467,23 +467,23 @@ public class RequestWorker extends Thread
 					
 					
 					ContentTO cto = mapper.readValue(requestValue[0], ContentTO.class);
-					UploadedFile uploadedFile = new UploadedFile();
+					Content uploadedFile = new Content();
 					uploadedFile.setUuid(cto.uuid);
 					uploadedFile.setName(cto.fileName);
 					uploadedFile.setSize(cto.size);
 					
 					methodInputData[i] = uploadedFile;
 				} 
-				else if (paramClass == UploadedFile[].class && requestValue != null)
+				else if (paramClass == Content[].class && requestValue != null)
 				{
 					String[] filesJson = requestValue;
-					UploadedFile[] files = new UploadedFile[filesJson.length];
+					Content[] files = new Content[filesJson.length];
 					int cnt = 0;
 					for (String json : filesJson)
 					{
 						ContentTO cto = mapper.readValue(json, ContentTO.class);
-						files[cnt] = new UploadedFile();
-						files[cnt].setUuid(cto.uuid);
+						files[cnt] = new Content();
+						files[cnt].setServerUuid(cto.uuid);
 						files[cnt].setName(cto.fileName);
 						files[cnt].setSize(cto.size);
 						files[cnt].setContentType(cto.type);

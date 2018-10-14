@@ -536,6 +536,7 @@ public class LocalDB
 		sql.append("CREATE TABLE content (");
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("version_uuid varchar(42) NOT NULL,");
+		sql.append("base_uuid varchar(42) NOT NULL,");
 		sql.append("content_type varchar(100) NOT NULL,");
 		sql.append("content_size bigint NOT NULL,");
 		sql.append("data blob(20M) NOT NULL,");

@@ -4,33 +4,28 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class UploadedFile
+import io.baltoro.features.Store;
+import io.baltoro.obj.Base;
+
+public class Content extends Base
 {
 
-	private String uuid;
-	private String name;
+	private @Store String serverUuid;
 	private byte[] data;
-	private long size;
-	private String contentType;
+	private @Store long size;
+	private @Store String contentType;
+	private @Store long uploadedOn;
 	
-	public String getUuid()
+	public String getServerUuid()
 	{
-		return uuid;
-	}
-	
-	void setUuid(String uuid)
-	{
-		this.uuid = uuid;
-	}
-	public String getName()
-	{
-		return name;
+		return serverUuid;
 	}
 	
-	void setName(String name)
+	void setServerUuid(String serverUuid)
 	{
-		this.name = name;
+		this.serverUuid = serverUuid;
 	}
+
 
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -45,7 +40,7 @@ public class UploadedFile
         		return data;
         	}
             
-        	data = Baltoro.cs.pullUploadedFileData(uuid);
+        	data = Baltoro.cs.pullUploadedFileData(getServerUuid());
             return data;
         });
 	}

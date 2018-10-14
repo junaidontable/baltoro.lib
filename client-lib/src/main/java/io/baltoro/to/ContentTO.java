@@ -7,5 +7,6 @@ public class ContentTO
 	public String fileName;
 	public long size;
 	public String type;
+	public long uploadedOn;
 	
 }
