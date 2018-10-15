@@ -448,6 +448,8 @@ public class RequestWorker extends Thread
 			}
 
 			
+			
+			
 			if(annoName != null)
 			{
 				if (paramClass == String.class && requestValue != null)
@@ -458,21 +460,21 @@ public class RequestWorker extends Thread
 				{
 					methodInputData[i] = requestValue;
 				} 
-				else if (paramClass == Content.class && requestValue != null)
+				else if ((paramClass == Content.class || paramClass.getSuperclass() == Content.class) && requestValue != null)
 				{
 					if(requestValue.length > 1)
 					{
 						new Exception("File upload, has multiple files coming in. use UploadedFile[] or fix the UI to receive one file .");
 					}
 					
-					
 					ContentTO cto = mapper.readValue(requestValue[0], ContentTO.class);
-					Content uploadedFile = new Content();
-					uploadedFile.setUuid(cto.uuid);
-					uploadedFile.setName(cto.fileName);
-					uploadedFile.setSize(cto.size);
 					
-					methodInputData[i] = uploadedFile;
+					Content ct = (Content) paramClass.newInstance();
+					ct.setUuid(cto.uuid);
+					ct.setName(cto.fileName);
+					ct.setSize(cto.size);
+					
+					methodInputData[i] = ct;
 				} 
 				else if (paramClass == Content[].class && requestValue != null)
 				{

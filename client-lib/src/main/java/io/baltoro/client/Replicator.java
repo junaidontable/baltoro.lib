@@ -11,7 +11,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
-import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -359,51 +358,13 @@ public class Replicator
 			return 0;
 		}
 		
-		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length);
 		
 		long nano = db.startRepPull();
 		
-		System.out.print("[");
-		//ReplicationTO lastTo = null;
-		long lastServerNano = 0;
-		for (int i=0;i<tos.length;i++)
-		{
-			ReplicationTO to = tos[i];
-			String[] sqls = to.cmd.split(";");
-			Statement st = db.getConnection().createStatement();
-			for (int j = 0; j < sqls.length; j++)
-			{
-				
-				st.addbatch(sqls[j]);
-			}
-			
-			try
-			{
-				st.executeBatch();
-			} 
-			catch (DerbySQLIntegrityConstraintViolationException e)
-			{
-				System.out.println("record already processed : "+to.nano);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			
-			lastServerNano = to.nano;
-			st.close();
-			
-			System.out.print(".");
-			
-			
-			if(i % 100 == 0)
-			{
-				System.out.print("\n");
-			}
-			
-			
-		}
-		System.out.println("]");
+		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length +" local rep uuid = "+nano);
+		
+		
+		long lastServerNano = db.executeReplicationSQL(tos);
 		
 		
 		db.updateRepPull(nano, lastServerNano, tos.length);
@@ -425,6 +386,5 @@ class Repl
 	long lcpOn;
 	long serverNano;
 	int sqlCount;
-	int lcpSqlCount;
 	
 }

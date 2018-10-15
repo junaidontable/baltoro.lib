@@ -21,7 +21,7 @@ public class Content extends Base
 		return serverUuid;
 	}
 	
-	void setServerUuid(String serverUuid)
+	public void setServerUuid(String serverUuid)
 	{
 		this.serverUuid = serverUuid;
 	}
@@ -50,7 +50,7 @@ public class Content extends Base
 	{
 		return size;
 	}
-	void setSize(long size)
+	public void setSize(long size)
 	{
 		this.size = size;
 	}
@@ -58,9 +58,19 @@ public class Content extends Base
 	{
 		return contentType;
 	}
-	void setContentType(String contentType)
+	public void setContentType(String contentType)
 	{
 		this.contentType = contentType;
+	}
+
+	public long getUploadedOn()
+	{
+		return uploadedOn;
+	}
+
+	public void setUploadedOn(long uploadedOn)
+	{
+		this.uploadedOn = uploadedOn;
 	}
 	
 	

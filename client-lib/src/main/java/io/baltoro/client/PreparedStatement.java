@@ -92,6 +92,13 @@ class PreparedStatement
 		stmt.setTimestamp(parameterIndex, x);
 	}
 	
+	
+	void setBytes(int parameterIndex, byte[] x) throws SQLException
+	{
+		stmt.setBytes(parameterIndex, x);
+	}
+	
+	
 	void addbatch(String ... att) throws SQLException
 	{
 

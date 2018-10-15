@@ -3,6 +3,7 @@ package io.baltoro.client;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,6 +29,7 @@ import io.baltoro.client.util.UUIDGenerator;
 import io.baltoro.features.Store;
 import io.baltoro.obj.BODefaults;
 import io.baltoro.obj.Base;
+import io.baltoro.to.ReplicationTO;
 
 
 public class LocalDB
@@ -158,7 +161,7 @@ public class LocalDB
 		{
 			System.out.println("setting up NEW local database.... "+dbName);
 		
-			setupTables();
+			setupTables(con);
 			
 		}
 		finally 
@@ -172,7 +175,7 @@ public class LocalDB
 	
 	
 	
-	Connection getConnection()
+	private Connection getConnection()
 	{
 		Connection con = connectionQueue.poll();
 		if(con == null)
@@ -240,6 +243,10 @@ public class LocalDB
 			st = con.createStatement();
 			st.executeNoReplication("delete from rep_push");
 			st.close();
+			
+			st = con.createStatement();
+			st.executeNoReplication("delete from content");
+			st.close();
 		
 			
 		}
@@ -304,12 +311,15 @@ public class LocalDB
 		st.executeNoReplication("drop table rep_push");
 		st.close();
 		
+		st = con.createStatement();
+		st.executeNoReplication("drop table content");
+		st.close();
+		
 		con.close();
 	}
 	
-	private void setupTables() throws Exception
+	private void setupTables(Connection con) throws Exception
 	{
-		Connection con = getConnection();
 		
 		Statement st = con.createStatement();
 		
@@ -330,12 +340,12 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("base", "name");
-		createIndex("base", "created_on");
-		createIndex("base", "container_uuid");
-		createIndex("base", "type");
-		createIndex("base", "latest_version_uuid");
-		createIndex("base", "name,container_uuid,type");
+		createIndex("base", "name", con);
+		createIndex("base", "created_on", con);
+		createIndex("base", "container_uuid", con);
+		createIndex("base", "type", con);
+		createIndex("base", "latest_version_uuid", con);
+		createIndex("base", "name,container_uuid,type", con);
 		
 		System.out.println("Base Table Created");
 		
@@ -353,9 +363,9 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("version", "name");
-		createIndex("version", "base_uuid");
-		createIndex("version", "created_on");
+		createIndex("version", "name", con);
+		createIndex("version", "base_uuid", con);
+		createIndex("version", "created_on", con);
 		
 		System.out.println("Version Table Created");
 		
@@ -374,9 +384,9 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("metadata", "name");
-		createIndex("metadata", "base_uuid");
-		createIndex("metadata", "version_uuid");
+		createIndex("metadata", "name", con);
+		createIndex("metadata", "base_uuid", con);
+		createIndex("metadata", "version_uuid", con);
 		
 		System.out.println("Metadata Table Created");
 		
@@ -425,11 +435,11 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("link", "p_uuid");
-		createIndex("link", "c_uuid");
-		createIndex("link", "p_obj_type");
-		createIndex("link", "c_obj_type");
-		createIndex("link", "created_on");
+		createIndex("link", "p_uuid", con);
+		createIndex("link", "c_uuid", con);
+		createIndex("link", "p_obj_type", con);
+		createIndex("link", "c_obj_type", con);
+		createIndex("link", "created_on", con);
 		
 		System.out.println("Link Table Created");
 		
@@ -445,9 +455,9 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("link_att", "link_uuid");
-		createIndex("link_att", "name");
-		createIndex("link_att", "value");
+		createIndex("link_att", "link_uuid", con);
+		createIndex("link_att", "name", con);
+		createIndex("link_att", "value", con);
 		
 		System.out.println("Link_att Table Created");
 		
@@ -470,9 +480,9 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("permission", "base_uuid");
-		createIndex("permission", "ctx_uuid");
-		createIndex("permission", "created_on");
+		createIndex("permission", "base_uuid", con);
+		createIndex("permission", "ctx_uuid", con);
+		createIndex("permission", "created_on", con);
 		
 		System.out.println("Permission Table Created");
 		
@@ -488,7 +498,7 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("type", "type");
+		createIndex("type", "type", con);
 		
 		System.out.println("type Table Created");
 		
@@ -506,8 +516,8 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("repl_pull", "init_on");
-		createIndex("repl_pull", "server_nano");
+		createIndex("repl_pull", "init_on", con);
+		createIndex("repl_pull", "server_nano", con);
 	
 		System.out.println("repl_pull Table Created");
 		
@@ -525,8 +535,8 @@ public class LocalDB
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("repl_push", "init_on");
-		createIndex("repl_push", "server_nano");
+		createIndex("repl_push", "init_on", con);
+		createIndex("repl_push", "server_nano", con);
 	
 		System.out.println("repl_push Table Created");
 		
@@ -534,36 +544,32 @@ public class LocalDB
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE content (");
-		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("version_uuid varchar(42) NOT NULL,");
 		sql.append("base_uuid varchar(42) NOT NULL,");
+		sql.append("name varchar(256) NOT NULL,");
 		sql.append("content_type varchar(100) NOT NULL,");
 		sql.append("content_size bigint NOT NULL,");
 		sql.append("data blob(20M) NOT NULL,");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("created_by varchar(42) NOT NULL, ");
-		sql.append("PRIMARY KEY (uuid))");
+		sql.append("PRIMARY KEY (version_uuid))");
 		
-		System.out.println(sql.toString());
+		//System.out.println(sql.toString());
 		st = con.createStatement();
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
-		createIndex("base_uuid", "base_uuid");
+		createIndex("content", "base_uuid", con);
+		createIndex("content", "name", con);
 		
 		System.out.println("binary Table Created");
-	
-		
-		
-		con.close();
 		
 	}
 	
 	
-	private void createIndex(String tableName, String cols)
+	private void createIndex(String tableName, String cols, Connection con)
 	throws Exception
 	{
-		Connection con = getConnection();
 		
 		Statement st = con.createStatement();
 		String indexName = UUIDGenerator.randomString(6);
@@ -571,9 +577,8 @@ public class LocalDB
 		String sql = "CREATE INDEX IDX_"+tableName+"_"+indexName.toUpperCase()+" on "+tableName+"("+cols+")";
 		//System.out.println(sql);
 		st.executeNoReplication(sql);
-		st.close();
+	
 		
-		con.close();
 	}
 	
 
@@ -1251,6 +1256,45 @@ public class LocalDB
 			insertVersion(obj);
 			insertMetadata(obj);
 		}
+		
+		if(obj instanceof Content)
+		{
+			insertContent((Content)obj);
+		}
+	}
+	
+	private void insertContent(Content ct)
+	{
+			
+		Connection con = getConnection();
+		try
+		{
+			
+			PreparedStatement st = con.prepareStatement("insert into content(version_uuid, base_uuid, name, content_type, content_size, created_by, created_on, data) "
+					+ "values(?,?,?,?,?,?,?,?)");
+			
+			st.setString(1, ct.getLatestVersionUuid());
+			st.setString(2, ct.getBaseUuid());
+			st.setString(3, ct.getName());
+			st.setString(4, ct.getContentType());
+			st.setLong(5, ct.getSize());
+			st.setString(6, ct.getCreatedBy());
+			st.setTimestamp(7, ct.getCreatedOn());
+			st.setBytes(8, ct.getData().get());
+			
+			st.executeAndReplicate();
+				
+			st.close();
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
 	}
 	
 	
@@ -1826,7 +1870,7 @@ public class LocalDB
 			repl.compOn = rs.getLong("comp_on");
 			repl.serverNano = rs.getLong("server_nano");
 			repl.sqlCount = rs.getInt("sql_count");
-			repl.lcpSqlCount = rs.getInt("lcp_sql_count");
+		
 			
 		}
 		rs.close();
@@ -1855,9 +1899,10 @@ public class LocalDB
 	
 	void updateRepPull(long nano, long serverNano, int sqlCount) throws Exception
 	{
+		
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_nano = ?, sql_count=? where nano=? ");
+		PreparedStatement st = con.prepareStatement("update repl_pull set comp_on = ?, server_nano = ?, sql_count=? where nano=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
 		st.setLong(2, serverNano);
@@ -1945,6 +1990,68 @@ public class LocalDB
 		con.close();
 		return nano;
 		
+	}
+	
+	
+	long executeReplicationSQL(ReplicationTO[] tos)
+	{
+		Connection con = getConnection();
+		long lastServerNano = 0;
+		try
+		{
+			System.out.print("[");
+			//ReplicationTO lastTo = null;
+			
+			for (int i=0;i<tos.length;i++)
+			{
+				ReplicationTO to = tos[i];
+				String[] sqls = to.cmd.split(";");
+				
+				Statement st = con.createStatement();
+				for (int j = 0; j < sqls.length; j++)
+				{
+					
+					st.addbatch(sqls[j]);
+				}
+				
+				try
+				{
+					st.executeBatch();
+				} 
+				catch (DerbySQLIntegrityConstraintViolationException | BatchUpdateException e)
+				{
+					System.out.println("record already processed : "+to.nano+" -> "+to.cmd);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				
+				lastServerNano = to.nano;
+				st.close();
+				
+				System.out.print(".");
+				
+				
+				if(i % 100 == 0)
+				{
+					System.out.print("\n");
+				}
+				
+				
+			}
+			System.out.println("]");
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			con.close();
+		}
+		
+		return lastServerNano;
 	}
 	
 	
