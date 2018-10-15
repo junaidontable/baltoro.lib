@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 import io.baltoro.features.Store;
 import io.baltoro.obj.Base;
 
-public class Content extends Base
+public class Content extends Base implements BLTContent
 {
 
 	private @Store String serverUuid;

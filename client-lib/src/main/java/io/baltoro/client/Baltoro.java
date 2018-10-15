@@ -448,7 +448,7 @@ public class Baltoro
 	{
 		for (int i = 0; i < serviceName.length; i++)
 		{
-			pullReplicationServiceNames = serviceName[i] + " ";
+			pullReplicationServiceNames = "service:"+serviceName[i] + " ";
 		}
 		
 		pullReplicationServiceNames = pullReplicationServiceNames.substring(0 , pullReplicationServiceNames.length()-1);

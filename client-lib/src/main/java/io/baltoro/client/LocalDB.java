@@ -549,7 +549,7 @@ public class LocalDB
 		sql.append("name varchar(256) NOT NULL,");
 		sql.append("content_type varchar(100) NOT NULL,");
 		sql.append("content_size bigint NOT NULL,");
-		sql.append("data blob(20M) NOT NULL,");
+		sql.append("data blob(20M) ,");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("PRIMARY KEY (version_uuid))");
@@ -1282,9 +1282,11 @@ public class LocalDB
 			st.setTimestamp(7, ct.getCreatedOn());
 			st.setBytes(8, ct.getData().get());
 			
-			st.executeAndReplicate();
+			st.executeAndReplicate(ct.getType(),"ctUuid:"+ct.getServerUuid());
 				
 			st.close();
+			
+			
 		} 
 		catch (Exception e)
 		{
@@ -1294,6 +1296,47 @@ public class LocalDB
 		{
 			con.close();
 		}
+		
+	}
+	
+	public byte[] getContent(Base obj)
+	{
+		return getContent(obj.getLatestVersionUuid());
+	}
+	
+	public byte[] getContent(String versionUuid)
+	{
+			
+		Connection con = getConnection();
+		byte[] bytes = null;
+		try
+		{
+			
+			
+			PreparedStatement st = con.prepareStatement("select data from content where version_uuid=?");
+			st.setString(1, versionUuid);
+		
+			ResultSet rs = st.executeQuery();
+			if(rs.next())
+			{
+				bytes = rs.getBytes(1);
+			}
+			
+					
+			st.close();
+			
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return bytes;
 		
 	}
 	
@@ -1817,14 +1860,14 @@ public class LocalDB
 		
 		st = con.prepareStatement("delete from link_att where link_uuid = ?");
 		st.setString(1, uuid);
-		a = st.executeAndReplicate("LNAT");
+		a = st.executeAndReplicate();
 		st.close();
 		
 		con.close();
 		return a;
 	}
 	
-	private boolean deletLink(String pUuid, String cUuid) throws Exception
+	public boolean deletLink(String pUuid, String cUuid) throws Exception
 	{
 		/*
 		PreparedStatement st = con.prepareStatement("insert into link"
@@ -2020,7 +2063,7 @@ public class LocalDB
 				} 
 				catch (DerbySQLIntegrityConstraintViolationException | BatchUpdateException e)
 				{
-					System.out.println("record already processed : "+to.nano+" -> "+to.cmd);
+					System.out.println(e.getMessage()+" : "+to.nano+" -> "+to.cmd);
 				}
 				catch (Exception e)
 				{
@@ -2037,6 +2080,16 @@ public class LocalDB
 				{
 					System.out.print("\n");
 				}
+				
+				int ctUuidIdx = to.att.indexOf("ctUuid:");
+				String ctUuid = null;
+				if(ctUuidIdx != -1)
+				{
+					ctUuid = to.att.substring(ctUuidIdx+7,ctUuidIdx+43);
+					
+					System.out.println("========> ctUUid : "+ctUuid);
+				}
+				
 				
 				
 			}

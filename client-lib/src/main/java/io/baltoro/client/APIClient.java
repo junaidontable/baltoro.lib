@@ -303,20 +303,32 @@ public class APIClient
 	}
 	
 	
+	private static String serviceAtt = null;
 	
 	ReplicationTO[] pullReplication(String lServerPushNano, String lServerPullNano) throws Exception
 	{
 		
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pull");
-		String att = null;
+		if(serviceAtt == null)
+		{
 		
-		if(Baltoro.pullReplicationServiceNames == null)
-		{
-			att = Baltoro.serviceNames.toString();
-		}
-		else
-		{
-			att = Baltoro.serviceNames.toString()+" "+Baltoro.pullReplicationServiceNames;
+			StringBuffer att = new StringBuffer();
+			
+			if(Baltoro.pullReplicationServiceNames != null)
+			{
+				att.append(Baltoro.pullReplicationServiceNames.toString());
+			}
+			
+			att.append(" ");
+			
+			String[] sNames = Baltoro.serviceNames.toString().split(",");
+			for (int i = 0; i < sNames.length; i++)
+			{
+				String sName = sNames[i].toUpperCase();
+				att.append(" service:"+sName+" ");
+			}
+			
+			serviceAtt = att.toString();
 		}
 		
 		//log.info(" PULL ======= > "+att);
@@ -324,7 +336,7 @@ public class APIClient
 		Form form = new Form();
 		form.param("appUuid", Baltoro.appUuid);
 		form.param("instUuid", Baltoro.instanceUuid);
-		form.param("att",att);
+		form.param("att",serviceAtt);
 		form.param("lServerPullNano", lServerPullNano);
 		form.param("lServerPushNano", lServerPushNano);
 		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");

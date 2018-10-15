@@ -95,11 +95,17 @@ public class Replicator
 				{
 					DataValueDescriptor ds = params.getParameter(i++);
 					String type = ds.getTypeName();
-					//System.out.println(" type >>>>>>>>>>>>> "+type);
+					
+					
+					
 					
 					if(type.contains("INT"))
 					{
 						theparam = ds.getString();
+					}
+					else if(type.equals("BLOB"))
+					{
+						theparam = "NULL";
 					}
 					else
 					{
@@ -202,40 +208,63 @@ public class Replicator
 	{
 		StringBuffer token = new StringBuffer();
 		
-		if(sql.startsWith("insert into link_att"))
+		if(sql.startsWith("insert into link_att") || sql.startsWith("delete from link_att") || sql.startsWith("updatde link_att"))
 		{
-			token.append("LKAT");
+			token.append("tab:LKAT");
 		}
-		else if(sql.startsWith("insert into link"))
+		else if(sql.startsWith("insert into link") || sql.startsWith("delete from link") || sql.startsWith("updatde link"))
 		{
-			token.append("LINK");
+			token.append("tab:LINK");
 		}
-		else if(sql.startsWith("insert into base"))
+		else if(sql.startsWith("insert into base") || sql.startsWith("delete from base") || sql.startsWith("updatde base"))
 		{
-			token.append("BASE");
+			token.append("tab:BASE");
 		}
-		else if(sql.startsWith("insert into version"))
+		else if(sql.startsWith("insert into version") || sql.startsWith("delete from version") || sql.startsWith("updatde version"))
 		{
-			token.append("VERN");
+			token.append("tab:VERN");
 		}
-		else if(sql.startsWith("insert into metadata("))
+		else if(sql.startsWith("insert into metadata") || sql.startsWith("delete from metadata") || sql.startsWith("updatde metadata"))
 		{
-			token.append("MTDT");
+			token.append("tab:MTDT");
 		}
-		else if(sql.startsWith("insert into permission"))
+		else if(sql.startsWith("insert into permission") || sql.startsWith("delete from permission") || sql.startsWith("updatde permission"))
 		{
-			token.append("PERM");
+			token.append("tab:PERM");
+		}
+		else if(sql.startsWith("insert into content") || sql.startsWith("delete from content") || sql.startsWith("updatde content"))
+		{
+			token.append("tab:UPCT");
+		}
+		else if(sql.startsWith("insert into type") || sql.startsWith("delete from type") || sql.startsWith("updatde type"))
+		{
+			token.append("tab:TYPE");
 		}
 		
 		
-		String sNames = Baltoro.serviceNames.toString().replaceAll(",", " ").toUpperCase();
-		token.append(" "+sNames+" ");
+		
+		//String sNames = Baltoro.serviceNames.toString().replaceAll(",", " ").toUpperCase();
+		String[] sNames = Baltoro.serviceNames.toString().split(",");
+		for (int i = 0; i < sNames.length; i++)
+		{
+			String sName = sNames[i].toUpperCase();
+			token.append(" service:"+sName+" ");
+		}
+		
+		token.append(" ");
 		
 		if(StringUtil.isNotNullAndNotEmpty(att))
 		{
 			for (int i = 0; i < att.length; i++)
 			{
-				token.append(att[i]+" ");
+				if(att[i].length() == 4)
+				{
+					token.append("obj:"+att[i]+" ");
+				}
+				else
+				{
+					token.append(att[i]+" ");
+				}
 			}
 		}
 		

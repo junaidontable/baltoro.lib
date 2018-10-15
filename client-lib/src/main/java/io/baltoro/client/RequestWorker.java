@@ -1,6 +1,7 @@
 package io.baltoro.client;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -450,6 +451,8 @@ public class RequestWorker extends Thread
 			
 			
 			
+	
+			
 			if(annoName != null)
 			{
 				if (paramClass == String.class && requestValue != null)
@@ -460,7 +463,7 @@ public class RequestWorker extends Thread
 				{
 					methodInputData[i] = requestValue;
 				} 
-				else if ((paramClass == Content.class || paramClass.getSuperclass() == Content.class) && requestValue != null)
+				else if (requestValue != null && !paramClass.isArray() && isContentClass(paramClass))
 				{
 					if(requestValue.length > 1)
 					{
@@ -476,15 +479,16 @@ public class RequestWorker extends Thread
 					
 					methodInputData[i] = ct;
 				} 
-				else if (paramClass == Content[].class && requestValue != null)
+				else if (requestValue != null && paramClass.isArray() && isContentClass(paramClass))
 				{
 					String[] filesJson = requestValue;
-					Content[] files = new Content[filesJson.length];
+					        
+					Content[] files = (Content[]) Array.newInstance(paramClass.getComponentType(), filesJson.length);
 					int cnt = 0;
 					for (String json : filesJson)
 					{
 						ContentTO cto = mapper.readValue(json, ContentTO.class);
-						files[cnt] = new Content();
+						files[cnt] = (Content) paramClass.getComponentType().newInstance();
 						files[cnt].setServerUuid(cto.uuid);
 						files[cnt].setName(cto.fileName);
 						files[cnt].setSize(cto.size);
@@ -588,11 +592,34 @@ public class RequestWorker extends Thread
 
 	}
 	
-	/*
-	@Override
-	public boolean equals(Object obj)
+	
+	private boolean isContentClass(Class _class)
 	{
-		return count == ((RequestWorker)obj).count;
+		Class nClass = _class;
+		
+		boolean isArray = nClass.isArray();
+		if(isArray)
+		{
+			nClass = _class.getComponentType();
+		}
+		
+		if(nClass == Content.class)
+		{
+			return true;
+		}
+		
+		for (int i = 0; i < 10; i++)
+		{
+			Class pClass = nClass.getSuperclass();
+			if(pClass == Content.class)
+			{
+				return true;
+			}
+			
+			nClass = pClass;
+		}
+		
+		return false;
+		
 	}
-	*/
 }
