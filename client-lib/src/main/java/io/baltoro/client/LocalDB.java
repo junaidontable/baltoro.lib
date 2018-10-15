@@ -390,34 +390,6 @@ public class LocalDB
 		
 		System.out.println("Metadata Table Created");
 		
-		/*
-		sql = new StringBuffer();
-		sql.append("CREATE TABLE link (");
-		sql.append("link_uuid varchar(42) NOT NULL,");
-		sql.append("link_type varchar(12) NOT NULL DEFAULT 'default',");
-		sql.append("obj_type varchar(5) NOT NULL,");
-		sql.append("obj_uuid varchar(42) NOT NULL,");
-		sql.append("sort smallint NOT NULL DEFAULT 50,");
-		sql.append("seq smallint NOT NULL DEFAULT 5,");
-		sql.append("count smallint NOT NULL DEFAULT 5,");
-		sql.append("created_by varchar(42) NOT NULL, ");
-		sql.append("created_on timestamp NOT NULL)");
-		//sql.append("PRIMARY KEY (uuid, ctx_uuid))");
-		
-		
-		st = con.createStatement();
-		st.execute(sql.toString(), false);
-		st.close();
-		
-		createIndex("link", "link_uuid");
-		createIndex("link", "link_type");
-		createIndex("link", "obj_type");
-		createIndex("link", "obj_uuid");
-		createIndex("link", "obj_uuid,obj_type");
-		createIndex("link", "created_on");
-		
-		System.out.println("Link Table Created");
-		*/
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE link (");
@@ -506,7 +478,6 @@ public class LocalDB
 		sql.append("CREATE TABLE repl_pull (");
 		sql.append("nano bigint NOT NULL,");
 		sql.append("init_on bigint NOT NULL ,");
-		sql.append("lcp_on bigint,");
 		sql.append("comp_on bigint,");
 		sql.append("server_nano bigint,");
 		sql.append("sql_count int,");
@@ -1282,7 +1253,7 @@ public class LocalDB
 			st.setTimestamp(7, ct.getCreatedOn());
 			st.setBytes(8, ct.getData().get());
 			
-			st.executeAndReplicate(ct.getType(),"ctUuid:"+ct.getServerUuid());
+			st.executeAndReplicate(ct.getType(),"ctUuid:"+ct.getServerUuid(), "vrUuid:"+ct.getLatestVersionUuid());
 				
 			st.close();
 			
@@ -2082,12 +2053,25 @@ public class LocalDB
 				}
 				
 				int ctUuidIdx = to.att.indexOf("ctUuid:");
+				int vrUuidIdx = to.att.indexOf("vrUuid:");
 				String ctUuid = null;
-				if(ctUuidIdx != -1)
+				String vrUuid = null;
+				
+				if(ctUuidIdx != -1 && vrUuidIdx != -1)
 				{
 					ctUuid = to.att.substring(ctUuidIdx+7,ctUuidIdx+43);
+					vrUuid = to.att.substring(vrUuidIdx+7,vrUuidIdx+48);
 					
-					System.out.println("========> ctUUid : "+ctUuid);
+					System.out.println("downloading ... content for uuid =>  "+vrUuid);
+					byte[] bytes = Baltoro.cs.pullUploadedFileData(ctUuid);
+					
+					PreparedStatement cst = con.prepareStatement("update content set data=? where version_uuid=?");
+					cst.setBytes(1, bytes);
+					cst.setString(2, vrUuid);
+					cst.executeNoReplicate();
+					cst.close();
+					
+					System.out.println("saveed content ... for uuid =>  "+vrUuid);
 				}
 				
 				
