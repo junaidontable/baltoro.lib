@@ -14,6 +14,7 @@ public class ResponseContext
 	private long lastModifiedOn;
 	private boolean sendNotModified; 
 	private byte[] data;
+	public boolean hasBinaryData = false;
 	
 	public String getRedirect()
 	{

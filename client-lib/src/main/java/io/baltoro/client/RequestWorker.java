@@ -340,6 +340,7 @@ public class RequestWorker extends Thread
 				}
 				else if (returnObj instanceof byte[])
 				{
+					to.responseContext.hasBinaryData = true;
 					to.responseContext.setData((byte[]) returnObj);
 				} 
 				else
@@ -347,6 +348,7 @@ public class RequestWorker extends Thread
 					//byte[] bytes = ObjectUtil.convertToBytes(returnObj);
 					//to.responseContext.setData(bytes);
 					//String json = mapper.writeValueAsString(returnObj);
+					//to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
 					to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
 				}
 			}

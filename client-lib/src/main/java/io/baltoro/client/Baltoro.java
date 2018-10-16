@@ -45,7 +45,7 @@ public class Baltoro
 	
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
 
-	static Map<String, NewCookie> agentCookieMap = new HashMap<String, NewCookie>(100);
+	static Map<String, NewCookie> cookieMap = new HashMap<String, NewCookie>(100);
 	
 		
 	static List<ServicePackage> serviceList = new ArrayList<ServicePackage>();

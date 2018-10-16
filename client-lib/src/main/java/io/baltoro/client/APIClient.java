@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -21,6 +22,9 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -78,7 +82,7 @@ public class APIClient
 		
 		RequestFilter reqFilter = new RequestFilter();
 		
-		CheckResponseFilter responseFilter = new CheckResponseFilter("admin",Baltoro.agentCookieMap);
+		CheckResponseFilter responseFilter = new CheckResponseFilter();
 		
 		
 		webClient = ClientBuilder.newBuilder()
@@ -86,6 +90,7 @@ public class APIClient
 				.register(CheckRequestFilter.class)
 				.register(reqFilter)
 				.register(responseFilter)
+				.register(MultiPartWriter.class)
 				.build();
 		webClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
 		webClient.property(ClientProperties.READ_TIMEOUT, 60000);
@@ -263,12 +268,42 @@ public class APIClient
 		return data;
 	}
 	
-	String sendAPIResponse(String toUuid, String json) throws Exception
+	String sendAPIResponse(String toUuid, String json, byte[] bytes) throws Exception
 	{
 		//log.info("... getting app data -> server ...");
 	
 		WebTarget target = webClient.target(blHost).path(RESP_SERVICE);
+		
+		if(bytes != null)
+		{
+		
+		
+			log.info(".>>>>>>>>>>>>>>>>>>>>>>>>>>> .. sending binary data -> server ...");
+			StreamDataBodyPart dataPart = new StreamDataBodyPart("content", new ByteArrayInputStream(bytes));
 			
+				
+			FormDataMultiPart form = new FormDataMultiPart();
+			  form.field("app-uuid", Baltoro.appUuid);
+			  form.field("inst-uuid", Baltoro.instanceUuid);
+			  form.field("to-uuid", toUuid);
+			  form.field("json", json);
+			  form.bodyPart(dataPart);
+			
+
+			  
+			Invocation.Builder ib =	getIB(target);
+			
+			
+			
+			Response response = ib.post( Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+			   
+			String data = response.readEntity(String.class);
+			form.close();
+			response.close();
+			return data;
+			
+		}
+		
 		Form form = new Form();
 		form.param("app-uuid", Baltoro.appUuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
@@ -276,9 +311,11 @@ public class APIClient
 		form.param("json", json);
 		
 		
+		
 		Invocation.Builder ib =	getIB(target);
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 		String data = response.readEntity(String.class);
+		response.close();
 		return data;
 	}
 	
@@ -286,12 +323,12 @@ public class APIClient
 	Builder getIB(WebTarget target)
 	{
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		Set<String> cookieNames = Baltoro.agentCookieMap.keySet();
+		Set<String> cookieNames = Baltoro.cookieMap.keySet();
 		
 		StringBuffer buffer = new StringBuffer();
 		for (String cookieName : cookieNames)
 		{
-			NewCookie cookie = Baltoro.agentCookieMap.get(cookieName);
+			NewCookie cookie = Baltoro.cookieMap.get(cookieName);
 			//log.info("sending ============= >>>>>> ["+Baltoro.agentCookieMap.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
 			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
 			buffer.append(_cookie);

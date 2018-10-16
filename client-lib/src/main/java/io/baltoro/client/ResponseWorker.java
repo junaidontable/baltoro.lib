@@ -81,11 +81,16 @@ public class ResponseWorker extends  Thread
 				*/
 				
 				to.requestContext = null;
-				
+				byte[] bytes = null;
+				if(to.responseContext.hasBinaryData)
+				{
+					bytes = to.responseContext.getData();
+					to.responseContext.setData(null);
+				}
 				String json = ObjectUtil.toJasonStr(to);
 				//ByteBuffer byteBuffer = ByteBuffer.wrap(json);
 				//session.getBasicRemote().sendBinary(byteBuffer);
-				Baltoro.cs.sendAPIResponse(to.uuid, json);
+				Baltoro.cs.sendAPIResponse(to.uuid, json, bytes);
 				
 				
 			} 

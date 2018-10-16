@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.0.4</version>
+  <version>3.0.5</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -89,6 +89,12 @@
 	    <groupId>org.glassfish.tyrus</groupId>
 	    <artifactId>tyrus-container-grizzly-client</artifactId>
 	    <version>1.13.1</version>
+	</dependency>
+	
+	<dependency>
+    	<groupId>org.glassfish.jersey.media</groupId>
+    	<artifactId>jersey-media-multipart</artifactId>
+    	<version>2.27</version>
 	</dependency>
 
 

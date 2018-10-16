@@ -18,13 +18,10 @@ public class CheckResponseFilter implements ClientResponseFilter
 	static Logger log = Logger.getLogger(CheckResponseFilter.class.getName());
 	
 	
-	protected Map<String, NewCookie> cookieMap;
-	private String appName;
 	
-	public CheckResponseFilter(String appName, Map<String, NewCookie> cookieMap)
+	public CheckResponseFilter()
 	{
-		this.cookieMap = cookieMap;
-		this.appName = appName;
+	
 	}
 	
 	public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) 
@@ -54,7 +51,7 @@ public class CheckResponseFilter implements ClientResponseFilter
 		{
 			NewCookie cookie = map.get(key);
 			//log.info("received ======<"+this.appName+">======= >>>["+map.hashCode()+"]>> 111 >>>>>> "+key+" : "+cookie);
-			cookieMap.put(key, cookie);
+			Baltoro.cookieMap.put(key, cookie);
 		}	
 	}
 	
