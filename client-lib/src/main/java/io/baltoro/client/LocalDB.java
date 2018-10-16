@@ -1190,6 +1190,7 @@ public class LocalDB
 		obj.setCreatedOn(rs.getTimestamp("created_on"));
 		obj.setVersionUuid(rs.getString("latest_version_uuid"));
 		
+		obj.setVersionUuid(obj.getLatestVersionUuid());
 	}
 	
 	public void save(Base obj)
