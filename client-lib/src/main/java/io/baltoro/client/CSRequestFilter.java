@@ -1,6 +1,7 @@
 package io.baltoro.client;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -26,15 +27,26 @@ public class CSRequestFilter implements ClientRequestFilter
 		requestContext.getHeaders().add("BLT_APP_NAME", appName);
 		//requestContext.getHeaders().add("BLT_SERVICE_NAME", Baltoro.serviceNames.toString());
 		
+		StringBuffer value = new StringBuffer();
+		
+		
+		Map<String, String> ccookies = Baltoro.userRequestCtx.get().getCookies();
+		for (String c : ccookies.keySet())
+		{
+			String v = ccookies.get(c);
+			value.append(c+"="+v+";");
+		}
+		
+		/*
 		UserSession session = Baltoro.getUserSession();
 		Set<NewCookie> cookies = session.getCookies();
 		
-		StringBuffer value = new StringBuffer();
+		
 		for (NewCookie cookie : cookies)
 		{
 			value.append(cookie.getName()+"="+cookie.getValue()+";");
 		}
-		
+		*/
 		//System.out.println("cookie:"+value.toString());
 		
 		requestContext.getHeaders().add("Cookie", value.toString());

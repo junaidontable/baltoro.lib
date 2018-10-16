@@ -23,6 +23,12 @@ public class ResponseContext
 	{
 		this.redirect = redirect;
 	}
+	
+	public void sendRedirect(String redirect)
+	{
+		this.redirect = redirect;
+	}
+	
 	public String getError()
 	{
 		return error;
