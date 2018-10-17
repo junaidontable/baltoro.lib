@@ -3,7 +3,6 @@ package io.baltoro.ep;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,13 +15,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
-import org.bouncycastle.asn1.cms.SCVPReqRes;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CSRequestFilter;
 import io.baltoro.client.CSResponseFilter;
-import io.baltoro.client.CheckRequestFilter;
-import io.baltoro.client.CheckResponseFilter;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
@@ -81,27 +75,7 @@ public class CloudServer
 	Builder getIB(WebTarget target)
 	{
 	
-		
 		Invocation.Builder ib =	target.request(MediaType.APPLICATION_JSON_TYPE);
-		
-		/*
-		Map<String, NewCookie> map = cookieMap.get(appName);
-		
-		Set<String> cookieNames = map.keySet();
-		
-		//log.info("sending ============= >>>>>> Cookie count ["+cookieNames.size()+"]");
-		StringBuffer buffer = new StringBuffer();
-		for (String cookieName : cookieNames)
-		{
-			NewCookie cookie = map.get(cookieName);
-			//log.info("sending ============= >>>>>> ["+map.hashCode()+"]>>>>> "+cookieName+" : "+cookie);
-			String _cookie = cookie.getName()+"="+cookie.getValue()+";";
-			buffer.append(_cookie);
-		}
-		
-		ib.header("Cookie", buffer.toString());
-		*/
-		
 		return ib;
 	}
 	
@@ -175,11 +149,11 @@ public class CloudServer
 	}
 	
 	
-	public <T> T call(String path, EPData data, Class<T> returnType)
+	public <T> T call(String serverUrl, String path, EPData data, Class<T> returnType)
 	{
-		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
+		WebTarget target = client.target(serverUrl).path(path);	
 	
-		log.info("url --> "+target);
+		log.info("API call URL --> "+serverUrl+path);
 		
 		Form form = new Form();
 		

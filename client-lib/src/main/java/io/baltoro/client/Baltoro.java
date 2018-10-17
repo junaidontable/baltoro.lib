@@ -44,28 +44,18 @@ public class Baltoro
 	static ThreadLocal<ResponseContext> userResponseCtx = new ThreadLocal<>();
 	
 	static ThreadLocal<String> serviceNameCtx = new ThreadLocal<>();
-	
 	static Map<String, Class<?>> pathClassMap = new HashMap<String, Class<?>>(100); 
-
 	static Map<String, NewCookie> cookieMap = new HashMap<String, NewCookie>(100);
-	
-		
+
 	static List<ServicePackage> serviceList = new ArrayList<ServicePackage>();
 	
 	static StringBuffer serviceNames = new StringBuffer();
 	static String hostId;
 	static APIClient cs;
 	
-	/*
-	private static boolean logedin = false;
-	static private String email;
-	static private String password;
-	private static UserTO user;
-	*/
 	
 	static String instanceUuid;
 	static int instanceThreadCount = 3;
-	//public static boolean debug = false;
 	static Properties props = null;
 	static String appUuid;
 	static String appPrivateKey;
@@ -76,13 +66,9 @@ public class Baltoro
 	static String appURL;
 	static Env env = Env.PRD;
 	
-	//static String serverDomain = "baltoro.io";
-	//static int serverPort = 80;
-	//static String serverProtocol = "http";
 	
 	static String pullReplicationServiceNames;
 	
-	//static RequestPoller requestPoller;
 	static ResponsePoller responsePoller;
 	
 	private static boolean running = false;
@@ -90,8 +76,6 @@ public class Baltoro
 	
 	
 	static LocalDB db;
-	static String lcp;
-	static long repMillis;
 	
 
 	
@@ -243,7 +227,13 @@ public class Baltoro
 			}
 			
 			
-			T t = cServer.call(path, epData, returnType);
+			String url = userRequestCtx.get().getUrl();
+			int idx1 = url.indexOf("://");
+			int idx2 = url.indexOf("/", idx1+3);
+			
+			String serverUrl = url.substring(0, idx2);
+			
+			T t = cServer.call(serverUrl, path, epData, returnType);
 			return t;
 			
 		} 
