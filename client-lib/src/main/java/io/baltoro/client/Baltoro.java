@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.NewCookie;
 
+import com.google.common.net.InetAddresses;
+
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
@@ -70,12 +72,13 @@ public class Baltoro
 	static String appName;
 	static String userUuid;
 	static File propFile;
-	static String serverURL = "http://www.baltoro.io";
+	static String serverURL = "http://"+APIClient.BLTC_CLIENT+".baltoro.io";
+	static String appURL;
 	static Env env = Env.PRD;
 	
-	static String serverDomain = "baltoro.io";
-	static int serverPort = 80;
-	static String serverProtocol = "http";
+	//static String serverDomain = "baltoro.io";
+	//static int serverPort = 80;
+	//static String serverProtocol = "http";
 	
 	static String pullReplicationServiceNames;
 	
@@ -352,6 +355,13 @@ public class Baltoro
 	public static void init(String appName, Env env)
 	{
 		
+		String url = System.getProperties().getProperty("url");
+		if(StringUtil.isNotNullAndNotEmpty(url))
+		{
+			serverURL = url;
+		}
+		
+
 		String _envStr = System.getProperties().getProperty("env");
 		if(StringUtil.isNotNullAndNotEmpty(_envStr))
 		{
@@ -382,36 +392,43 @@ public class Baltoro
 		
 		Baltoro.appName = appName;
 		
+		//int hostIdx1 = serverURL.indexOf("://");
+		//int hostIdx2 = serverURL.indexOf(hostIdx1,"/");
+		
+		boolean isIP = InetAddresses.isInetAddress(serverURL);
+		
+		
 		switch (env)
 		{
 			case PRD:
 				Baltoro.appName = appName;
-				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;	
+				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;	
+				
 				break;
 				
 			case STG:
 				Baltoro.appName = appName+"-envsg";
-				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
+				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;
 				
 			case QA:
 				Baltoro.appName = appName+"-envqa";
-				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
+				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 				
 			case DEV:
 				Baltoro.appName = appName+"-envdv";
-				serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
+				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 
-			case LOC:
-				serverURL = "http://localhost:8080";
-				break;
 				
 			default :
-				serverURL = serverProtocol+"://www.baltoro.io";
+				//serverURL = serverProtocol+"://www.baltoro.io";
 				break;
 		}
+		
+		appURL = serverURL.replace("://"+APIClient.BLTC_CLIENT, "://"+Baltoro.appName);
+		
 		
 		
 		
@@ -482,14 +499,14 @@ public class Baltoro
 			{
 				log.info("=====================================================");
 				log.info("=====================================================");
-				if(Baltoro.env == Env.LOC)
+				if(Baltoro.serverURL.contains("localhost") || Baltoro.serverURL.contains("127.0.0.1"))
 				{
 					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld?appName="+Baltoro.appName);
 				}
 				else
 				{
-					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld");
-					String hostUrl = Baltoro.serverURL.substring(0,serverURL.indexOf('.'))+"-hid"+hostId+""+Baltoro.serverURL.substring(serverURL.indexOf('.'));
+					log.info("Test URL --> "+Baltoro.appURL+"/"+sp.serviceName+"/helloworld");
+					String hostUrl = Baltoro.appURL.substring(0,appURL.indexOf('.'))+"-hid"+hostId+""+Baltoro.appURL.substring(appURL.indexOf('.'));
 					log.info("Host URL --> "+hostUrl+"/"+sp.serviceName+"/helloworld");
 				}
 				log.info("HOST ID ====> "+hostId);

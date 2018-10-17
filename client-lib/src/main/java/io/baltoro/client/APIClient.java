@@ -54,31 +54,16 @@ public class APIClient
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
-	String host;
-	String port;
 	
-	String blHost = "http://"+BLTC_CLIENT+".baltoro.io";
-	//String host = "http://admin.baltoro.io";
+	String blHost;
 	
 	
 	boolean online = false;
 	
 	APIClient()
 	{
-		/*
-		if(Baltoro.debug)
-		{
-			//blHost = "http://admin.baltoro.io:8080";
-			//host = "http://admin.baltoro.io:8080";
-		}
-		*/
 		
-		
-		if(Baltoro.env == Env.LOC)
-		{
-			blHost = "http://localhost:8080";
-		}
-		
+		blHost = Baltoro.serverURL;
 		
 		RequestFilter reqFilter = new RequestFilter();
 		

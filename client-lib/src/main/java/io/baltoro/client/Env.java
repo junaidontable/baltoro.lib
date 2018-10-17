@@ -5,6 +5,5 @@ public enum Env
 	PRD,
 	STG,
 	QA,
-	DEV,
-	LOC;
+	DEV;
 }
