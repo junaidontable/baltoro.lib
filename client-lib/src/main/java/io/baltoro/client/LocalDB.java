@@ -1500,14 +1500,12 @@ public class LocalDB
 	
 	private void insertMetadata(Base obj)
 	{
+		Map<String, String> mdMap = new HashMap<>();
 		
-		
-		PreparedStatement st = null;
-		Connection con = getConnection();
 		try
 		{
 			
-			Map<String, String> mdMap = new HashMap<>();
+			
 			
 			Map<String, Methods> fieldMap = classFieldMap.get(obj.getClass().getName());
 			if(fieldMap == null)
@@ -1556,11 +1554,31 @@ public class LocalDB
 				}
 				
 				mdMap.put(fieldName, value);
-				//System.out.println(mdObj);
+				
+				
+				
+				
 				
 			}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
 			
-			st = con.prepareStatement("insert into metadata(base_uuid, version_uuid, name, value,created_by, created_on) "
+			
+		if(mdMap == null || mdMap.isEmpty())
+		{
+			return;
+		}
+			
+		Connection con = getConnection();
+		try
+		{
+			
+			
+			PreparedStatement st = con.prepareStatement("insert into metadata(base_uuid, version_uuid, name, value,created_by, created_on) "
 					+ "values(?,?,?,?,?,?)");
 			
 			
@@ -1591,7 +1609,9 @@ public class LocalDB
 		}
 		finally 
 		{
+		
 			con.close();
+			
 		}
 		
 	}
@@ -1651,11 +1671,20 @@ public class LocalDB
 	}
 	
 	
+	public String getObjClassByUuid(String uuid)
+	{
+		String type = ObjectUtil.getType(uuid);
+		return getObjClass(type);
+	}
 	
-	private String getObjClass(String type)
+	public String getObjClassType(String type)
 	{
 		
-	
+		return getObjClass(type);
+	}
+		
+	private String getObjClass(String type)
+	{
 		String objClass = typeClassMap.get(type);
 		if(objClass != null)
 		{
