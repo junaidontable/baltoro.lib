@@ -176,9 +176,14 @@ public class CloudServer
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
 		{
+	
 			System.out.println("////////////////////////");
 			System.out.println(error);
 			System.out.println("////////////////////////");
+			if(error.startsWith("BLT-OBJ:NOT-FOUND"))
+			{
+				return null;
+			}
 			throw new APIError(error);
 		}
 		

@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
+import io.baltoro.client.util.StringUtil;
+
 public class CSRequestFilter implements ClientRequestFilter
 {
  
@@ -23,17 +25,26 @@ public class CSRequestFilter implements ClientRequestFilter
 	{
 		requestContext.getHeaders().add("BLT_APP_NAME", appName);
 		
-		StringBuffer value = new StringBuffer();
+		StringBuffer cookieValue = new StringBuffer();
 		
+		UserSession session = Baltoro.getUserSession();
 		
-		Map<String, String> ccookies = Baltoro.userRequestCtx.get().getCookies();
-		for (String c : ccookies.keySet())
+		Map<String, String> cookies = Baltoro.userRequestCtx.get().getCookies();
+		for (String c : cookies.keySet())
 		{
-			String v = ccookies.get(c);
-			value.append(c+"="+v+";");
+			String v = cookies.get(c);
+			String sessionValue = session.getCookies().get(c);
+			
+			if(StringUtil.isNotNullAndNotEmpty(sessionValue))
+			{
+				v = sessionValue;
+			}
+					
+					
+			cookieValue.append(c+"="+v+";");
 		}
 			
-		requestContext.getHeaders().add("Cookie", value.toString());
+		requestContext.getHeaders().add("Cookie", cookieValue.toString());
 		
 	}
 	

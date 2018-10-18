@@ -33,21 +33,11 @@ public class RequestWorker extends Thread
 	int count;
 	long lastWorked = System.currentTimeMillis();
 	
-	/*
-	static ThreadLocal<RequestContext> requestCtx = new ThreadLocal<>();
-	static ThreadLocal<ResponseContext> responseCtx = new ThreadLocal<>();
-	static ThreadLocal<WebSocketContext> wsCtx = new ThreadLocal<>();
-	*/
 
 	
 	RequestWorker()
 	{
-		/*
-		synchronized (RequestWorker.class.getName().intern())
-		{
-			count = _count++;
-		}
-		*/
+	
 	}
 	
 	void set(WSTO to)
@@ -351,6 +341,10 @@ public class RequestWorker extends Thread
 					//to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
 					to.responseContext.setData(mapper.writeValueAsBytes(returnObj));
 				}
+			}
+			else
+			{
+				to.responseContext.setError("BLT-OBJ:NOT-FOUND");
 			}
 
 		} 

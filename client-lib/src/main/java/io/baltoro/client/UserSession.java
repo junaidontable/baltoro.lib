@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.core.NewCookie;
-
 import io.baltoro.to.SessionUserTO;
 
 public class UserSession
@@ -21,7 +19,7 @@ public class UserSession
 	private long createdOn;
 	private long authenticatedOn;
 	private int timeoutMin = 20;
-	private Map<String, Set<NewCookie>> cookieAppMap = new HashMap<>(100);
+	private Map<String, String> cookieMap = new HashMap<>(100);
 	
 	UserSession(String sessionId)
 	{
@@ -112,29 +110,12 @@ public class UserSession
 	
 	void addCookie(String name, String value)
 	{
-		Set<NewCookie> cookieSet = cookieAppMap.get(Baltoro.appName);
-		if(cookieSet == null)
-		{
-			cookieSet = new HashSet<>(100);
-			cookieAppMap.put(Baltoro.appName, cookieSet);
-		}
-		
-		NewCookie cookie = new NewCookie(name, value);
-		cookieSet.add(cookie);
-		
+		cookieMap.put(name, value);
 	}
 	
-	Set<NewCookie> getCookies()
+	Map<String, String> getCookies()
 	{
-		Set<NewCookie> cookieSet = cookieAppMap.get(Baltoro.appName);
-		if(cookieSet == null)
-		{
-			cookieSet = new HashSet<>(100);
-			cookieAppMap.put(Baltoro.appName, cookieSet);
-		}
-		
-		cookieSet.add(new NewCookie("BLT_SESSION_ID", sessionId));
-		return cookieSet;
+		return cookieMap;
 	}
 
 	void sendSession()
