@@ -1051,6 +1051,40 @@ public class LocalDB
 	}
 	
 	
+	public String getLinkUuid(String pUuid, String cUuid)
+	{
+		Connection con = getConnection();
+		String linkUuid = null;
+		try
+		{
+			PreparedStatement st = con.prepareStatement("select uuid from link where p_uuid=? and c_uuid = ? ");
+				
+			st.setString(1, pUuid);
+			st.setString(2,  cUuid);
+			ResultSet rs = st.executeQuery();
+			
+			if(rs.next())
+			{
+				linkUuid = rs.getString(1);
+			}
+			
+			rs.close();
+			st.close();
+			
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return linkUuid;
+	}
 	
 	private Base selectBase(String baseUuid, Base obj)
 	throws Exception
@@ -1629,8 +1663,11 @@ public class LocalDB
 			return type;
 		}
 		
-		String hash = CryptoUtil.hash(className);
-		type = hash.substring(10, 14).toUpperCase().replaceAll("/", "0");
+		String hash = CryptoUtil.md5(className.getBytes());
+		
+		System.out.println(" hash ====> "+hash);
+		
+		type = hash.substring(10, 14).toUpperCase();
 		
 		
 		String objClass = getObjClass(type);
