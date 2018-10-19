@@ -51,9 +51,19 @@ public class StringUtil
 		return false;	
 	}
 	
-	public static boolean isNotNullAndNotEmpty(String[] str)
+	public static boolean isNotNullAndNotEmpty(Object[] str)
 	{
 		if(str != null && str.length > 0)
+		{
+			return true;
+		}
+		
+		return false;	
+	}
+	
+	public static boolean isNotNullAndNotEmpty(Collection<?> col)
+	{
+		if(col != null && col.size() > 0)
 		{
 			return true;
 		}

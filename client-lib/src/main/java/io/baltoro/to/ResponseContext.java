@@ -15,6 +15,7 @@ public class ResponseContext
 	private boolean sendNotModified; 
 	private byte[] data;
 	public boolean hasBinaryData = false;
+	public boolean noReturnData = false;
 	
 	public String getRedirect()
 	{
@@ -98,5 +99,6 @@ public class ResponseContext
 	}
 	
 
+	
 	
 }

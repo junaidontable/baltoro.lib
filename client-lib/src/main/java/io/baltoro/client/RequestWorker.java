@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -344,7 +345,7 @@ public class RequestWorker extends Thread
 			}
 			else
 			{
-				to.responseContext.setError("BLT-OBJ:NOT-FOUND");
+				to.responseContext.noReturnData = true;
 			}
 
 		} 
@@ -434,7 +435,7 @@ public class RequestWorker extends Thread
 			}
 
 			String[] requestValue = requestParam.get(annoName);
-			if(annoName != null && requestValue == null)
+			if(annoName != null && requestValue == null && paramClass != Optional.class)
 			{
 				StringBuffer buffer = new StringBuffer();
 				for (String paramName : requestParam.keySet())
@@ -454,6 +455,17 @@ public class RequestWorker extends Thread
 				if (paramClass == String.class && requestValue != null)
 				{
 					methodInputData[i] = requestValue[0];
+				} 
+				else if (paramClass == Optional.class)
+				{
+					if(requestValue == null)
+					{
+						methodInputData[i] = null;
+					}
+					else
+					{
+						methodInputData[i] = Optional.of(requestValue[0]);
+					}
 				} 
 				else if (paramClass == String[].class && requestValue != null)
 				{
@@ -607,6 +619,11 @@ public class RequestWorker extends Thread
 		for (int i = 0; i < 10; i++)
 		{
 			Class pClass = nClass.getSuperclass();
+			if(pClass == null)
+			{
+				return false;
+			}
+			
 			if(pClass == Content.class)
 			{
 				return true;

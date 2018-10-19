@@ -561,6 +561,10 @@ public class LocalDB
 		{
 			obj = _class.newInstance();
 			selectBase(baseUuid, obj);
+			if(obj.getBaseUuid() == null)
+			{
+				return null;
+			}
 			Map<String, Base> map = new HashMap<String, Base>();
 			map.put(obj.getBaseUuid(), obj);
 			
@@ -1100,6 +1104,10 @@ public class LocalDB
 			if(rs.next())
 			{
 				buildBO(rs, obj);
+			}
+			else
+			{
+				obj.setBaseUuid(null);
 			}
 			rs.close();
 			st.close();
