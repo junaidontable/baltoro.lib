@@ -262,6 +262,17 @@ public class RequestWorker extends Thread
 		
 		
 		String url = req.getApiPath();
+		if(url.equals("/"))
+		{
+			url = "/app_root";
+		}
+		
+		if(url.endsWith("/"))
+		{
+			url = url.substring(0, url.length()-1);
+		}
+		
+		
 		WebMethod wm = WebMethodMap.getInstance().getMethod(url);
 		if (wm == null)
 		{

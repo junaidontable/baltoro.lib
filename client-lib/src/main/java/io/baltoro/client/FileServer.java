@@ -38,7 +38,7 @@ public class FileServer
 		}
 		
 		
-		System.out.println(" loading ---- > file : "+file.getName()+", "+file.length());
+		System.out.println(" loading ---- > file : "+file.getAbsolutePath()+", "+file.length());
 		try
 		{
 		
@@ -65,7 +65,16 @@ public class FileServer
 			long browerTime = req.getIfModifiedSince();
 			long fileTime = file.lastModified();
 		
-			if(browerTime >= fileTime)
+			if(fileTime == 0)
+			{
+				System.out.println(" ============== > file ("+file.getAbsolutePath()+") not found !!!");
+				res.setError("file -> "+file.getName()+" not found .. ");
+				webFile.error = "file -> "+file.getName()+" not found .. ";
+				
+				return webFile;
+				
+			}
+			else if(browerTime >= fileTime)
 			{
 				res.setSendNotModified(true);
 				return webFile;

@@ -11,9 +11,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.annotation.security.RolesAllowed;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
 
 import org.reflections.Reflections;
 
@@ -170,6 +167,7 @@ public class AnnotationProcessor
 			}
 		}
 		
+		/*
 		if (method.isAnnotationPresent(OnOpen.class))
 		{
 			fPath = cPath+"/onopen";
@@ -187,10 +185,18 @@ public class AnnotationProcessor
 			fPath = cPath+"/onmessage";
 			isWS = true;
 		}
+		*/
 		
 		if(fPath == null)
 		{
 			return null;
+		}
+			
+		
+		if(fPath.endsWith("/"))
+		{
+			System.out.println(" =====> "+fPath);
+			fPath = fPath.substring(0, fPath.length()-1);
 		}
 			
 		

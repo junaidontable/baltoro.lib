@@ -426,9 +426,9 @@ public class Baltoro
 	
 	public static void register(String serviceName, String ... packageNames)
 	{
-		if(StringUtil.isNullOrEmpty(serviceName))
+		if(StringUtil.isNullOrEmpty(serviceName) || serviceName.equals("/"))
 		{
-			serviceName = "/";
+			serviceName = "app_root";
 		}
 		
 		String[] _packageNames = new String[packageNames.length+1];
