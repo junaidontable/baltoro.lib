@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.1.3</version>
+  <version>3.1.6</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -51,6 +51,7 @@
 
    <dependencies>
     
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -214,6 +215,8 @@
 						<addClasspath>true</addClasspath>
 						<mainClass>io.baltoro.client.Baltoro</mainClass>
 						<classpathPrefix>dependency-jars/</classpathPrefix>
+						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 					</manifest>
 				</archive>
 			</configuration>
@@ -232,6 +235,8 @@
 				<archive>
 					<manifest>
 						<mainClass>io.baltoro.client.Baltoro</mainClass>
+						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 					</manifest>
 				</archive>
 

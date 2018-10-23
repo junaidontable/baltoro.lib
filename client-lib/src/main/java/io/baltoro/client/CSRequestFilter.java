@@ -14,10 +14,12 @@ public class CSRequestFilter implements ClientRequestFilter
  
 	static Logger log = Logger.getLogger(CSRequestFilter.class.getName());
 	private String appName;
+	private UserSession session;
 	
-	public CSRequestFilter(String appName)
+	public CSRequestFilter(String appName, UserSession session)
 	{
 		this.appName = appName;
+		this.session = session;
 	}
 	
 	public void filter(ClientRequestContext requestContext) 
@@ -27,13 +29,12 @@ public class CSRequestFilter implements ClientRequestFilter
 		
 		StringBuffer cookieValue = new StringBuffer();
 		
-		UserSession session = Baltoro.getUserSession();
 		
-		Map<String, String> cookies = Baltoro.userRequestCtx.get().getCookies();
+		Map<String, String> cookies = session.getCookies();
 		for (String c : cookies.keySet())
 		{
 			String v = cookies.get(c);
-			String sessionValue = session.getCookies().get(c);
+			String sessionValue = cookies.get(c);
 			
 			if(StringUtil.isNotNullAndNotEmpty(sessionValue))
 			{
@@ -45,6 +46,7 @@ public class CSRequestFilter implements ClientRequestFilter
 		}
 			
 		requestContext.getHeaders().add("Cookie", cookieValue.toString());
+		
 		
 	}
 	

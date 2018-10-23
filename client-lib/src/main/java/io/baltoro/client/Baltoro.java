@@ -205,35 +205,49 @@ public class Baltoro
 		
 	}
 	
+	public static <T> T callSync(UserSession session, String path, Class<T> returnType, ParamInput input)
+	{
+		return callSync(Baltoro.appName, session, path, returnType, input);
+	}
+	
 	public static <T> T callSync(String path, Class<T> returnType, ParamInput input)
 	{
-		return callSync(Baltoro.appName, Baltoro.userRequestCtx.get(), path, returnType, input);
+		return callSync(Baltoro.appName, Baltoro.getUserSession(), path, returnType, input);
 	}
 	
 	public static <T> T callSync(String path, Class<T> returnType)
 	{
-		return callSync(Baltoro.appName, Baltoro.userRequestCtx.get(), path, returnType, null);
+		return callSync(Baltoro.appName, Baltoro.getUserSession(), path, returnType, null);
 	}
 	
-	private static <T> T callSync(String appName, RequestContext req, String path, Class<T> returnType, ParamInput input)
+	private static <T> T callSync(String appName, UserSession session, String path, Class<T> returnType, ParamInput input)
 	{
 		try
 		{
-			CloudServer cServer = new CloudServer(appName, req);
+			CloudServer cServer = new CloudServer(appName, session);
 			EPData epData = null;
 			if(input != null)
 			{
 				epData = input.getEPData();
 			}
 			
+			String url = null;
 			
-			String url = userRequestCtx.get().getUrl();
-			int idx1 = url.indexOf("://");
-			int idx2 = url.indexOf("/", idx1+3);
+			if(userRequestCtx == null || userRequestCtx.get() == null)
+			{
+				url = Baltoro.appURL;
+			}
+			else
+			{
+				url = userRequestCtx.get().getUrl();
+				int idx1 = url.indexOf("://");
+				int idx2 = url.indexOf("/", idx1+3);
+				
+				url = url.substring(0, idx2);
+			}
 			
-			String serverUrl = url.substring(0, idx2);
 			
-			T t = cServer.call(serverUrl, path, epData, returnType);
+			T t = cServer.call(url, path, epData, returnType);
 			return t;
 			
 		} 
@@ -246,28 +260,48 @@ public class Baltoro
 	}
 	
 	
+	public static Future<?> callAsync(UserSession session, String path, Class<?> returnType, ParamInput input)
+	{
+		return callAsync(appName, session, path, returnType, input);
+	}
+	
 	public static Future<?> callAsync(String path, Class<?> returnType, ParamInput input)
 	{
-		return callAsync(appName, Baltoro.userRequestCtx.get(), path, returnType, input);
+		return callAsync(appName, Baltoro.getUserSession(), path, returnType, input);
 	}
 	
 	public static Future<?> callAsync(String path, Class<?> returnType)
 	{
-		return callAsync(appName, Baltoro.userRequestCtx.get(), path, returnType, null);
+		return callAsync(appName, Baltoro.getUserSession(), path, returnType, null);
 	}
 	
-	public static Future<?> callAsync(String appName, RequestContext req, String path, Class<?> returnType, ParamInput input)
+	public static Future<?> callAsync(String appName, UserSession session, String path, Class<?> returnType, ParamInput input)
 	{
 		try
 		{
-			CloudServer cServer = new CloudServer(appName, req);
+			CloudServer cServer = new CloudServer(appName, session);
 			EPData epData = null;
 			if(input != null)
 			{
 				epData = input.getEPData();
 			}
+			
+			String url = null;
+			
+			if(userRequestCtx == null || userRequestCtx.get() == null)
+			{
+				url = Baltoro.appURL;
+			}
+			else
+			{
+				url = userRequestCtx.get().getUrl();
+				int idx1 = url.indexOf("://");
+				int idx2 = url.indexOf("/", idx1+3);
 				
-			Future<?> f = cServer.callAsyn(path, epData, returnType);
+				url = url.substring(0, idx2);
+			}
+				
+			Future<?> f = cServer.callAsyn(url, path, epData, returnType);
 			
 			return f;
 			
@@ -312,6 +346,24 @@ public class Baltoro
 		return userSession;
 	}
 	
+	
+	public static UserSession createSession()
+	{
+		try
+		{
+			String bltSessionId = cs.areYouThere();
+			
+			UserSession session = SessionManager.getSession(bltSessionId);
+			return session;
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public static void invalidateSession()
 	{
 		//RequestContext rc = RequestWorker.requestCtx.get();
@@ -334,7 +386,7 @@ public class Baltoro
 	
 	public static void init(String appName)
 	{
-		init(appName, null);
+		init(appName, Env.PRD);
 	}
 	
 	public static String getServerUrl()
@@ -470,6 +522,8 @@ public class Baltoro
 		
 		try
 		{
+			
+					
 			processEnv();
 			
 			buildService();
@@ -505,6 +559,11 @@ public class Baltoro
 				log.info("=====================================================");
 				
 			}
+			
+		     
+	        System.out.println(" ********** Baltoro lib version ************ " );
+			System.out.println(Baltoro.class.getPackage().getImplementationVersion());
+			System.out.println(" ********************** ");
 			
 			db = LocalDB.instance();
 			

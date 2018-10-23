@@ -26,10 +26,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.baltoro.client.Baltoro;
 import io.baltoro.client.CSRequestFilter;
 import io.baltoro.client.CSResponseFilter;
+import io.baltoro.client.UserSession;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
-import io.baltoro.to.RequestContext;
 
 public class CloudServer
 {
@@ -45,13 +45,13 @@ public class CloudServer
 	
 	
 	
-	public CloudServer(String appName, RequestContext req)
+	public CloudServer(String appName, UserSession session)
 	{
 		this.appName = appName;
 		
 		
-		CSResponseFilter responseFilter = new CSResponseFilter(appName);
-		CSRequestFilter requestFilter = new CSRequestFilter(appName);
+		CSResponseFilter responseFilter = new CSResponseFilter(appName, session);
+		CSRequestFilter requestFilter = new CSRequestFilter(appName, session);
 	
 		
 		client = appMap.get(appName);
@@ -200,9 +200,9 @@ public class CloudServer
 	
 	}
 	
-	public Future<?> callAsyn(String path, EPData data, Class<?> returnType)
+	public Future<?> callAsyn(String url, String path, EPData data, Class<?> returnType)
 	{
-		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
+		WebTarget target = client.target(url).path(path);	
 	
 		log.info("url --> "+target);
 		

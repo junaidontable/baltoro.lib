@@ -126,6 +126,14 @@ public class RequestWorker extends Thread
 		Baltoro.serviceNameCtx.set(to.serviceName);
 		Baltoro.userRequestCtx.set(req);
 		Baltoro.userResponseCtx.set(res);
+		
+		UserSession userSession = SessionManager.getSession(req.getSessionId());
+		for (String ck : req.getCookies().keySet())
+		{
+			String v = req.getCookies().get(ck);
+			userSession.addCookie(ck, v);
+		}
+		
 		//responseCtx.set(res);
 		
 		try

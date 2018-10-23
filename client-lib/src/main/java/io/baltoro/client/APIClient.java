@@ -121,7 +121,7 @@ public class APIClient
 	}
 	
 	
-	void areYouThere() throws Exception
+	String areYouThere() throws Exception
 	{
 		log.info("... Are you There ..."+blHost);
 	
@@ -135,6 +135,7 @@ public class APIClient
 			System.exit(1);
 		}
 		log.info("response ==>"+str);
+		return str;
 	}
 	
 	int getRemainingInsanceThreadsCount(String appUuid, String instanceUuid) throws Exception
