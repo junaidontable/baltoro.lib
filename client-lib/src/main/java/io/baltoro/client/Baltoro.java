@@ -56,12 +56,12 @@ public class Baltoro
 	
 	static String instanceUuid;
 	static int instanceThreadCount = 3;
-	static Properties props = null;
+	
 	static String appUuid;
 	static String appPrivateKey;
 	static String appName;
 	static String userUuid;
-	static File propFile;
+	
 	static String serverURL = "http://"+APIClient.BLTC_CLIENT+".baltoro.io";
 	static String appURL;
 	static Env env = Env.PRD;
@@ -104,8 +104,25 @@ public class Baltoro
 	
 	public static LocalDB getDB()
 	{
+		
 		if(!Baltoro.running)
 		{
+			/*
+			StackTraceElement[] elems = Thread.currentThread().getStackTrace();
+			StackTraceElement baseObj = elems[elems.length-1];
+			if(baseObj.getClassName().contains("TestRunner"))
+			{
+				Baltoro.env = Env.JUNIT;
+				
+			}
+			
+			
+			if(Baltoro.env == Env.JUNIT)
+			{
+				return LocalDB.instance();
+			}
+			*/
+			
 			System.out.println("Baltoro not running, first call Baltoro.start() method ... ");
 			System.out.println("Shutting down ... ");
 			System.exit(1);
@@ -520,10 +537,18 @@ public class Baltoro
 	{
 
 		
+		if(env == Env.JUNIT)
+		{
+			runLocalTests();
+			return;
+		}
+		
 		try
 		{
 			
 					
+			setHostId();
+			
 			processEnv();
 			
 			buildService();
@@ -578,23 +603,35 @@ public class Baltoro
 	}
 	
 
+	private static void runLocalTests()
+	{
+		try
+		{
+			Baltoro.appName = appName+"-junit";
+			setHostId();
+			
+			db = LocalDB.instance();
+			db.cleanData();
+			running = true;
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+	}
     
-    private static void processEnv() throws Exception
-    {
-    	  
-    	Properties hostProps = new Properties();
+	
+	
+	private static void setHostId() throws Exception
+	{
+		Properties hostProps = new Properties();
 		String homeDir = System.getProperty("user.home");
 		
     	String hostPropFileName = homeDir+"/baltoro_host.env";
     	
-    	String bltDir = homeDir+"/baltoro_io";
-    	File f = new File(bltDir);
-    	if(!f.exists())
-    	{
-    		f.mkdirs();
-    	}
-		
-		File hostPropFile = new File(hostPropFileName);
+    	File hostPropFile = new File(hostPropFileName);
 		if(!hostPropFile.exists())
 		{
 			hostPropFile.createNewFile();
@@ -611,16 +648,29 @@ public class Baltoro
 			hostProps.store(output,"");
 			
 		}
+    	
+	}
+	
+    private static void processEnv() throws Exception
+    {
+    	  
+    	String homeDir = System.getProperty("user.home");
+    	String bltDir = homeDir+"/baltoro_io";
+    	File f = new File(bltDir);
+    	if(!f.exists())
+    	{
+    		f.mkdirs();
+    	}
 		
-		
+			
     	cs = new APIClient();
-		props = new Properties();
+		Properties props = new Properties();
 		
 		String propName = getMainClassName();
 		String propFileName = bltDir+"/"+propName+"-"+Baltoro.env.toString().toUpperCase()+".env";
 		
 		System.out.println(propFileName);
-		propFile = new File(propFileName);
+		File propFile = new File(propFileName);
 		
     	
 		

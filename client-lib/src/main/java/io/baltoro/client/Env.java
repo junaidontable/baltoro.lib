@@ -5,5 +5,6 @@ public enum Env
 	PRD,
 	STG,
 	QA,
-	DEV;
+	DEV,
+	JUNIT; // run junit API tests directly, creates test local db, after test the db is cleaned. 
 }

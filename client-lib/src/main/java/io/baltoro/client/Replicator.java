@@ -159,6 +159,11 @@ public class Replicator
 	public static void push(PreparedStatement st, String ... att)
 	{
 
+		if(Baltoro.env == Env.JUNIT)
+		{
+			return;
+		}
+		
 		String sql = getSQL(st);
 		
 		ReplicationTO obj = new ReplicationTO();
@@ -172,6 +177,11 @@ public class Replicator
 	public static void pushBatch(String sqls, String att)
 	{
 
+		if(Baltoro.env == Env.JUNIT)
+		{
+			return;
+		}
+		
 		ReplicationTO obj = new ReplicationTO();
 		obj.nano = System.nanoTime();
 		obj.cmd = sqls;
@@ -182,6 +192,10 @@ public class Replicator
 	
 	public static void push(String sql, String att)
 	{
+		if(Baltoro.env == Env.JUNIT)
+		{
+			return;
+		}
 
 		ReplicationTO obj = new ReplicationTO();
 		obj.nano = System.nanoTime();
@@ -276,6 +290,12 @@ public class Replicator
 	
 	private static void initReplicator()
 	{
+		
+		if(Baltoro.env == Env.JUNIT)
+		{
+			return;
+		}
+		
 		pusher = new Timer();
 		pusher.schedule(new TimerTask()
 		{

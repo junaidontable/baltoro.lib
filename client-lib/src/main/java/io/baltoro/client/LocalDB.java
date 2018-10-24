@@ -81,13 +81,21 @@ public class LocalDB
 			    		f.mkdirs();
 			    	}
 					
+					//String _dbName = "LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
 					
 					dbName = bltDir+"/LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
 					
 					System.out.println("[[[[[[[[[[[ local db name = "+dbName+" ]]]]]]]]]]]]]]]");
 					db = new LocalDB(dbName);
-					//db.startReplication();
-					Replicator.start();
+					
+					if(Baltoro.env == Env.JUNIT)
+					{
+						System.out.println(" ........ cleaned local db ... for junit tests ");
+					}
+					else
+					{
+						Replicator.start();
+					}
 				}
 			}
 		}
@@ -248,11 +256,11 @@ public class LocalDB
 			*/
 			
 			st = con.createStatement();
-			st.executeNoReplication("delete from rep_pull");
+			st.executeNoReplication("delete from repl_pull");
 			st.close();
 			
 			st = con.createStatement();
-			st.executeNoReplication("delete from rep_push");
+			st.executeNoReplication("delete from repl_push");
 			st.close();
 			
 			st = con.createStatement();
@@ -315,11 +323,11 @@ public class LocalDB
 		*/
 		
 		st = con.createStatement();
-		st.executeNoReplication("drop table rep_pull");
+		st.executeNoReplication("drop table repl_pull");
 		st.close();
 		
 		st = con.createStatement();
-		st.executeNoReplication("drop table rep_push");
+		st.executeNoReplication("drop table repl_push");
 		st.close();
 		
 		st = con.createStatement();
