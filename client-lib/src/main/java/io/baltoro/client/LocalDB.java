@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,7 +72,17 @@ public class LocalDB
 			
 					//String dbName = "LDB-"+Baltoro.appName+"-"+Baltoro.serviceNames.toString().replaceAll(",", "-").replaceAll("/", "-");
 					String serviceName = Baltoro.serviceNames.toString().replaceAll(",","");
-					dbName = "LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
+					
+					String homeDir = System.getProperty("user.home");
+					String bltDir = homeDir+"/baltoro_io";
+			    	File f = new File(bltDir);
+			    	if(!f.exists())
+			    	{
+			    		f.mkdirs();
+			    	}
+					
+					
+					dbName = bltDir+"/LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
 					
 					System.out.println("[[[[[[[[[[[ local db name = "+dbName+" ]]]]]]]]]]]]]]]");
 					db = new LocalDB(dbName);

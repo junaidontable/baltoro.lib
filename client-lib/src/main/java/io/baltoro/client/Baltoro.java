@@ -583,7 +583,17 @@ public class Baltoro
     {
     	  
     	Properties hostProps = new Properties();
-		String hostPropFileName = System.getProperty("user.home")+"/baltoro_host.env";
+		String homeDir = System.getProperty("user.home");
+		
+    	String hostPropFileName = homeDir+"/baltoro_host.env";
+    	
+    	String bltDir = homeDir+"/baltoro_io";
+    	File f = new File(bltDir);
+    	if(!f.exists())
+    	{
+    		f.mkdirs();
+    	}
+		
 		File hostPropFile = new File(hostPropFileName);
 		if(!hostPropFile.exists())
 		{
@@ -607,10 +617,10 @@ public class Baltoro
 		props = new Properties();
 		
 		String propName = getMainClassName();
-		String fileName = propName+"-"+Baltoro.env.toString().toUpperCase()+".env";
+		String propFileName = bltDir+"/"+propName+"-"+Baltoro.env.toString().toUpperCase()+".env";
 		
-		System.out.println(fileName);
-		propFile = new File(fileName);
+		System.out.println(propFileName);
+		propFile = new File(propFileName);
 		
     	
 		
