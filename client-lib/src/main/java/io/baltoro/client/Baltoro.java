@@ -25,6 +25,7 @@ import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
+import io.baltoro.to.APIError;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 
@@ -40,6 +41,7 @@ public class Baltoro
 	}
 	
 	static ThreadLocal<String> userSessionIdCtx = new ThreadLocal<>();
+	static UserSession noneUserSession;
 	static ThreadLocal<RequestContext> userRequestCtx = new ThreadLocal<>();
 	static ThreadLocal<ResponseContext> userResponseCtx = new ThreadLocal<>();
 	
@@ -222,25 +224,35 @@ public class Baltoro
 		
 	}
 	
-	public static <T> T callSync(UserSession session, String path, Class<T> returnType, ParamInput input)
-	{
-		return callSync(Baltoro.appName, session, path, returnType, input);
-	}
 	
 	public static <T> T callSync(String path, Class<T> returnType, ParamInput input)
 	{
-		return callSync(Baltoro.appName, Baltoro.getUserSession(), path, returnType, input);
+		return callSync(Baltoro.appName, path, returnType, input);
 	}
 	
 	public static <T> T callSync(String path, Class<T> returnType)
 	{
-		return callSync(Baltoro.appName, Baltoro.getUserSession(), path, returnType, null);
+		return callSync(Baltoro.appName, path, returnType, null);
 	}
 	
-	private static <T> T callSync(String appName, UserSession session, String path, Class<T> returnType, ParamInput input)
+	private static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
 	{
+		
+		UserSession session = Baltoro.getUserSession();
+		if(session == null)
+		{
+			session = Baltoro.noneUserSession;
+		}
+		
+		if(session == null)
+		{
+			throw new APIError("no session found in API call : "+path);
+		}
+		
 		try
 		{
+			
+			
 			CloudServer cServer = new CloudServer(appName, session);
 			EPData epData = null;
 			if(input != null)
@@ -277,23 +289,31 @@ public class Baltoro
 	}
 	
 	
-	public static Future<?> callAsync(UserSession session, String path, Class<?> returnType, ParamInput input)
-	{
-		return callAsync(appName, session, path, returnType, input);
-	}
+
 	
 	public static Future<?> callAsync(String path, Class<?> returnType, ParamInput input)
 	{
-		return callAsync(appName, Baltoro.getUserSession(), path, returnType, input);
+		return callAsync(appName, path, returnType, input);
 	}
 	
 	public static Future<?> callAsync(String path, Class<?> returnType)
 	{
-		return callAsync(appName, Baltoro.getUserSession(), path, returnType, null);
+		return callAsync(appName, path, returnType, null);
 	}
 	
-	public static Future<?> callAsync(String appName, UserSession session, String path, Class<?> returnType, ParamInput input)
+	public static Future<?> callAsync(String appName, String path, Class<?> returnType, ParamInput input)
 	{
+		UserSession session = Baltoro.getUserSession();
+		if(session == null)
+		{
+			session = Baltoro.noneUserSession;
+		}
+		
+		if(session == null)
+		{
+			throw new APIError("no session found in API call : "+path);
+		}
+		
 		try
 		{
 			CloudServer cServer = new CloudServer(appName, session);
@@ -364,13 +384,20 @@ public class Baltoro
 	}
 	
 	
-	public static UserSession createSession()
+	static UserSession createNoneUserSession()
 	{
 		try
 		{
+			if(Baltoro.noneUserSession != null)
+			{
+				return noneUserSession;
+			}
 			String bltSessionId = cs.areYouThere();
 			
 			UserSession session = SessionManager.getSession(bltSessionId);
+			
+			noneUserSession = session;
+			
 			return session;
 		} 
 		catch (Exception e)
