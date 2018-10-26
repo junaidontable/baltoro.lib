@@ -867,6 +867,11 @@ public class LocalDB
 		return findLinkedUuid(pUuid,null,Direction.CHILD);
 	}
 	
+	public List<String> getChildrenUuids(String pUuid, Class<?> cObjType)
+	{
+		return findLinkedUuid(pUuid,cObjType,Direction.CHILD);
+	}
+	
 	public <T extends Base> Base getChild(Class<T> _class, String pUuid)
 	{
 		List<String> list = findLinkedUuid(pUuid,_class,Direction.CHILD);
@@ -1690,41 +1695,48 @@ public class LocalDB
 			return type;
 		}
 		
+		
+		type = getTypeByClassFromDB(className);
+		if(type != null)
+		{
+			classTypeMap.put(className, type);
+			typeClassMap.put(type, className);
+			
+			return type;
+		}
+		
 		String hash = CryptoUtil.md5(className.getBytes());
 		
 		System.out.println(" hash ====> "+hash);
 		
 		type = hash.substring(10, 14).toUpperCase();
 		
-		
-		String objClass = getObjClass(type);
-		if(objClass == null)
+	
+		Connection con = getConnection();
+		try
 		{
-			Connection con = getConnection();
-			try
-			{
+		
+			PreparedStatement st = con.prepareStatement("insert into type(class,type,created_by, created_on) values (?,?,?,?)");
+			st.setString(1, className);
+			st.setString(2, type);
+			st.setString(3, BODefaults.BASE_USER);
+			st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+			st.executeAndReplicate(type);
 			
-				PreparedStatement st = con.prepareStatement("insert into type(class,type,created_by, created_on) values (?,?,?,?)");
-				st.setString(1, className);
-				st.setString(2, type);
-				st.setString(3, BODefaults.BASE_USER);
-				st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-				st.executeAndReplicate(type);
-				
-				st.close();
-				
-				
+			st.close();
 			
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			finally 
-			{
-				con.close();
-			}
+			
+		
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
+		finally 
+		{
+			con.close();
+		}
+		
 		
 		classTypeMap.put(className, type);
 		typeClassMap.put(type, className);
@@ -1788,6 +1800,39 @@ public class LocalDB
 		}
 		
 		return objClass;
+	}
+
+	
+	private String getTypeByClassFromDB(String className)
+	{
+		
+		String type = null;
+		Connection con = getConnection();
+		try
+		{
+			PreparedStatement st = con.prepareStatement("select * from type where class = ?");
+			st.setString(1, className);
+			ResultSet rs = st.executeQuery();
+			if(rs.next())
+			{
+				type = rs.getString("type");
+			}
+			
+			rs.close();
+			st.close();
+			
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return type;
 	}
 
 	
