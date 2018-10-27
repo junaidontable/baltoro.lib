@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.1.11</version>
+  <version>3.1.12</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>

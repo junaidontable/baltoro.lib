@@ -245,6 +245,7 @@ public class APIClient
 		Form form = new Form();
 		form.param("app-uuid", Baltoro.appUuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
+		form.param("service-name", Baltoro.serviceNames.toString());
 		form.param("json", json);
 		
 		
