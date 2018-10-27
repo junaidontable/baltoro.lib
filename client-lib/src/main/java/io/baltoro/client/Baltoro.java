@@ -246,6 +246,14 @@ public class Baltoro
 		
 		if(session == null)
 		{
+			session = createNoneUserSession();
+			Baltoro.noneUserSession = session;
+			
+		}
+		
+		
+		if(session == null)
+		{
 			throw new APIError("no session found in API call : "+path);
 		}
 		
