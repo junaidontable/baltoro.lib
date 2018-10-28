@@ -862,6 +862,17 @@ public class LocalDB
 		return list.get(0);
 	}
 	
+	public String getChildUuid(String pUuid, Class<?> cObjType)
+	{
+		List<String> list = findLinkedUuid(pUuid,cObjType,Direction.CHILD);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		return list.get(0);
+	}
+	
 	public List<String> getChildrenUuids(String pUuid)
 	{
 		return findLinkedUuid(pUuid,null,Direction.CHILD);
@@ -944,9 +955,25 @@ public class LocalDB
 		return list.get(0);
 	}
 	
+	public String getParentUuid(String cUuid, Class<?> cObjType)
+	{
+		List<String> list = findLinkedUuid(cUuid,cObjType,Direction.PARENT);
+		if(StringUtil.isNullOrEmpty(list))
+		{
+			return null;
+		}
+		
+		return list.get(0);
+	}
+	
 	public List<String> getParentUuids(String cUuid)
 	{
 		return findLinkedUuid(cUuid,null,Direction.PARENT);
+	}
+	
+	public List<String> getParentUuids(String pUuid, Class<?> cObjType)
+	{
+		return findLinkedUuid(pUuid,cObjType,Direction.PARENT);
 	}
 	
 	public <T extends Base> Base getParent(Class<T> _class, String cUuid)
