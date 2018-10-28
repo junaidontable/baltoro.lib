@@ -168,6 +168,8 @@ public class CloudServer
 			}
 		}
 		
+		form.param("appName", "flocap-envdv");
+		
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
@@ -187,13 +189,18 @@ public class CloudServer
 			throw new APIError(error);
 		}
 		
-			
+		if (returnType == null)
+		{
+			return null;
+		}
+		
 		String json = response.readEntity(String.class);
 		if(returnType == String.class)
 		{
 			return returnType.cast(json);
 		}
 	
+		
 		Object obj = ObjectUtil.toObject(returnType, json.getBytes());
 		
 		return returnType.cast(obj);

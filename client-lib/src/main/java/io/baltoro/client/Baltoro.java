@@ -230,6 +230,11 @@ public class Baltoro
 		return callSync(Baltoro.appName, path, returnType, input);
 	}
 	
+	public static <T> T callSync(String path, ParamInput input)
+	{
+		return callSync(Baltoro.appName, path, null, input);
+	}
+	
 	public static <T> T callSync(String path, Class<T> returnType)
 	{
 		return callSync(Baltoro.appName, path, returnType, null);
@@ -603,7 +608,7 @@ public class Baltoro
 			{
 				log.info("=====================================================");
 				log.info("=====================================================");
-				if(Baltoro.serverURL.contains("localhost") || Baltoro.serverURL.contains("127.0.0.1"))
+				if(Baltoro.serverURL.contains("localhost") || Baltoro.serverURL.contains("127.0.0.1") || Baltoro.serverURL.contains("super-server"))
 				{
 					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld?appName="+Baltoro.appName);
 				}
