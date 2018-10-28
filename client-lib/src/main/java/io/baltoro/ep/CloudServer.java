@@ -169,7 +169,7 @@ public class CloudServer
 			}
 		}
 		
-		form.param("appName", "flocap-envdv");
+		form.param("appName", Baltoro.getAppName());
 		
 		Invocation.Builder ib =	getIB(target);
 		
