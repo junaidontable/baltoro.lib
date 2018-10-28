@@ -80,6 +80,7 @@ public class CloudServer
 	}
 	
 
+	/*
 	public <T> T execute(String path, EPData data, Class<T> returnType, Class<?> returnSubType)
 	{
 		WebTarget target = client.target(Baltoro.getServerUrl()).path(path);	
@@ -129,7 +130,7 @@ public class CloudServer
 			return returnType.cast(obj);
 		}
 		
-		/*
+		
 		try
 		{
 			
@@ -142,12 +143,12 @@ public class CloudServer
 		{
 			e.printStackTrace();
 		}
-		*/
+		
 		//return null;
 		
 		
 	}
-	
+	*/
 	
 	public <T> T call(String serverUrl, String path, EPData data, Class<T> returnType)
 	{

@@ -446,10 +446,7 @@ public class Baltoro
 		init(appName, Env.PRD);
 	}
 	
-	public static String getServerUrl()
-	{
-		return serverURL;
-	}
+
 	
 	public static void init(String appName, Env env)
 	{
@@ -640,6 +637,22 @@ public class Baltoro
 		}
 		
 	
+	}
+	
+	
+	public static String getAppName()
+	{
+		return appName;
+	}
+	
+	public static String getPublicURL()
+	{
+			
+		String url = "http://"+Baltoro.getAppName()+".baltoro.io";
+		
+		return url;
+		
+		
 	}
 	
 
