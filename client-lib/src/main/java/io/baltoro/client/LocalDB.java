@@ -74,7 +74,7 @@ public class LocalDB
 					String serviceName = Baltoro.serviceNames.toString().replaceAll(",","");
 					
 					String homeDir = System.getProperty("user.home");
-					String bltDir = homeDir+"/baltoro_io";
+					String bltDir = homeDir+"/baltoro.io";
 			    	File f = new File(bltDir);
 			    	if(!f.exists())
 			    	{
