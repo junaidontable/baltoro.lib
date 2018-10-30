@@ -1526,7 +1526,7 @@ public class LocalDB
 			return;
 		}
 		
-		if(obj instanceof Base)
+		if(obj.getClass() == Base.class)
 		{
 			return;
 		}
