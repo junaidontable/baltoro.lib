@@ -1521,6 +1521,16 @@ public class LocalDB
 	private void setupMetadataFields(Base obj) throws Exception
 	{
 		
+		if(obj == null)
+		{
+			return;
+		}
+		
+		if(obj instanceof Base)
+		{
+			return;
+		}
+		
 		List<Class<?>> classes = new ArrayList<>();
 		Class<?> clazz = obj.getClass();
 		classes.add(obj.getClass());
