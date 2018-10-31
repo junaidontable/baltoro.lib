@@ -27,6 +27,7 @@ import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
+import io.baltoro.exp.LocalDBException;
 import io.baltoro.features.Store;
 import io.baltoro.obj.BODefaults;
 import io.baltoro.obj.Base;
@@ -1288,6 +1289,12 @@ public class LocalDB
 	
 	public void save(Base obj)
 	{
+		
+		if(obj.getClass() == Base.class)
+		{
+			throw new LocalDBException("Base class needs to be extended and can't be used as concrete class");
+		}
+		
 		if(StringUtil.isNullOrEmpty(obj.getBaseUuid()))
 		{
 			String type = getType(obj.getClass());

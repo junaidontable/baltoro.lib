@@ -3,7 +3,7 @@ package io.baltoro.obj;
 import java.sql.Timestamp;
 
 
-public class Base 
+public abstract class Base 
 {
 	
 	private String containerUuid = BODefaults.BASE_CONTAINER;
