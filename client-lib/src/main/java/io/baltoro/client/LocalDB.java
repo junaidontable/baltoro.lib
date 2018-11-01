@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -599,9 +600,25 @@ public class LocalDB
 		return _class.cast(obj);
 	}
 	
-	
-		
 	public List<Base> get(String[] baseUuids)
+	{
+		String uuids = StringUtil.toInClause(baseUuids);
+		return get(uuids);
+	}
+	
+	public List<Base> get(Set<String> baseUuids)
+	{
+		String uuids = StringUtil.toInClause(baseUuids);
+		return get(uuids);
+	}
+	
+	public List<Base> get(List<String> baseUuids)
+	{
+		String uuids = StringUtil.toInClause(baseUuids);
+		return get(uuids);
+	}
+		
+	private List<Base> get(String inClasueUuids)
 	{
 		List<Base> objList = new ArrayList<>(200);
 		
@@ -610,8 +627,7 @@ public class LocalDB
 		{
 			
 			
-			String uuids = StringUtil.toInClause(baseUuids);
-			String query = ("select * from base where uuid in ("+uuids+")");
+			String query = ("select * from base where uuid in ("+inClasueUuids+")");
 			Statement st = con.createStatement();
 			Map<String, Base> map = new HashMap<String, Base>();
 			ResultSet rs = st.executeQuery(query);
@@ -851,192 +867,55 @@ public class LocalDB
 		return objList;
 	}
 	
-	
-	public String getChildUuid(String pUuid)
+
+	public <T extends Base> Linked<T> getChildren(Base obj)
 	{
-		List<String> list = findLinkedUuid(pUuid,null,Direction.CHILD);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		
-		return list.get(0);
+		return getChildren(null, obj.getBaseUuid());
 	}
 	
-	public String getChildUuid(String pUuid, Class<?> cObjType)
+	public <T extends Base> Linked<T> getChildren(Class<T> c, Base obj)
 	{
-		List<String> list = findLinkedUuid(pUuid,cObjType,Direction.CHILD);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		
-		return list.get(0);
+		return getChildren(c, obj.getBaseUuid());
 	}
 	
-	public List<String> getChildrenUuids(String pUuid)
-	{
-		return findLinkedUuid(pUuid,null,Direction.CHILD);
-	}
-	
-	public List<String> getChildrenUuids(String pUuid, Class<?> cObjType)
-	{
-		return findLinkedUuid(pUuid,cObjType,Direction.CHILD);
-	}
-	
-	public <T extends Base> Base getChild(Class<T> _class, String pUuid)
-	{
-		List<String> list = findLinkedUuid(pUuid,_class,Direction.CHILD);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		
-		String uuid = list.get(0);
-		if(StringUtil.isNullOrEmpty(uuid))
-		{
-			return null;
-		}
-		
-		Base base = get(uuid, _class);
-		return _class.cast(base);
-	}
-	
-	public <T extends Base> T getChild(Class<T> _class, Base obj)
-	{
-		List<String> list = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		
-		String uuid = list.get(0);
-		if(StringUtil.isNullOrEmpty(uuid))
-		{
-			return null;
-		}
-		Base base = get(uuid, _class);
-		return _class.cast(base);
-	}
-	
-	public <T extends Base> List<T> getChildren(Class<T> _class, String pUuid)
+	public <T extends Base> Linked<T> getChildren(Class<T> c, String pUuid)
 	{
 		
-		List<String> uuids = findLinkedUuid(pUuid,_class,Direction.CHILD);
+		Linked<T> linked = new Linked<>(c, pUuid, Direction.CHILD, this);
+		List<String> uuids = findLinkedUuid(pUuid,c,Direction.CHILD);
 		if(StringUtil.isNullOrEmpty(uuids))
 		{
-			return new ArrayList<>();
+			return linked;
 		}
 		
-		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
-		return objs;
+		linked.setCount(uuids.size());
+		linked.setUuids(uuids);
+		
+		return linked;
 	}
 	
-	public <T extends Base> List<T> getChildren(Class<T> _class, Base obj)
+	public <T extends Base> Linked<T> getParent(Class<T> c, Base obj)
 	{
-		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),_class,Direction.CHILD);
+		return getChildren(c, obj.getBaseUuid());
+	}
+	
+	public <T extends Base> Linked<T> getParent(Class<T> c, String cUuid)
+	{
+		
+		Linked<T> linked = new Linked<>(c, cUuid, Direction.PARENT, this);
+		List<String> uuids = findLinkedUuid(cUuid,c,Direction.PARENT);
 		if(StringUtil.isNullOrEmpty(uuids))
 		{
-			return new ArrayList<>();
-		}
-		String[] _uuids = uuids.toArray(new String[uuids.size()]);
-		List<T> objs = (List<T>) get(_uuids);
-		return objs;
-	}
-	
-	
-	public String getParentUuid(String cUuid)
-	{
-		List<String> list = findLinkedUuid(cUuid,null,Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
+			return linked;
 		}
 		
-		return list.get(0);
-	}
-	
-	public String getParentUuid(String cUuid, Class<?> cObjType)
-	{
-		List<String> list = findLinkedUuid(cUuid,cObjType,Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
+		linked.setCount(uuids.size());
+		linked.setUuids(uuids);
 		
-		return list.get(0);
+		return linked;
 	}
 	
-	public List<String> getParentUuids(String cUuid)
-	{
-		return findLinkedUuid(cUuid,null,Direction.PARENT);
-	}
-	
-	public List<String> getParentUuids(String pUuid, Class<?> cObjType)
-	{
-		return findLinkedUuid(pUuid,cObjType,Direction.PARENT);
-	}
-	
-	public <T extends Base> Base getParent(Class<T> _class, String cUuid)
-	{
-		List<String> list = findLinkedUuid(cUuid,null,Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		
-		String uuid = list.get(0);
-		if(StringUtil.isNullOrEmpty(uuid))
-		{
-			return null;
-		}
-		Base base = get(uuid, _class);
-		return _class.cast(base);
-	}
-	
-	public <T extends Base> T getParent(Class<T> _class, Base obj)
-	{
-		List<String> list = findLinkedUuid(obj.getBaseUuid(),_class, Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(list))
-		{
-			return null;
-		}
-		String uuid = list.get(0);
-		if(StringUtil.isNullOrEmpty(uuid))
-		{
-			return null;
-		}
-		Base base = get(uuid, _class);
-		return _class.cast(base);
-	}
-	
-	public <T extends Base> List<T> getParents(Class<T> _class, String cUuid)
-	{
-		
-		List<String> uuids = findLinkedUuid(cUuid,_class,Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(uuids))
-		{
-			return new ArrayList<>();
-		}
-		
-		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
-		return objs;
-	}
-	
-	public <T extends Base> List<T> getParents(Class<T> _class, Base obj)
-	{
-		
-		List<String> uuids = findLinkedUuid(obj.getBaseUuid(),_class,Direction.PARENT);
-		if(StringUtil.isNullOrEmpty(uuids))
-		{
-			return new ArrayList<>();
-		}
-		
-		List<T> objs = (List<T>) get(uuids.toArray(new String[uuids.size()]));
-		return objs;
-	}
-	
-	private enum Direction
+	enum Direction
 	{
 		PARENT,
 		CHILD;
@@ -1997,28 +1876,65 @@ public class LocalDB
 		return linkUuid;
 	}
 	
-	private boolean deletLink(String uuid) throws Exception
+	Map<String, Set<String>> getLinkAtt(String pObjUuid, List<String> lUuids, Direction direction)
 	{
-		/*
-		PreparedStatement st = con.prepareStatement("insert into link"
-				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
-				+ " values(?,?,?,?,?,?,?,?,?) ");
-		*/
-		
+		String inClause = StringUtil.toInClause(lUuids);
+		return getLinkAtt(pObjUuid, inClause, direction);
+	}
+	
+	
+	
+	
+	private Map<String, Set<String>> getLinkAtt(String srcObjUuid, String lUuids, Direction direction)
+	{
+		Map<String, Set<String>> map = new HashMap<>(100);
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("delete from link where uuid = ?");
-		st.setString(1, uuid);
-		boolean a = st.executeAndReplicate();
-		st.close();
+		String query = null;
 		
-		st = con.prepareStatement("delete from link_att where link_uuid = ?");
-		st.setString(1, uuid);
-		a = st.executeAndReplicate();
-		st.close();
+		if(direction == Direction.PARENT)
+		{
+			query = "select l.c_uuid, a.value from link l, link_att a where a.link_uuid=l.uuid "
+					+ " and a.name='obj' and l.c_uuid=? and l.p_uuid in ("+lUuids+")";
+		}
+		else
+		{
+			query =  "select l.c_uuid, a.value from link l, link_att a where a.link_uuid=l.uuid "
+					+ " and a.name='obj' and l.p_uuid=?  and l.c_uuid in ("+lUuids+")";
+		}
 		
-		con.close();
-		return a;
+		try
+		{
+			PreparedStatement st = con.prepareStatement(query);
+			st.setString(1, srcObjUuid);
+			ResultSet rs = st.executeQuery();
+			while(rs.next())
+			{
+				String cUuid = rs.getString("c_uuid");
+				String value = rs.getString("value");
+				
+				Set<String> set = map.get(cUuid);
+				if(set == null)
+				{
+					set = new HashSet<>();
+					map.put(cUuid, set);
+				}
+				set.add(value);
+				
+				
+			}
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return map;
+		
 	}
 	
 	public boolean deletLink(String pUuid, String cUuid) throws Exception

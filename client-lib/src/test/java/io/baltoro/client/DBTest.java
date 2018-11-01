@@ -188,7 +188,7 @@ public class DBTest extends TestCase
     	
     	System.out.println("............. begin link get test ............. ");
     	
-    	List<TestObj2> list = db.getChildren(TestObj2.class, uuidObj1);
+    	List<TestObj2> list = db.getChildren(TestObj2.class, uuidObj1).getAll();
     	
     	
     	System.out.println("list size : "+list.size());
@@ -201,7 +201,7 @@ public class DBTest extends TestCase
     	assertEquals(TestObj2.class, obj2.getClass());
     	
     	
-    	List<TestObj3> list1 = db.getChildren(TestObj3.class, uuidObj1);
+    	List<TestObj3> list1 = db.getChildren(TestObj3.class, uuidObj1).getAll();
     	
     	
     	System.out.println("list size obj3 : "+list1.size());
@@ -270,11 +270,11 @@ public class DBTest extends TestCase
     	
     	
     	
-    	List<TestObj2> list = db.getChildren(TestObj2.class,obj1);
+    	List<TestObj2> list = db.getChildren(TestObj2.class,obj1).getAll();
     	
     	System.out.println(" ------------> linkType22 obj found = "+list.get(0));
     	
-    	list = db.getChildren(TestObj2.class,obj1);
+    	list = db.getChildren(TestObj2.class,obj1).getAll();
     	
     	System.out.println("-------------> linkType23 obj found = "+list.get(0));
     	

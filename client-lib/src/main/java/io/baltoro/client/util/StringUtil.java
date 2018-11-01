@@ -3,6 +3,7 @@ package io.baltoro.client.util;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import io.baltoro.obj.Base;
 
@@ -138,6 +139,34 @@ public class StringUtil
 		
 		return buffer.toString();
 	}
+	
+	public static String toInClause(List<String> list)
+	{
+		if(list == null || list.size() == 0)
+		{
+			return "";
+		}
+		
+		StringBuilder buffer = new StringBuilder(list.size() * 10); 
+		for (Object val : list) 
+		{
+			buffer.append("'"+val+"',");
+			/*
+			if(val instanceof String)
+			{
+				buffer.append("'"+val+"',");
+			}
+			else if(val instanceof Base)
+			{
+				buffer.append("'"+((Base)val).getBaseUuid()+"',");
+			}
+			*/
+		}
+		buffer.deleteCharAt(buffer.length()-1);
+		
+		return buffer.toString();
+	}
+		
 	
 	public static String toInClause(Base... bases)
 	{

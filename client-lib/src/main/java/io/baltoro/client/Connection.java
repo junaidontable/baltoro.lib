@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 class Connection
@@ -24,6 +25,12 @@ class Connection
 	throws SQLException
 	{
 		return new PreparedStatement(con.prepareStatement(sql));
+	}
+	
+
+	public void close1() throws IOException
+	{
+		LocalDB.connectionQueue.add(this);	
 	}
 	
 	
