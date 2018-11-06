@@ -273,6 +273,10 @@ public class RequestWorker extends Thread
 		if(url.equals("/"))
 		{
 			url = "/app_root";
+		}	
+		else if(url.lastIndexOf('/') == 0)
+		{
+			url = "/app_root"+url;
 		}
 		
 		if(url.endsWith("/"))

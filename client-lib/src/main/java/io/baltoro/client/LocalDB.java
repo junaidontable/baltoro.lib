@@ -575,12 +575,12 @@ public class LocalDB
 	
 
 	
-	public <T extends Base> T get(String baseUuid, Class<T> _class)
+	public <T extends Base> T get(String baseUuid, Class<T> t)
 	{
 		Base obj = null;
 		try
 		{
-			obj = _class.newInstance();
+			obj = t.newInstance();
 			selectBase(baseUuid, obj);
 			if(obj.getBaseUuid() == null)
 			{
@@ -597,7 +597,7 @@ public class LocalDB
 			e.printStackTrace();
 			return null;
 		}
-		return _class.cast(obj);
+		return t.cast(obj);
 	}
 	
 	public List<Base> get(String[] baseUuids)

@@ -18,8 +18,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.NewCookie;
 
-import com.google.common.net.InetAddresses;
-
+import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
@@ -446,6 +445,8 @@ public class Baltoro
 		init(appName, Env.PRD);
 	}
 	
+	
+	
 
 	
 	public static void init(String appName, Env env)
@@ -486,35 +487,26 @@ public class Baltoro
 			env = Env.PRD;
 		}
 		
+		
 		Baltoro.appName = appName;
-		
-		//int hostIdx1 = serverURL.indexOf("://");
-		//int hostIdx2 = serverURL.indexOf(hostIdx1,"/");
-		
-		boolean isIP = InetAddresses.isInetAddress(serverURL);
 		
 		
 		switch (env)
 		{
 			case PRD:
 				Baltoro.appName = appName;
-				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;	
-				
 				break;
 				
 			case STG:
 				Baltoro.appName = appName+"-envsg";
-				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;
 				
 			case QA:
 				Baltoro.appName = appName+"-envqa";
-				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 				
 			case DEV:
 				Baltoro.appName = appName+"-envdv";
-				//serverURL = serverProtocol+"://"+Baltoro.appName+"."+serverDomain+":"+serverPort;
 				break;	
 
 				
@@ -525,9 +517,16 @@ public class Baltoro
 		
 		appURL = serverURL.replace("://"+APIClient.BLTC_CLIENT, "://"+Baltoro.appName);
 		
-		
-		
-		
+	
+		if(appName.contains("."))
+		{
+			String _appName = CryptoUtil.md5(Baltoro.appName.getBytes()).toLowerCase();
+			System.out.println("appName = "+appName);
+			appName = _appName;
+			Baltoro.appName = _appName;
+					
+			///System.exit(1);
+		}
 	}
 	
 	public static void register(String serviceName, String ... packageNames)
