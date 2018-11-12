@@ -507,6 +507,7 @@ public class RequestWorker extends Thread
 					ct.setUuid(cto.uuid);
 					ct.setName(cto.fileName);
 					ct.setSize(cto.size);
+					ct.setType(cto.type);
 					
 					methodInputData[i] = ct;
 				} 
