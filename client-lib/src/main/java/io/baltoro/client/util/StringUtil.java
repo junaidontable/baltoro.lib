@@ -20,6 +20,43 @@ public class StringUtil
 			
 	}
 	
+	
+	public static String pad(String text, int count, char c)
+	{
+		StringBuilder s = new StringBuilder();
+		
+		if (count % 2 != 0)
+		{
+			count++;
+		}
+		
+		int c2 = count-text.length();
+		
+		int c1 = Math.abs(c2)-2;
+		for (int i = 0; i < c1; i++)
+		{
+			s.append(c);
+		}
+		
+		if(c1 <= 0)
+		{
+			s.append(text);
+			
+		}
+		else
+		{
+			s.append(" "+text+" ");
+		}
+		
+		
+		for (int i = 0; i < c1; i++)
+		{
+			s.append(c);
+		}
+		
+		return s.toString();
+	}
+	
 	public static boolean isNullOrEmpty(Object[] objs)
 	{
 		if(objs != null && objs.length > 0)

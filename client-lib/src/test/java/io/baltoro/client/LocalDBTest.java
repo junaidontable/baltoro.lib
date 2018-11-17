@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.baltoro.client.util.StringUtil;
+
 public class LocalDBTest
 {
 
@@ -74,6 +76,47 @@ public class LocalDBTest
 		System.out.println("l1 ...... "+l1.getAllAsArray().length);
 		System.out.println("l1 ...... "+l1.getAttUuids(l1.getFirstUuid()));
 						
+		
+		
+		RecordList<Record> rList = db.query(Record.class, "select * from link").execute();
+		
+		for (ColumnMetadata md : rList.getColMD())
+		{
+			
+			int len =  md.getMaxLen() > md.getColName().length() ? md.getMaxLen() : md.getColName().length();
+			System.out.print(StringUtil.pad(md.getColName(), len, '*'));
+			System.out.print(" | ");
+		}
+		
+		System.out.println("");
+		
+		
+		for (Record record : rList)
+		{
+			rList.getColMD().forEach(md -> 
+			{
+			
+				Object v = record.getValue(md.getColName());
+				//System.out.print(a+"="+v+" , ");
+				int len =  md.getMaxLen() > md.getColName().length() ? md.getMaxLen() : md.getColName().length();
+				System.out.print(StringUtil.pad(v.toString(),len, '*'));
+				System.out.print(" | ");
+				
+			});
+			
+			System.out.println("");
+		}
+		
+		
+		RecordList<Link> rList1 = db.query(Link.class, "select * from link")
+									.map("p_uuid", "pUuid").map("c_uuid", "cUuid")
+									.execute();
+		
+		
+		for (Link ln : rList1)
+		{
+			System.out.println(ln.pUuid+" | "+ln.cUuid);	
+		}
 		
 	}
 		

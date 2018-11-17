@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
@@ -2105,6 +2107,115 @@ public class LocalDB
 		
 	}
 	
+	
+	public <T> CustomQuery<T> query(Class<T> c, String q)
+	{
+		if(q.contains("update") || q.contains("delete") || q.contains("insert"))
+		{
+			throw new LocalDBException("query can only be a select query");
+		}
+		
+		CustomQuery<T> cq = new CustomQuery<>(c, q, this);
+		
+		return cq;
+	}
+	
+	<T> RecordList<T> executeQuery(Class<T> c, CustomQuery<T> cq)
+	{
+		RecordList<T> records = new RecordList<>(c);
+		
+		Connection con = getConnection();
+		try
+		{
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery(cq.getQuery());
+			
+			if(rs.next())
+			{
+				ResultSetMetaData md = rs.getMetaData();
+				int cols = md.getColumnCount();
+	            System.out.println("Column Count is " + cols);
+	           
+	            for (int i = 1; i <= cols; i++) 
+	            {
+	            	String colName = md.getColumnLabel(i);
+	            	ColumnMetadata cmd = new ColumnMetadata(colName);
+	            	cmd.setColIndex(i);
+	            	
+	            	records.addColumn(colName, cmd);
+	            }
+	            
+	           processRS(cq, records, rs);
+				
+			}
+			
+
+			while (rs.next())
+			{
+				
+				 processRS(cq, records, rs);
+				
+			}
+			
+			rs.close();
+			st.close();
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return records;
+	}
+	
+	
+	private <T> void processRS(CustomQuery<T> cq, RecordList<T> records, ResultSet rs) throws Exception
+	{
+		
+		
+		if(cq.getClassT() == Record.class)
+		{
+			Record r = (Record) cq.getClassT().newInstance();
+			for (String colName : records.getColumns())
+			{
+				Object v = rs.getObject(colName);
+				r.add(colName, v);
+			 	ColumnMetadata colMD = records.getColMetadata(colName);
+			 	colMD.setMaxLen(v.toString().length());
+			 	
+			}
+			records.add((T)r);
+		}
+		else
+		{
+			
+			T t = cq.getClassT().newInstance();
+			for (String colName : records.getColumns())
+			{
+
+				String pName = cq.getPropertyName(colName);
+				if(pName == null)
+				{
+					continue;
+				}
+				Object v = rs.getObject(colName);
+				BeanUtils.setProperty(t, pName, v);
+			 	ColumnMetadata colMD = records.getColMetadata(colName);
+			 	colMD.setMaxLen(v.toString().length());
+			 	
+			 				           
+			}
+			
+			records.add(t);
+		}
+		
+		
+	}
 	
 	long executeReplicationSQL(ReplicationTO[] tos)
 	{
