@@ -3,6 +3,10 @@ package io.baltoro.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.beanutils.BeanUtils;
+
+import io.baltoro.client.util.StringUtil;
+
 public class CustomQuery<T>
 {
 	
@@ -47,4 +51,60 @@ public class CustomQuery<T>
 		return map.get(colName.toLowerCase());
 	}
 	
+	
+	
+	public void displayResults()
+	{
+		RecordList<T> rl = db.executeQuery(c, this);
+		
+		for (ColumnMetadata md : rl.getColMD())
+		{
+			int len =  md.getMaxLen() > md.getColName().length() ? md.getMaxLen() : md.getColName().length();
+			System.out.print(StringUtil.pad(md.getColName(), len, '*'));
+			System.out.print(" | ");
+		}
+		
+		System.out.println("");
+		
+		
+
+		for (T t : rl)
+		{
+			rl.getColMD().forEach(md -> 
+			{
+			
+				Object v = null;
+				if(t instanceof Record)
+				{
+					v = ((Record)t).getValue(md.getColName());
+				}
+				else
+				{
+					String pName = getPropertyName(md.getColName());
+					if(pName != null)
+					{
+						try
+						{
+							v = BeanUtils.getProperty(t, pName);
+						} 
+						catch (Exception e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+				
+				
+				int len =  md.getMaxLen() > md.getColName().length() ? md.getMaxLen() : md.getColName().length();
+				System.out.print(StringUtil.pad(v.toString(),len, ' '));
+				System.out.print(" | ");
+				
+			});
+			
+			System.out.println("");
+		}
+	
+		
+		
+	}
 }

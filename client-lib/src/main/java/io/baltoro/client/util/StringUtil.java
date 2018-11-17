@@ -25,18 +25,33 @@ public class StringUtil
 	{
 		StringBuilder s = new StringBuilder();
 		
-		if (count % 2 != 0)
+		
+		int cnt = count-text.length();
+		if(cnt <= 0)
 		{
-			count++;
+			return text;
 		}
 		
-		int c2 = count-text.length();
+		s.append(text);
 		
-		int c1 = Math.abs(c2)-2;
+		for (int i = 0; i < cnt; i++)
+		{
+			s.append(c);
+		}
+		
+		/*
+		if (c2 % 2 != 0)
+		{
+			c2++;
+		}
+		
+		int c1 = Math.abs(c2/2)-2;
 		for (int i = 0; i < c1; i++)
 		{
 			s.append(c);
 		}
+		
+		
 		
 		if(c1 <= 0)
 		{
@@ -53,6 +68,7 @@ public class StringUtil
 		{
 			s.append(c);
 		}
+		*/
 		
 		return s.toString();
 	}
