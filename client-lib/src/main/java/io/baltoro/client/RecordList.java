@@ -14,6 +14,8 @@ public class RecordList<T> extends ArrayList<T>
 	private Map<String, ColumnMetadata> colMD = new HashMap<>(50);
 	List<ColumnMetadata> colList = new ArrayList<>(50);
 	
+	Map<String, Object> recordColMap = new HashMap<>(50000);
+	
 	private Class<T> t;
 	
 	RecordList(Class<T> t)

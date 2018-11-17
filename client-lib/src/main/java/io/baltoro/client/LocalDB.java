@@ -2181,6 +2181,7 @@ public class LocalDB
 		if(cq.getClassT() == Record.class)
 		{
 			Record r = (Record) cq.getClassT().newInstance();
+			r.setRecordList((RecordList<Record>) records);
 			for (String colName : records.getColumns())
 			{
 				Object v = rs.getObject(colName);

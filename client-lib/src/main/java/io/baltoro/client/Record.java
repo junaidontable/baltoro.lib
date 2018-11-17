@@ -1,34 +1,32 @@
 package io.baltoro.client;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import io.baltoro.client.util.UUIDGenerator;
 
 public class Record
 {
-	private Map<String, Object> map = new HashMap<>(50);
 	
+	RecordList<Record> rList;
+	String rUuid;
 	
 	Record()
 	{
-		
+		this.rUuid = UUIDGenerator.uuid("RECD");
 	}
 	
-	void add(String name, Object value)
+	void setRecordList(RecordList<Record> rList)
 	{
-		map.put(name, value);
-		
+		this.rList = rList;
 	}
 	
-	
-	public Set<String> getColmunNames()
+	void add(String colName, Object value)
 	{
-		return map.keySet();
+		rList.recordColMap.put(rUuid+"-"+colName, value);
+		
 	}
 	
 	
 	public Object getValue(String colName)
 	{
-		return map.get(colName);
+		return rList.recordColMap.get(rUuid+"-"+colName);
 	}
 }
