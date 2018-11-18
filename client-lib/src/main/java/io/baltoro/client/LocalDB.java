@@ -898,7 +898,7 @@ public class LocalDB
 	
 	public <T extends Base> Linked<T> getParent(Class<T> c, Base obj)
 	{
-		return getChildren(c, obj.getBaseUuid());
+		return getParent(c, obj.getBaseUuid());
 	}
 	
 	public <T extends Base> Linked<T> getParent(Class<T> c, String cUuid)

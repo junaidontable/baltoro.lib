@@ -14,6 +14,8 @@ public class CustomQuery<T>
 	private String q;
 	private Map<String, String> map = new HashMap<>(50);
 	private LocalDB db;
+	private RecordList<T> rl;
+	private boolean executed;
 	
 	CustomQuery(Class<T> c, String q, LocalDB db)
 	{
@@ -32,7 +34,11 @@ public class CustomQuery<T>
 	
 	public RecordList<T> execute()
 	{
-		RecordList<T> rl = db.executeQuery(c, this);
+		if(!executed)
+		{
+			rl = db.executeQuery(c, this);
+		}
+		executed = true;
 		return rl;
 	}
 	
@@ -51,11 +57,9 @@ public class CustomQuery<T>
 		return map.get(colName.toLowerCase());
 	}
 	
-	
-	
-	public void displayResults()
+	public CustomQuery<T> displayHeaders()
 	{
-		RecordList<T> rl = db.executeQuery(c, this);
+		execute();
 		
 		for (ColumnMetadata md : rl.getColMD())
 		{
@@ -66,8 +70,13 @@ public class CustomQuery<T>
 		
 		System.out.println("");
 		
+		return this;
+	}
+	
+	public void displayResults()
+	{
+		execute();
 		
-
 		for (T t : rl)
 		{
 			rl.getColMD().forEach(md -> 
