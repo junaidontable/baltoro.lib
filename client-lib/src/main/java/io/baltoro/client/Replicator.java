@@ -167,7 +167,7 @@ public class Replicator
 		String sql = getSQL(st);
 		
 		ReplicationTO obj = new ReplicationTO();
-		obj.nano = System.nanoTime();
+		obj.serverId = -1;
 		obj.cmd = sql;
 		obj.att = getAtt(sql, att);
 				
@@ -183,7 +183,7 @@ public class Replicator
 		}
 		
 		ReplicationTO obj = new ReplicationTO();
-		obj.nano = System.nanoTime();
+		obj.serverId = -1;
 		obj.cmd = sqls;
 		obj.att = att;
 				
@@ -198,7 +198,7 @@ public class Replicator
 		}
 
 		ReplicationTO obj = new ReplicationTO();
-		obj.nano = System.nanoTime();
+		obj.serverId = -1;
 		obj.att = att;
 		obj.cmd = sql;
 				
@@ -209,7 +209,7 @@ public class Replicator
 	{
 		
 		ReplicationTO to = new ReplicationTO();
-		to.nano = System.nanoTime();
+		to.serverId = -1;
 		to.att = getAtt(sql, att);
 		to.cmd = sql;
 		
@@ -338,13 +338,13 @@ public class Replicator
 					{
 						System.out.println("... pushing "+list.size()+" data ");
 						String json = mapper.writeValueAsString(list);
-						long nano = db.startRepPush(list.size());
-						String _servernano = Baltoro.cs.pushReplication(json);
-						long servernano = Long.parseLong(_servernano);
+						long initOn = db.startRepPush(list.size());
+						String _serverId = Baltoro.cs.pushReplication(json);
+						long serverId = Long.parseLong(_serverId);
 								
-						db.updateRepPush(nano, servernano);
+						db.updateRepPush(initOn, serverId);
 						
-						System.out.println(" last push nano ==> "+db.getLastPush());
+						System.out.println(" last push on ==> "+db.getLastPush());
 					}
 					
 					
@@ -369,16 +369,11 @@ public class Replicator
 				try
 				{
 					
-					long lServerPushNano = db.getLastPush();
-					long lServerPullNano = db.getLastPull();
+					long lServerPushId = db.getLastPush();
+					long lServerPullId = db.getLastPull();
 					
-					//long nano = db.startRepPull();
 					
-					//ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushNano, ""+lServerPullNano);
-					
-					//System.out.println(" lServerPushNano --> "+lServerPushNano+" , lServerPullNano -- > "+lServerPullNano);
-					
-					pullReplication(lServerPushNano, lServerPullNano);
+					pullReplication(lServerPushId, lServerPullId);
 				
 				} 
 				catch (Exception e)
@@ -392,10 +387,10 @@ public class Replicator
 	}
 	
 	
-	private static long pullReplication(long lServerPushNano, long lServerPullNano) throws Exception
+	private static long pullReplication(long lServerPushId, long lServerPullId) throws Exception
 	{
 		
-		ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushNano,""+lServerPullNano);
+		ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushId,""+lServerPullId);
 		if(StringUtil.isNullOrEmpty(tos))
 		{
 			if(!pullDone)
@@ -408,15 +403,15 @@ public class Replicator
 		}
 		
 		
-		long nano = db.startRepPull();
+		long milli = db.startRepPull();
 		
-		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length +" local rep uuid = "+nano);
-		
-		
-		long lastServerNano = db.executeReplicationSQL(tos);
+		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length +" local rep uuid = "+milli);
 		
 		
-		db.updateRepPull(nano, lastServerNano, tos.length);
+		long lastServerId = db.executeReplicationSQL(tos);
+		
+		
+		db.updateRepPull(milli, lastServerId, tos.length);
 		
 		
 		return tos.length;
@@ -429,11 +424,9 @@ public class Replicator
 
 class Repl
 {
-	long nano;
 	long initOn;
 	long compOn;
-	long lcpOn;
-	long serverNano;
+	long serverId;
 	int sqlCount;
 	
 }

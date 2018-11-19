@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.2.6</version>
+  <version>3.2.7</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -51,6 +51,11 @@
 
    <dependencies>
     
+    <dependency>
+	  <groupId>org.apache.maven</groupId>
+	  <artifactId>maven-model</artifactId>
+	  <version>3.3.9</version>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>

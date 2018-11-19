@@ -329,7 +329,7 @@ public class APIClient
 	
 	private static String serviceAtt = null;
 	
-	ReplicationTO[] pullReplication(String lServerPushNano, String lServerPullNano) throws Exception
+	ReplicationTO[] pullReplication(String lServerPushId, String lServerPullId) throws Exception
 	{
 		
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pull");
@@ -361,8 +361,8 @@ public class APIClient
 		form.param("appUuid", Baltoro.appUuid);
 		form.param("instUuid", Baltoro.instanceUuid);
 		form.param("att",serviceAtt);
-		form.param("lServerPullNano", lServerPullNano);
-		form.param("lServerPushNano", lServerPushNano);
+		form.param("lServerPullId", lServerPullId);
+		form.param("lServerPushId", lServerPushId);
 		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");
 		
 		
@@ -373,7 +373,7 @@ public class APIClient
 		return tos;
 	}
 	
-	int pullReplicationCount(String lServerPushNano, String lServerPullNano) throws Exception
+	int pullReplicationCount(String lServerPushId, String lServerPullId) throws Exception
 	{
 	 
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/pullCount");
@@ -396,8 +396,8 @@ public class APIClient
 		form.param("instUuid", Baltoro.instanceUuid);
 		form.param("att", att);
 		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");
-		form.param("lServerPullNano", lServerPullNano);
-		form.param("lServerPushNano", lServerPushNano);
+		form.param("lServerPullId", lServerPullId);
+		form.param("lServerPushId", lServerPushId);
 		
 		
 		

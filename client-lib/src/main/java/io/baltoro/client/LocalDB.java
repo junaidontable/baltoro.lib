@@ -173,19 +173,37 @@ public class LocalDB
 		}
 		
 		Connection con = getConnection();
+		String bltVersion = Baltoro.getVersion();
 		try
 		{
 	
-			con.createStatement().executeQuery("select uuid from base WHERE uuid='1'");
-			
+			ResultSet rs = con.createStatement().executeQuery("select * from baltoro_version order by updated_on");
 			System.out.println("Found local database.... "+dbName);
+			boolean vFound = false;
+			
+			while(rs.next())
+			{
+				String v = rs.getString(1);
+				if(v.equals(bltVersion))
+				{
+					vFound = true;
+				}
+				System.out.println(v+" : "+rs.getTimestamp(2));
+			}
+			
+			if(!vFound)
+			{
+				con.createStatement().executeNoReplication("insert into baltoro_version(version, updated_on) values('"+bltVersion+"','"+new Timestamp(System.currentTimeMillis())+"') ");
+			}
+			
+			
 		} 
 		catch (SQLException e)
 		{
 			System.out.println("setting up NEW local database.... "+dbName);
 		
 			setupTables(con);
-			
+			con.createStatement().executeNoReplication("insert into baltoro_version(version, updated_on) values('"+bltVersion+"','"+new Timestamp(System.currentTimeMillis())+"') ");
 		}
 		finally 
 		{
@@ -290,6 +308,10 @@ public class LocalDB
 		Statement st = con.createStatement();
 		
 		st = con.createStatement();
+		st.executeNoReplication("drop table baltoro_version");
+		st.close();
+		
+		st = con.createStatement();
 		st.executeNoReplication("drop table base");
 		st.close();
 		
@@ -347,6 +369,15 @@ public class LocalDB
 		Statement st = con.createStatement();
 		
 		StringBuffer sql = new StringBuffer();
+		sql.append("CREATE TABLE baltoro_version (");
+		sql.append("version varchar(42) NOT NULL,");
+		sql.append("updated_on timestamp NOT NULL,");
+		sql.append("PRIMARY KEY (version))");
+		st = con.createStatement();
+		st.executeNoReplication(sql.toString());
+		st.close();
+		
+		sql = new StringBuffer();
 		sql.append("CREATE TABLE base (");
 		sql.append("uuid varchar(42) NOT NULL,");
 		sql.append("name varchar(32672) NOT NULL,");
@@ -359,7 +390,7 @@ public class LocalDB
 		sql.append("created_by varchar(42) NOT NULL, ");
 		sql.append("created_on timestamp NOT NULL,");
 		sql.append("PRIMARY KEY (uuid))");
-		//System.out.println(sql.toString());
+		st = con.createStatement();
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
@@ -499,38 +530,36 @@ public class LocalDB
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE repl_pull (");
-		sql.append("nano bigint NOT NULL,");
 		sql.append("init_on bigint NOT NULL ,");
 		sql.append("comp_on bigint,");
-		sql.append("server_nano bigint,");
+		sql.append("server_id bigint,");
 		sql.append("sql_count int,");
-		sql.append("PRIMARY KEY (nano))");
+		sql.append("PRIMARY KEY (init_on))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("repl_pull", "init_on", con);
-		createIndex("repl_pull", "server_nano", con);
+		createIndex("repl_pull", "server_id", con);
 	
 		System.out.println("repl_pull Table Created");
 		
 		
 		sql = new StringBuffer();
 		sql.append("CREATE TABLE repl_push (");
-		sql.append("nano bigint NOT NULL,");
 		sql.append("init_on bigint NOT NULL,");
 		sql.append("comp_on bigint,");
-		sql.append("server_nano bigint,");
+		sql.append("server_id bigint,");
 		sql.append("sql_count int,");
-		sql.append("PRIMARY KEY (nano))");
+		sql.append("PRIMARY KEY (init_on))");
 		//System.out.println(sql.toString());
 		st = con.createStatement();
 		st.executeNoReplication(sql.toString());
 		st.close();
 		
 		createIndex("repl_push", "init_on", con);
-		createIndex("repl_push", "server_nano", con);
+		createIndex("repl_push", "server_id", con);
 	
 		System.out.println("repl_push Table Created");
 		
@@ -1941,18 +1970,13 @@ public class LocalDB
 	
 	public boolean deletLink(String pUuid, String cUuid) throws Exception
 	{
-		/*
-		PreparedStatement st = con.prepareStatement("insert into link"
-				+ "(link_uuid,link_type,obj_type,obj_uuid,sort,seq,count, created_by, created_on) "
-				+ " values(?,?,?,?,?,?,?,?,?) ");
-		*/
 		
 		String pObjType = ObjectUtil.getType(pUuid);
 		String cObjType = ObjectUtil.getType(cUuid);
 		
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ? and c_uuid=?) ?");
+		PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ? and c_uuid=?)");
 		st.setString(1, pUuid);
 		boolean a = st.executeAndReplicate(pObjType, cObjType);
 		st.close();
@@ -1968,22 +1992,65 @@ public class LocalDB
 		return a;
 	}
 	
+	public boolean deletChildren(String pUuid) throws Exception
+	{
+			
+		String pObjType = ObjectUtil.getType(pUuid);
+		
+		Connection con = getConnection();
+		
+		PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ?)");
+		st.setString(1, pUuid);
+		boolean a = st.executeAndReplicate(pObjType);
+		st.close();
+		
+		 st = con.prepareStatement("delete from link where p_uuid = ?");
+		st.setString(1, pUuid);
+		
+		
+		a = st.executeAndReplicate(pObjType);
+		st.close();
+		
+		con.close();
+		return a;
+	}
 	
-	Repl getRepPull(long nano) throws Exception
+	public boolean deletParent(String cUuid) throws Exception
+	{
+		
+		String cObjType = ObjectUtil.getType(cUuid);
+		
+		Connection con = getConnection();
+		
+		PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where c_uuid=?)");
+		st.setString(1, cUuid);
+		boolean a = st.executeAndReplicate(cObjType);
+		st.close();
+		
+		st = con.prepareStatement("delete from link where c_uuid=?");
+		st.setString(1, cUuid);
+		
+		a = st.executeAndReplicate(cObjType);
+		st.close();
+		
+		con.close();
+		return a;
+	}
+	
+	Repl getRepPull(long milli) throws Exception
 	{
 		Connection con = getConnection();
-		PreparedStatement st = con.prepareStatement("select * from repl_pull where nano = ?");
-		st.setLong(1, nano);
+		PreparedStatement st = con.prepareStatement("select * from repl_pull where init_on = ?");
+		st.setLong(1, milli);
 		
 		Repl repl = null;
 		ResultSet rs =  st.executeQuery();
 		if(rs.next())
 		{
 			repl = new Repl();
-			repl.nano = nano;
 			repl.initOn = rs.getLong("init_on");
 			repl.compOn = rs.getLong("comp_on");
-			repl.serverNano = rs.getLong("server_nano");
+			repl.serverId = rs.getLong("server_id");
 			repl.sqlCount = rs.getInt("sql_count");
 		
 			
@@ -2000,29 +2067,28 @@ public class LocalDB
 	{
 		
 		Connection con = getConnection();
-		PreparedStatement st = con.prepareStatement("insert into repl_pull (nano, init_on, sql_count) values (?,?,?) ");
-		long nano = System.nanoTime();
-		st.setLong(1, nano);
-		st.setLong(2, System.currentTimeMillis());
-		st.setInt(3, 0);
+		PreparedStatement st = con.prepareStatement("insert into repl_pull (init_on, sql_count) values (?,?) ");
+		long initOn = System.currentTimeMillis();
+		st.setLong(1, initOn);
+		st.setInt(2, 0);
 		st.executeNoReplicate();
 		st.close();
 		
 		con.close();
-		return nano;
+		return initOn;
 	}
 	
-	void updateRepPull(long nano, long serverNano, int sqlCount) throws Exception
+	void updateRepPull(long initOn, long serverId, int sqlCount) throws Exception
 	{
 		
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("update repl_pull set comp_on = ?, server_nano = ?, sql_count=? where nano=? ");
+		PreparedStatement st = con.prepareStatement("update repl_pull set comp_on = ?, server_id = ?, sql_count=? where init_on=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
-		st.setLong(2, serverNano);
+		st.setLong(2, serverId);
 		st.setInt(3,  sqlCount);
-		st.setLong(4, nano);
+		st.setLong(4, initOn);
 		st.executeNoReplicate();
 		st.close();
 		
@@ -2036,27 +2102,26 @@ public class LocalDB
 		
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("insert into repl_push (nano, init_on, sql_count) values (?,?,?) ");
-		long nano = System.nanoTime();
-		st.setLong(1, nano);
-		st.setLong(2, System.currentTimeMillis());
-		st.setInt(3, sqlCount);
+		PreparedStatement st = con.prepareStatement("insert into repl_push (init_on, sql_count) values (?,?) ");
+		long initOn = System.currentTimeMillis();
+		st.setLong(1, initOn);
+		st.setInt(2, sqlCount);
 		st.executeNoReplicate();
 		st.close();
 		
 		con.close();
-		return nano;
+		return initOn;
 	}
 	
-	void updateRepPush(long nano, long serverNano) throws Exception
+	void updateRepPush(long initOn, long serverId) throws Exception
 	{
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_nano = ? where nano=? ");
+		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_id = ? where initOn=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
-		st.setLong(2, serverNano);
-		st.setLong(3, nano);
+		st.setLong(2, serverId);
+		st.setLong(3, initOn);
 		st.executeNoReplicate();
 		st.close();
 		
@@ -2072,18 +2137,18 @@ public class LocalDB
 		
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("select max(server_nano) from repl_push ");
-		long nano = 0;
+		PreparedStatement st = con.prepareStatement("select max(server_id) from repl_push ");
+		long serverId = 0;
 		ResultSet rs =  st.executeQuery();
 		if(rs.next())
 		{
-			nano = rs.getLong(1);
+			serverId = rs.getLong(1);
 		}
 		rs.close();
 		st.close();
 		
 		con.close();
-		return nano;
+		return serverId;
 		
 	}
 	
@@ -2091,19 +2156,19 @@ public class LocalDB
 	{
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("select max(server_nano) from repl_pull ");
-		long nano = 0;
+		PreparedStatement st = con.prepareStatement("select max(server_id) from repl_pull ");
+		long serverId = 0;
 		ResultSet rs =  st.executeQuery();
 		if(rs.next())
 		{
-			nano = rs.getLong(1);
+			serverId = rs.getLong(1);
 		}
 		rs.close();
 		st.close();
 		
 		
 		con.close();
-		return nano;
+		return serverId;
 		
 	}
 	
@@ -2221,7 +2286,7 @@ public class LocalDB
 	long executeReplicationSQL(ReplicationTO[] tos)
 	{
 		Connection con = getConnection();
-		long lastServerNano = 0;
+		long lastServerId = 0;
 		try
 		{
 			System.out.print("[");
@@ -2245,14 +2310,14 @@ public class LocalDB
 				} 
 				catch (DerbySQLIntegrityConstraintViolationException | BatchUpdateException e)
 				{
-					System.out.println(e.getMessage()+" : "+to.nano+" -> "+to.cmd);
+					System.out.println(e.getMessage()+" : "+to.serverId+" -> "+to.cmd);
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
 				
-				lastServerNano = to.nano;
+				lastServerId = to.serverId;
 				st.close();
 				
 				System.out.print(".");
@@ -2299,7 +2364,7 @@ public class LocalDB
 			con.close();
 		}
 		
-		return lastServerNano;
+		return lastServerId;
 	}
 	
 	

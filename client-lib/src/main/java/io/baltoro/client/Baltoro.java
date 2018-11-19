@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,9 @@ import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.NewCookie;
+
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.StringUtil;
@@ -623,7 +627,7 @@ public class Baltoro
 			
 		     
 	        System.out.println(" ********** Baltoro lib version ************ " );
-			System.out.println(Baltoro.class.getPackage().getImplementationVersion());
+			System.out.println(getVersion());
 			System.out.println(" ********************** ");
 			
 			db = LocalDB.instance();
@@ -638,6 +642,26 @@ public class Baltoro
 	
 	}
 	
+
+	public static String getVersion()
+	{
+		String v = Baltoro.class.getPackage().getImplementationVersion();
+		if(StringUtil.isNullOrEmpty(v))
+		{
+			MavenXpp3Reader reader = new MavenXpp3Reader();
+	        Model model =  null;
+			try
+			{
+				model = reader.read(new FileReader("pom.xml"));
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+	        v = model.getVersion();
+		}
+		return v;
+	}
 	
 	public static String getAppName()
 	{

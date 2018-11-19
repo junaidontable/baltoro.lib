@@ -465,7 +465,7 @@ public class RequestWorker extends Thread
 				{
 					buffer.append(paramName+",");
 				}
-				throw new Exception(annoName+" is not submitted as a parameter. incoming params ["+buffer.toString()+"] ");
+				throw new Exception("["+to.requestContext.getApiPath()+"]" + annoName+" is not submitted as a parameter. incoming params ["+buffer.toString()+"] ");
 			}
 
 			
@@ -504,10 +504,10 @@ public class RequestWorker extends Thread
 					ContentTO cto = mapper.readValue(requestValue[0], ContentTO.class);
 					
 					Content ct = (Content) paramClass.newInstance();
-					ct.setUuid(cto.uuid);
+					ct.setServerUuid(cto.uuid);
 					ct.setName(cto.fileName);
 					ct.setSize(cto.size);
-					ct.setType(cto.type);
+					ct.setContentType(cto.type);
 					
 					methodInputData[i] = ct;
 				} 
