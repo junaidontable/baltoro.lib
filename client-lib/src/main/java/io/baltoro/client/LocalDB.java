@@ -2117,7 +2117,7 @@ public class LocalDB
 	{
 		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_id = ? where initOn=? ");
+		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_id = ? where init_on=? ");
 		
 		st.setLong(1, System.currentTimeMillis());
 		st.setLong(2, serverId);

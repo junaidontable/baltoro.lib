@@ -1,5 +1,6 @@
 package io.baltoro.client;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,12 @@ public class CustomQuery<T>
 	public CustomQuery<T> map(String colName, String propertyName)
 	{
 		map.put(colName.toLowerCase(), propertyName);
+		return this;
+	}
+	
+	public CustomQuery<T> map(String colName, Field f)
+	{
+		map.put(colName.toLowerCase(), f.getName());
 		return this;
 	}
 	
