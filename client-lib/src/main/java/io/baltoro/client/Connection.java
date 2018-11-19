@@ -3,7 +3,7 @@ package io.baltoro.client;
 import java.io.IOException;
 import java.sql.SQLException;
 
-class Connection
+class Connection implements AutoCloseable
 {
 
 	private java.sql.Connection con;
@@ -34,7 +34,7 @@ class Connection
 	}
 	
 	
-	void close()
+	public void close()
 	{
 		LocalDB.connectionQueue.add(this);
 	}

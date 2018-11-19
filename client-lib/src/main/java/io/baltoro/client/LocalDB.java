@@ -2115,17 +2115,21 @@ public class LocalDB
 	
 	void updateRepPush(long initOn, long serverId) throws Exception
 	{
-		Connection con = getConnection();
 		
-		PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_id = ? where init_on=? ");
-		
-		st.setLong(1, System.currentTimeMillis());
-		st.setLong(2, serverId);
-		st.setLong(3, initOn);
-		st.executeNoReplicate();
-		st.close();
-		
-		con.close();
+		try(Connection con = getConnection())
+		{
+			PreparedStatement st = con.prepareStatement("update repl_push set comp_on = ?, server_id = ? where init_on=? ");
+			
+			st.setLong(1, System.currentTimeMillis());
+			st.setLong(2, serverId);
+			st.setLong(3, initOn);
+			st.executeNoReplicate();
+			st.close();
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -2135,40 +2139,42 @@ public class LocalDB
 	long getLastPush() throws Exception
 	{
 		
-		Connection con = getConnection();
-		
-		PreparedStatement st = con.prepareStatement("select max(server_id) from repl_push ");
-		long serverId = 0;
-		ResultSet rs =  st.executeQuery();
-		if(rs.next())
+		try(Connection con = getConnection())
 		{
-			serverId = rs.getLong(1);
-		}
-		rs.close();
-		st.close();
-		
-		con.close();
-		return serverId;
-		
+			PreparedStatement st = con.prepareStatement("select max(server_id) from repl_push ");
+			long serverId = 0;
+			ResultSet rs =  st.executeQuery();
+			if(rs.next())
+			{
+				serverId = rs.getLong(1);
+			}
+			rs.close();
+			st.close();
+			
+			
+			return serverId;
+		} 
+
 	}
 	
 	long getLastPull() throws Exception
 	{
-		Connection con = getConnection();
-		
-		PreparedStatement st = con.prepareStatement("select max(server_id) from repl_pull ");
-		long serverId = 0;
-		ResultSet rs =  st.executeQuery();
-		if(rs.next())
+		try(Connection con = getConnection())
 		{
-			serverId = rs.getLong(1);
+			PreparedStatement st = con.prepareStatement("select max(server_id) from repl_pull ");
+			long serverId = 0;
+			ResultSet rs =  st.executeQuery();
+			if(rs.next())
+			{
+				serverId = rs.getLong(1);
+			}
+			rs.close();
+			st.close();
+			
+			
+		
+			return serverId;
 		}
-		rs.close();
-		st.close();
-		
-		
-		con.close();
-		return serverId;
 		
 	}
 	
@@ -2295,13 +2301,13 @@ public class LocalDB
 			for (int i=0;i<tos.length;i++)
 			{
 				ReplicationTO to = tos[i];
-				String[] sqls = to.cmd.split(";");
+				String[] sqls = to.cmd.split("\n<BLT-BLT>\n");
 				
 				Statement st = con.createStatement();
 				for (int j = 0; j < sqls.length; j++)
 				{
-					
-					st.addbatch(sqls[j]);
+					String sql = sqls[j];
+					st.addbatch(sql);
 				}
 				
 				try

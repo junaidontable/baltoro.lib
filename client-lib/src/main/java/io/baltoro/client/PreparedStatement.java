@@ -131,7 +131,7 @@ class PreparedStatement
 				attSet.add(item[i]);
 			}
 			
-			sqls.append(to.cmd+";\n");
+			sqls.append(to.cmd+"\n<BLT-BLT>\n");
 		}
 		
 		sqls.delete(sqls.length()-2, sqls.length());
