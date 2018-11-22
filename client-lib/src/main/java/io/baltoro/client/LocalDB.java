@@ -2303,7 +2303,7 @@ public class LocalDB
 				ReplicationTO to = tos[i];
 				
 			
-				String[] sqls = to.cmd.split("\n<BLT-BLT>\n");
+				String[] sqls = to.cmd.split("<BLT-BLT>");
 				
 				Statement st = con.createStatement();
 				for (int j = 0; j < sqls.length; j++)
