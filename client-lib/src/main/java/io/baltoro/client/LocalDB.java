@@ -2309,6 +2309,7 @@ public class LocalDB
 				{
 					String sql = sqls[j];
 					st.addbatch(sql);
+					
 				}
 				
 				try

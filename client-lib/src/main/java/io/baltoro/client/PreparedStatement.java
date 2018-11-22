@@ -123,7 +123,9 @@ class PreparedStatement
 		StringBuffer sqls = new StringBuffer();
 		StringBuffer attBuffer = new StringBuffer();
 		
-		for (int i=0;i < repList.size();i++)
+		int size = repList.size();
+		
+		for (int i=0;i < size;i++)
 		{
 			ReplicationTO to = repList.get(i);
 			String[] item = to.att.split(" ");
@@ -131,10 +133,11 @@ class PreparedStatement
 			{
 				attSet.add(item[j]);
 			}
+			sqls.append(to.cmd);
 			
-			if(i < repList.size())
+			if(i < size-1)
 			{
-				sqls.append(to.cmd+"<BLT-BLT>");
+				sqls.append("<BLT-BLT>");
 			}
 		}
 			
