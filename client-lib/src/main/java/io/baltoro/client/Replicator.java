@@ -396,6 +396,11 @@ public class Replicator
 			if(!pullDone)
 			{
 				System.out.println("INIT PULL finished ....... ");
+				
+				synchronized (Baltoro.PULL_REPLICATION_SYNC_KEY.intern())
+				{
+					Baltoro.PULL_REPLICATION_SYNC_KEY.notify();
+				}
 			}
 			pullDone = true;
 			

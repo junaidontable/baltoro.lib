@@ -81,7 +81,7 @@ public class Baltoro
 	
 	
 	static LocalDB db;
-	
+	static String PULL_REPLICATION_SYNC_KEY = "baltoro-pull-replication";
 
 	
 	private static void buildService() throws Exception
@@ -630,6 +630,16 @@ public class Baltoro
 			System.out.println(getVersion());
 			System.out.println(" ********************** ");
 			
+			LocalDB.instance();
+			long t0 = System.currentTimeMillis();
+			synchronized (PULL_REPLICATION_SYNC_KEY.intern())
+			{
+				System.out.println("waitng 10 min for replication to finish .... ");
+				PULL_REPLICATION_SYNC_KEY.wait(10* 60 * 1000);
+			}
+			long t1 = System.currentTimeMillis();
+			
+			System.out.println(" >>>>>>>>>>>>>>> pull replication finished in ("+(t1-t0)/1000+") sec ");
 			db = LocalDB.instance();
 			
 			
