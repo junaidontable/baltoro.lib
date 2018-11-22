@@ -2302,7 +2302,6 @@ public class LocalDB
 			{
 				ReplicationTO to = tos[i];
 				
-			
 				String[] sqls = to.cmd.split("<BLT-BLT>");
 				
 				Statement st = con.createStatement();

@@ -1,9 +1,16 @@
 package io.baltoro.client;
 
+import java.io.Serializable;
+
 import io.baltoro.client.util.UUIDGenerator;
 
-public class Record
+public class Record implements Serializable
 {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	RecordList<Record> rList;
 	String rUuid;
