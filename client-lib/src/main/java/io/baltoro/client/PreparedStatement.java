@@ -133,9 +133,7 @@ class PreparedStatement
 			
 			sqls.append(to.cmd+"\n<BLT-BLT>\n");
 		}
-		
-		sqls.delete(sqls.length()-2, sqls.length());
-		
+			
 		attSet.stream().forEach((a) -> 
 		{
 			attBuffer.append(a+" ");
