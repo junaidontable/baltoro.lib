@@ -390,6 +390,8 @@ public class Replicator
 	private static long pullReplication(long lServerPushId, long lServerPullId) throws Exception
 	{
 		
+		//System.out.println("current push ID ["+lServerPushId+"], pull ID ["+lServerPushId+"]");
+		
 		ReplicationTO[] tos = Baltoro.cs.pullReplication(""+lServerPushId,""+lServerPullId);
 		if(StringUtil.isNullOrEmpty(tos))
 		{
@@ -410,7 +412,7 @@ public class Replicator
 		
 		long milli = db.startRepPull();
 		
-		System.out.println(" ===========> pulling replicated records receiving..... "+tos.length +" local rep uuid = "+milli);
+		System.out.println("current pull ID ["+lServerPullId+"] ===========> pulling replicated records receiving..... "+tos.length +" local rep uuid = "+milli);
 		
 		
 		long lastServerId = db.executeReplicationSQL(tos);

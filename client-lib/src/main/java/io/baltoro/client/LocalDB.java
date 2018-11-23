@@ -2257,6 +2257,10 @@ public class LocalDB
 			{
 				Object v = rs.getObject(colName);
 				r.add(colName, v);
+				if(v == null)
+				{
+					continue;
+				}
 			 	ColumnMetadata colMD = records.getColMetadata(colName);
 			 	colMD.setMaxLen(v.toString().length());
 			 	
@@ -2276,6 +2280,10 @@ public class LocalDB
 					continue;
 				}
 				Object v = rs.getObject(colName);
+				if(v == null)
+				{
+					v = "";
+				}
 				BeanUtils.setProperty(t, pName, v);
 			 	ColumnMetadata colMD = records.getColMetadata(colName);
 			 	colMD.setMaxLen(v.toString().length());
