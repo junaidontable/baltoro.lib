@@ -23,6 +23,11 @@ public class CustomQuery<T>
 		this.c = c;
 		this.q = q;
 		this.db = db;
+		
+		if(c == String.class)
+		{
+			map.put("1", "");
+		}
 	}
 	
 	

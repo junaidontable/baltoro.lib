@@ -637,6 +637,12 @@ public class LocalDB
 		return get(uuids);
 	}
 	
+	public <T extends Base> List<T> get(Class<T> c, String[] baseUuids)
+	{
+		String uuids = StringUtil.toInClause(baseUuids);
+		return (List<T>) get(uuids);
+	}
+	
 	public List<Base> get(Set<String> baseUuids)
 	{
 		String uuids = StringUtil.toInClause(baseUuids);
@@ -742,26 +748,14 @@ public class LocalDB
 		
 	}
 	
-	public <T extends Base> T getByProperty(Class<T> _class, String name, String value)
+	public <T extends Base> PropertyQuery<T> getByProperty(Class<T> c)
 	{
-		//String type = getType(_class);
-		String type = getType(_class);
-		List<String> list = findByProperty(type, name, value);
-		if(list == null || list.isEmpty())
-		{
-			return null;
-		}
 		
-		List<Base> objList = get(list.toArray(new String[list.size()]));
-		if(StringUtil.isNullOrEmpty(objList))
-		{
-			return null;
-		}
-		
-		return _class.cast(objList.get(0));
-		
+		PropertyQuery<T> q = new PropertyQuery<>(c, db);
+		return q;
 	}
 	
+	/*
 	public <T extends Base> List<T> findByProperty(Class<T> _class, String name, String value)
 	{
 		//String type = getType(_class);
@@ -781,8 +775,10 @@ public class LocalDB
 		return (List<T>) objList;
 		
 	}
+	*/
 	
-	public List<String> findByProperty(String type, String name, String value)
+	/*
+	private List<String> findByProperty(String type, String name, String value)
 	{
 		List<String> list = new ArrayList<>(200);
 		
@@ -817,7 +813,7 @@ public class LocalDB
 		
 		return list;
 	}
-		
+	*/	
 	
 	public <T extends Base> List<T> findByName(String name, Class<T> _class)
 	{
@@ -1639,7 +1635,7 @@ public class LocalDB
 	
 	
 	
-	private String getType(Class<?> _class)
+	public String getType(Class<?> _class)
 	{
 		
 		String className = _class.getName();
@@ -2266,6 +2262,18 @@ public class LocalDB
 			 	
 			}
 			records.add((T)r);
+		}
+		else if(cq.getClassT() == String.class)
+		{
+			String v = rs.getString(1);
+			if(v == null)
+			{
+				v = "";
+			}
+		 	ColumnMetadata colMD = records.getColMetadata("1");
+		 	colMD.setMaxLen(v.toString().length());
+		 	
+		 	records.add((T)v);
 		}
 		else
 		{

@@ -1,8 +1,6 @@
 package io.baltoro.client;
 
-import javax.websocket.ClientEndpointConfig;
-
-public class BaltoroClientConfig_old extends ClientEndpointConfig.Configurator
+public class BaltoroClientConfig_old 
 {
 	/*
 	static Logger log = Logger.getLogger(BaltoroClientConfig.class.getName());

@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.2.17</version>
+  <version>3.2.18</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -76,6 +76,10 @@
     	<version>2.25.1</version>
 	</dependency>
 	
+
+	
+	
+	
 	<!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
 	<dependency>
 	    <groupId>org.reflections</groupId>
@@ -83,19 +87,17 @@
 	    <version>0.9.11</version>
 	</dependency>
 
-	<!-- https://mvnrepository.com/artifact/org.glassfish.tyrus/tyrus-client -->
-	<dependency>
+	<!--  dependency>
 	    <groupId>org.glassfish.tyrus</groupId>
 	    <artifactId>tyrus-client</artifactId>
-	    <version>1.13.1</version>
+	    <version>1.14</version>
 	</dependency>
 	
-	<!-- https://mvnrepository.com/artifact/org.glassfish.tyrus/tyrus-container-grizzly-client -->
 	<dependency>
 	    <groupId>org.glassfish.tyrus</groupId>
 	    <artifactId>tyrus-container-grizzly-client</artifactId>
 	    <version>1.13.1</version>
-	</dependency>
+	</dependency-->
 	
 	<dependency>
     	<groupId>org.glassfish.jersey.media</groupId>

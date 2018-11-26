@@ -1,14 +1,9 @@
 package io.baltoro.client;
 
-import java.nio.ByteBuffer;
-import java.util.logging.Logger;
-
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
-
-public class BaltoroByteBufferMessageHandler_old implements MessageHandler.Whole<ByteBuffer>
+public class BaltoroByteBufferMessageHandler_old 
 {
 	
+	/*
 	static Logger log = Logger.getLogger(BaltoroByteBufferMessageHandler_old.class.getName());
 	
 	private Session session;
@@ -27,5 +22,6 @@ public class BaltoroByteBufferMessageHandler_old implements MessageHandler.Whole
 	{
 		//RequestQueue.instance().addToRequestQueue(byteBuffer);
 	}
+	*/
 }
 

@@ -106,12 +106,12 @@ public abstract class Base
 	{
 		return type;
 	}
-	public void setType(String type) 
+	public final void setType(String type) 
 	{
 		this.type = type;
 	}
 	
-	public String getLatestVersionUuid() 
+	public final String getLatestVersionUuid() 
 	{
 		return latestVersionUuid;
 	}
