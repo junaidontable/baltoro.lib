@@ -38,7 +38,10 @@ public class AnnotationProcessor
 	
 	public Map<String, WebMethod> processAnnotation(String serviceName, String packageName) throws Exception
 	{
-		log.info("serviceName = "+serviceName+", packageName = "+packageName);
+		if(!packageName.equals("io.baltoro.client.APITest"))
+		{
+			System.out.println("[[[[\nserviceName = "+serviceName+", packageName = "+packageName);
+		}
 		
 		Set<Class<?>> classes = getClasses(packageName);
 		
@@ -46,7 +49,10 @@ public class AnnotationProcessor
 		
 		for (Class<?> _class : classes)
 		{
-			log.info("class = "+_class);
+			if(_class != APITest.class)
+			{
+				System.out.println("class => "+_class);
+			}
 			
 			Annotation[] annoArray =  _class.getAnnotations();
 	
@@ -116,11 +122,22 @@ public class AnnotationProcessor
 			
 		}
 		
+		if(packageName.equals("io.baltoro.client.APITest"))
+		{
+			return pathMap;
+		}
 		
+		String sName = serviceName.startsWith("/") ? serviceName : "/"+serviceName;
 		for (String key : pathMap.keySet())
 		{
-			System.out.println("PATH -> "+key+" --> "+pathMap.get(key));
+			if(key.startsWith(sName))
+			{
+				System.out.println("PATH -> "+key+" --> "+pathMap.get(key));
+			}
 		} 
+			
+		System.out.println("]]]]");
+		
 		
 		return pathMap;
 	}
