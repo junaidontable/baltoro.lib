@@ -1,11 +1,13 @@
 package io.baltoro.client;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import io.baltoro.client.LocalDB.Direction;
+import io.baltoro.client.util.StringUtil;
 import io.baltoro.obj.Base;
 
 
@@ -75,6 +77,10 @@ public class Linked<T extends Base>
 	
 	public List<T> getAll()
 	{
+		if(StringUtil.isNullOrEmpty(uuids))
+		{
+			return new ArrayList<>();
+		}
 		if(objs == null)
 		{
 			List<T> objs = (List<T>) db.get(uuids);

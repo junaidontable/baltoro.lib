@@ -2270,7 +2270,7 @@ public class LocalDB
 			{
 				v = "";
 			}
-		 	ColumnMetadata colMD = records.getColMetadata("1");
+		 	ColumnMetadata colMD = records.getFirstColMetadata();
 		 	colMD.setMaxLen(v.toString().length());
 		 	
 		 	records.add((T)v);

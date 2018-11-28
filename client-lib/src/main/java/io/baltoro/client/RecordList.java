@@ -43,6 +43,11 @@ public class RecordList<T> extends ArrayList<T>
 	}
 	
 	
+	ColumnMetadata getFirstColMetadata()
+	{
+		return colMD.values().iterator().next();
+	}
+	
 	public ColumnMetadata getColMetadata(String colName)
 	{
 		return colMD.get(colName);
