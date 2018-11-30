@@ -22,9 +22,16 @@ public class PropertyQuery<T extends Base>
 	}
 	
 	
-	public PropertyQuery<T> add(String name, String value)
+	public PropertyQuery<T> addEquals(String name, String value)
 	{
 		q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value='"+value+"' and version_uuid=b.latest_version_uuid and base_uuid in ");
+		count++;
+		return this;
+	}
+	
+	public PropertyQuery<T> addIn(String name, String value)
+	{
+		q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value in ("+value+") and version_uuid=b.latest_version_uuid and base_uuid in ");
 		count++;
 		return this;
 	}
