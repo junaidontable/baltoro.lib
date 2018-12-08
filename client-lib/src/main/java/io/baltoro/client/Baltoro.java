@@ -678,13 +678,14 @@ public class Baltoro
 		return appName;
 	}
 	
-	public static String getPublicURL()
+	public static String getPublicURL(boolean https)
 	{
 			
-		String url = "http://"+Baltoro.getAppName()+".baltoro.io";
-		
-		return url;
-		
+		if(https)
+		{
+			return "https://"+Baltoro.getAppName()+".baltoro.io";
+		}
+		return  "http://"+Baltoro.getAppName()+".baltoro.io";
 		
 	}
 	

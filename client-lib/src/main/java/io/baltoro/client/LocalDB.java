@@ -1570,11 +1570,7 @@ public class LocalDB
 				}
 				
 				mdMap.put(fieldName, value);
-				
-				
-				
-				
-				
+
 			}
 		} 
 		catch (Exception e)
@@ -2201,7 +2197,7 @@ public class LocalDB
 			{
 				ResultSetMetaData md = rs.getMetaData();
 				int cols = md.getColumnCount();
-	            System.out.println("Column Count is " + cols);
+	            //System.out.println("Column Count is " + cols);
 	           
 	            for (int i = 1; i <= cols; i++) 
 	            {
