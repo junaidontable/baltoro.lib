@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>3.2.22</version>
+  <version>3.2.23</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -64,6 +64,12 @@
       <scope>test</scope>
     </dependency>
     
+     <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.2</version>
+  	</dependency>
+  
     <dependency>
     	<groupId>org.glassfish.jersey.core</groupId>
     	<artifactId>jersey-client</artifactId>

@@ -61,6 +61,7 @@ public class CloudServer
 					.register(JacksonFeature.class)
 					.register(requestFilter)
 					.register(responseFilter)
+					.sslContext(Baltoro.sslCtx)
 					.build();
 			
 			appMap.put(appName, client);

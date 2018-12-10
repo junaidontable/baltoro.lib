@@ -76,6 +76,7 @@ public class APIClient
 				.register(reqFilter)
 				.register(responseFilter)
 				.register(MultiPartWriter.class)
+				.sslContext(Baltoro.sslCtx)
 				.build();
 		webClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
 		webClient.property(ClientProperties.READ_TIMEOUT, 60000);
@@ -85,6 +86,7 @@ public class APIClient
 		pollerClient = ClientBuilder.newBuilder()
 				.register(JacksonFeature.class)
 				.register(reqFilter)
+				.sslContext(Baltoro.sslCtx)
 				.build();
 		
 		pollerClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);
@@ -92,6 +94,7 @@ public class APIClient
 		
 		rawClient = ClientBuilder.newBuilder()
 					.register(reqFilter)
+					.sslContext(Baltoro.sslCtx)
 					.build();
 		
 		rawClient.property(ClientProperties.CONNECT_TIMEOUT, 5000);

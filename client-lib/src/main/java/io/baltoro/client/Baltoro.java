@@ -1,13 +1,21 @@
 package io.baltoro.client;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +25,11 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.NewCookie;
 
 import org.apache.maven.model.Model;
@@ -67,7 +80,7 @@ public class Baltoro
 	static String appName;
 	static String userUuid;
 	
-	static String serverURL = "http://"+APIClient.BLTC_CLIENT+".baltoro.io";
+	static String serverURL = "https://"+APIClient.BLTC_CLIENT+".baltoro.io";
 	static String appURL;
 	static Env env = Env.PRD;
 	
@@ -83,6 +96,7 @@ public class Baltoro
 	static LocalDB db;
 	static String PULL_REPLICATION_SYNC_KEY = "baltoro-pull-replication";
 
+	public static SSLContext sslCtx;
 	
 	private static void buildService() throws Exception
 	{
@@ -571,12 +585,84 @@ public class Baltoro
 		
 	}
 	
-	
+	private static void setupCerts() throws Exception
+	{
+		
+		
+		TrustManagerFactory dtmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		dtmf.init((KeyStore) null);
+		
+
+		X509TrustManager defaultTm = null;
+		for (TrustManager tm : dtmf.getTrustManagers()) 
+		{
+		    if (tm instanceof X509TrustManager) 
+		    {
+		        defaultTm = (X509TrustManager) tm;
+		        break;
+		    }
+		}
+		
+		
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+		byte [] decoded = Base64.getDecoder().decode(GDCerts.GD_CERT1);
+		ByteArrayInputStream in = new ByteArrayInputStream(decoded);
+		Certificate ca1 = cf.generateCertificate(in);
+		in.close();
+		
+		decoded = Base64.getDecoder().decode(GDCerts.GD_CERT2);
+		in = new ByteArrayInputStream(decoded);
+		Certificate ca2 = cf.generateCertificate(in);
+		in.close();
+		
+		decoded = Base64.getDecoder().decode(GDCerts.GD_CERT3);
+		in = new ByteArrayInputStream(decoded);
+		Certificate ca3 = cf.generateCertificate(in);
+		in.close();
+		
+		String keyStoreType = KeyStore.getDefaultType();
+		KeyStore ks = KeyStore.getInstance(keyStoreType);
+		ks.load(null, null);
+		ks.setCertificateEntry("cert1", ca1);
+		ks.setCertificateEntry("cert2", ca2);
+		ks.setCertificateEntry("cert3", ca3);
+      
+        
+		TrustManagerFactory gdtmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		gdtmf.init(ks);
+		
+		X509TrustManager gdTm = null;
+		for (TrustManager tm : gdtmf.getTrustManagers()) 
+		{
+		    if (tm instanceof X509TrustManager) 
+		    {
+		    	gdTm = (X509TrustManager) tm;
+		        break;
+		    }
+		}
+				  
+		TrustManager tms[] = new TrustManager[2];
+		tms[0] = gdTm;
+		tms[1] = defaultTm;
+		
+       
+        try 
+        {
+        	sslCtx = SSLContext.getInstance("TLS");
+        	sslCtx.init(null, tms, new SecureRandom());
+        } 
+        catch (java.security.GeneralSecurityException e) 
+        {
+            e.printStackTrace();
+            throw e;
+        }
+		 
+		 HttpsURLConnection.setDefaultSSLSocketFactory(sslCtx.getSocketFactory());
+	}
 	
 	public static void start()
 	{
 
-		
 		if(env == Env.JUNIT)
 		{
 			runLocalTests();
@@ -586,7 +672,9 @@ public class Baltoro
 		try
 		{
 			
-					
+				
+			setupCerts();
+			
 			setHostId();
 			
 			processEnv();
