@@ -76,7 +76,7 @@ public class Baltoro
 	static String apiKey;
 	static String authCode;
 	
-	static String serverURL = "http://"+APIClient.BLTC_CLIENT+".baltoro.io:8080";
+	static String serverURL = "https://"+APIClient.BLTC_CLIENT+".baltoro.io";
 	static String appURL;
 	
 	static AppTO appTO;
