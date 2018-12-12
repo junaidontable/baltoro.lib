@@ -159,7 +159,7 @@ public class Replicator
 	public static void push(PreparedStatement st, String ... att)
 	{
 
-		if(Baltoro.env == Env.JUNIT)
+		if(Baltoro.env == Env.UT)
 		{
 			return;
 		}
@@ -177,7 +177,7 @@ public class Replicator
 	public static void pushBatch(String sqls, String att)
 	{
 
-		if(Baltoro.env == Env.JUNIT)
+		if(Baltoro.env == Env.UT)
 		{
 			return;
 		}
@@ -192,7 +192,7 @@ public class Replicator
 	
 	public static void push(String sql, String att)
 	{
-		if(Baltoro.env == Env.JUNIT)
+		if(Baltoro.env == Env.UT)
 		{
 			return;
 		}
@@ -291,7 +291,7 @@ public class Replicator
 	private static void initReplicator()
 	{
 		
-		if(Baltoro.env == Env.JUNIT)
+		if(Baltoro.env == Env.UT)
 		{
 			return;
 		}

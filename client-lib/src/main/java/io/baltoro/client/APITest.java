@@ -12,7 +12,7 @@ public class APITest
 	@NoAuth
 	public String helloWorld()
 	{
-		return "Hello from "+Baltoro.appName+" env = "+Baltoro.env.toString()
+		return "Hello from "+Baltoro.appTO.name+" env = "+Baltoro.env
 		+"<br> sessionId = "+Baltoro.getUserSession().getSessionId()
 		+"<br> timestamp  = "+new Date().toString();
 	}

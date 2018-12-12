@@ -1,10 +1,16 @@
 package io.baltoro.to;
 
-import io.baltoro.to.BaseTO;
+import java.sql.Timestamp;
 
-public class AppTO extends BaseTO
+public class AppTO
 {
-	public String privateDataUuid;
-	public String publicKey;
+	
+	
+	public String  uuid;
+	public String name;
+	public String state;
+	public String env;
+	public Timestamp createdOn;
+	
 
 }

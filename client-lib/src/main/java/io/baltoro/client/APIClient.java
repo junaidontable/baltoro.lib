@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.baltoro.client.util.StreamUtil;
 import io.baltoro.client.util.StringUtil;
+import io.baltoro.to.AppTO;
 import io.baltoro.to.PathTO;
 import io.baltoro.to.ReplicationTO;
 import io.baltoro.to.SessionUserTO;
@@ -141,6 +142,22 @@ public class APIClient
 		return str;
 	}
 	
+	AppTO handShake(String apiKey, String authCode) throws Exception
+	{
+		log.info("...  HandShake ..."+blHost);
+	
+		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/handshake");	
+		Invocation.Builder ib =	getIB(target);
+		
+		Response response = ib.get();
+		
+		String json = response.readEntity(String.class);
+		
+		AppTO to = mapper.readValue(json, AppTO.class);
+
+		return to;
+	}
+	
 	int getRemainingInsanceThreadsCount(String appUuid, String instanceUuid) throws Exception
 	{
 		log.info("... getInsanceThreadsCount ...");
@@ -228,7 +245,7 @@ public class APIClient
 			WebMethod wm = map.get(key);
 			
 			PathTO pto = new PathTO();
-			pto.appUuid = Baltoro.appUuid;
+			pto.appUuid = Baltoro.appTO.uuid;
 			pto.createdBy = Baltoro.instanceUuid;
 			pto.path = key;
 			pto.authRequired = wm.authRequired;
@@ -246,7 +263,7 @@ public class APIClient
 		String json = mapper.writeValueAsString(pathList);
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("service-name", Baltoro.serviceNames.toString());
 		form.param("json", json);
@@ -273,7 +290,7 @@ public class APIClient
 			
 				
 			FormDataMultiPart form = new FormDataMultiPart();
-			  form.field("app-uuid", Baltoro.appUuid);
+			  form.field("app-uuid", Baltoro.appTO.uuid);
 			  form.field("inst-uuid", Baltoro.instanceUuid);
 			  form.field("to-uuid", toUuid);
 			  form.field("json", json);
@@ -295,7 +312,7 @@ public class APIClient
 		}
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("to-uuid", toUuid);
 		form.param("json", json);
@@ -361,7 +378,7 @@ public class APIClient
 		//log.info(" PULL ======= > "+att);
 		
 		Form form = new Form();
-		form.param("appUuid", Baltoro.appUuid);
+		form.param("appUuid", Baltoro.appTO.uuid);
 		form.param("instUuid", Baltoro.instanceUuid);
 		form.param("att",serviceAtt);
 		form.param("lServerPullId", lServerPullId);
@@ -395,7 +412,7 @@ public class APIClient
 		log.info(" PULL ======= > "+att);
 		
 		Form form = new Form();
-		form.param("appUuid", Baltoro.appUuid);
+		form.param("appUuid", Baltoro.appTO.uuid);
 		form.param("instUuid", Baltoro.instanceUuid);
 		form.param("att", att);
 		//form.param("initPull", LocalDB.initPull ? "YES" : "NO");
@@ -421,7 +438,7 @@ public class APIClient
 		WebTarget target = webClient.target(blHost).path(RPLT_SERVICE+"/push");
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("service-name", Baltoro.serviceNames.toString());
 		form.param("json", repObjJson);
@@ -442,7 +459,7 @@ public class APIClient
 		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/validate");
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("session-id", sessionId);
 		String json = mapper.writeValueAsString(to);
@@ -463,7 +480,7 @@ public class APIClient
 		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/invalidate");
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("session-id", sessionId);
 		
@@ -483,7 +500,7 @@ public class APIClient
 		WebTarget target = webClient.target(blHost).path(SESS_SERVICE+"/pull");
 		
 		Form form = new Form();
-		form.param("app-uuid", Baltoro.appUuid);
+		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("session-id", sessionId);
 		

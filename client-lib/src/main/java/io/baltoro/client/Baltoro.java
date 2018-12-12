@@ -10,11 +10,8 @@ import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -35,13 +32,13 @@ import javax.ws.rs.core.NewCookie;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
-import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.ep.ClassBuilder;
 import io.baltoro.ep.CloudServer;
 import io.baltoro.ep.EPData;
 import io.baltoro.ep.ParamInput;
 import io.baltoro.to.APIError;
+import io.baltoro.to.AppTO;
 import io.baltoro.to.RequestContext;
 import io.baltoro.to.ResponseContext;
 
@@ -75,16 +72,15 @@ public class Baltoro
 	static String instanceUuid;
 	static int instanceThreadCount = 3;
 	
-	static String appUuid;
-	static String appPrivateKey;
-	static String appName;
-	static String userUuid;
 	
-	static String serverURL = "https://"+APIClient.BLTC_CLIENT+".baltoro.io";
+	static String apiKey;
+	static String authCode;
+	
+	static String serverURL = "http://"+APIClient.BLTC_CLIENT+".baltoro.io:8080";
 	static String appURL;
+	
+	static AppTO appTO;
 	static Env env = Env.PRD;
-	
-	
 	static String pullReplicationServiceNames;
 	
 	static ResponsePoller responsePoller;
@@ -165,10 +161,12 @@ public class Baltoro
         return ste.getClassName();
     }
 	
+	/*
 	public static Env getEnv()
 	{
-		return env;
+		return appt;
 	}
+	*/
 	
 	public static String getMainClassPackageName() 
 	{ 
@@ -244,17 +242,17 @@ public class Baltoro
 	
 	public static <T> T callSync(String path, Class<T> returnType, ParamInput input)
 	{
-		return callSync(Baltoro.appName, path, returnType, input);
+		return callSync(Baltoro.appTO.name, path, returnType, input);
 	}
 	
 	public static <T> T callSync(String path, ParamInput input)
 	{
-		return callSync(Baltoro.appName, path, null, input);
+		return callSync(Baltoro.appTO.name, path, null, input);
 	}
 	
 	public static <T> T callSync(String path, Class<T> returnType)
 	{
-		return callSync(Baltoro.appName, path, returnType, null);
+		return callSync(Baltoro.appTO.name, path, returnType, null);
 	}
 	
 	private static <T> T callSync(String appName, String path, Class<T> returnType, ParamInput input)
@@ -323,12 +321,12 @@ public class Baltoro
 	
 	public static Future<?> callAsync(String path, Class<?> returnType, ParamInput input)
 	{
-		return callAsync(appName, path, returnType, input);
+		return callAsync(appTO.name, path, returnType, input);
 	}
 	
 	public static Future<?> callAsync(String path, Class<?> returnType)
 	{
-		return callAsync(appName, path, returnType, null);
+		return callAsync(appTO.name, path, returnType, null);
 	}
 	
 	public static Future<?> callAsync(String appName, String path, Class<?> returnType, ParamInput input)
@@ -458,17 +456,10 @@ public class Baltoro
 		userSession.sendSession();
 	}
 	
-	public static void init(String appName)
+	
+	public static void init(String apiKey, String authCode)
 	{
-		init(appName, Env.PRD);
-	}
-	
-	
-	
-
-	
-	public static void init(String appName, Env env)
-	{
+		
 		
 		String url = System.getProperties().getProperty("url");
 		if(StringUtil.isNotNullAndNotEmpty(url))
@@ -476,66 +467,22 @@ public class Baltoro
 			serverURL = url;
 		}
 		
-
-		String _envStr = System.getProperties().getProperty("env");
-		if(StringUtil.isNotNullAndNotEmpty(_envStr))
+		String _apiKey = System.getProperties().getProperty("apikey");
+		if(StringUtil.isNotNullAndNotEmpty(_apiKey))
 		{
-			Env _env = null;
-			try
-			{
-				_env = Env.valueOf(_envStr.toUpperCase());
-			} 
-			catch (Exception e)
-			{
-				System.out.println("Check JVM argument -Denv=? ALLOWED env values are "+Arrays.toString(Env.values()));
-				System.out.println("shut down ...");
-				System.exit(1);
-			}
+			apiKey = _apiKey;
+		}
+		Baltoro.apiKey = apiKey;
+		
+		
+		String _authCode = System.getProperties().getProperty("authcode");
+		if(StringUtil.isNotNullAndNotEmpty(_authCode))
+		{
+			authCode = _authCode;
+		}
+		Baltoro.authCode = authCode;
 			
-			
-			Baltoro.env = _env;
-		}
-		else
-		{
-			Baltoro.env = env;
-		}
-
-		if(env == null)
-		{
-			env = Env.PRD;
-		}
-		
-		
-		Baltoro.appName = appName;
-		
-		
-		switch (env)
-		{
-			case PRD:
-				Baltoro.appName = appName;
-				break;
-				
-			case STG:
-				Baltoro.appName = appName+"-envsg";
-				break;
-				
-			case QA:
-				Baltoro.appName = appName+"-envqa";
-				break;	
-				
-			case DEV:
-				Baltoro.appName = appName+"-envdv";
-				break;	
-
-				
-			default :
-				//serverURL = serverProtocol+"://www.baltoro.io";
-				break;
-		}
-		
-		appURL = serverURL.replace("://"+APIClient.BLTC_CLIENT, "://"+Baltoro.appName);
-		
-	
+		/*
 		if(appName.contains("."))
 		{
 			String _appName = CryptoUtil.md5(Baltoro.appName.getBytes()).toLowerCase();
@@ -545,6 +492,7 @@ public class Baltoro
 					
 			///System.exit(1);
 		}
+		*/
 	}
 	
 	public static void register(String serviceName, String ... packageNames)
@@ -663,11 +611,13 @@ public class Baltoro
 	public static void start()
 	{
 
-		if(env == Env.JUNIT)
+		
+		if(env == Env.UT)
 		{
 			runLocalTests();
 			return;
 		}
+		
 		
 		try
 		{
@@ -678,6 +628,9 @@ public class Baltoro
 			setHostId();
 			
 			processEnv();
+			
+			appURL = serverURL.replace("://"+APIClient.BLTC_CLIENT, "://"+Baltoro.appTO.name);
+			
 			
 			buildService();
 			
@@ -698,7 +651,7 @@ public class Baltoro
 				log.info("=====================================================");
 				if(Baltoro.serverURL.contains("localhost") || Baltoro.serverURL.contains("127.0.0.1") || Baltoro.serverURL.contains("super-server"))
 				{
-					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld?appName="+Baltoro.appName);
+					log.info("Test URL --> "+Baltoro.serverURL+"/"+sp.serviceName+"/helloworld?appName="+Baltoro.getAppName());
 				}
 				else
 				{
@@ -763,7 +716,7 @@ public class Baltoro
 	
 	public static String getAppName()
 	{
-		return appName;
+		return appTO.name;
 	}
 	
 	public static String getPublicURL(boolean https)
@@ -782,7 +735,7 @@ public class Baltoro
 	{
 		try
 		{
-			Baltoro.appName = appName+"-junit";
+			//Baltoro.appName = appName+"-junit";
 			setHostId();
 			
 			db = LocalDB.instance();
@@ -846,6 +799,10 @@ public class Baltoro
 		
 			
     	cs = new APIClient();
+    	
+    	appTO = cs.handShake(Baltoro.apiKey, Baltoro.authCode);
+    	env = Env.valueOf(appTO.env);
+    	
 		Properties props = new Properties();
 		
 		String propName = getMainClassName();
@@ -854,7 +811,6 @@ public class Baltoro
 		System.out.println(propFileName);
 		File propFile = new File(propFileName);
 		
-    	
 		
 		if(!propFile.exists())
 		{
@@ -863,6 +819,7 @@ public class Baltoro
 		
 		props.load(new FileInputStream(propFile));
 		
+		/*
 		appUuid = props.getProperty("app.uuid");
 		String _appUuid = cs.getAppUuidByName(appName);
 		if(StringUtil.isNullOrEmpty(_appUuid) || (appUuid ==null || !appUuid.equals(_appUuid)))
@@ -871,6 +828,7 @@ public class Baltoro
 			appUuid = _appUuid;
 		}
 		
+		
 		appPrivateKey = props.getProperty("app.key");
 		if(StringUtil.isNullOrEmpty(appPrivateKey))
 		{
@@ -878,9 +836,10 @@ public class Baltoro
 			props.put("app.key", appKey);
 			appPrivateKey = appKey;
 		}
+		*/
 		
 		instanceUuid = props.getProperty("app.instance.uuid");
-		String _instanceUuid = cs.createInstance(_appUuid, serviceNames.toString(), instanceUuid);
+		String _instanceUuid = cs.createInstance(appTO.uuid, serviceNames.toString(), instanceUuid);
 		if(StringUtil.isNullOrEmpty(_instanceUuid) || (instanceUuid==null || !instanceUuid.equals(_instanceUuid)))
 		{
 			props.put("app.instance.uuid", _instanceUuid);
@@ -889,7 +848,7 @@ public class Baltoro
 		
 		if(instanceUuid == null || instanceUuid.equals("NOT ALLOWED"))
 		{
-			System.out.println("can't find or create an instance exiting "+appName);
+			System.out.println("can't find or create an instance exiting "+appTO.name);
 			System.exit(1);
 		}
 		
@@ -899,13 +858,13 @@ public class Baltoro
 		
 		
 	
-		props.put("app.name", appName);
-		props.put("app.env", Baltoro.env.toString());
+		//props.put("app.name", appName);
+		//props.put("app.env", Baltoro.env.toString());
 		props.put("app.service.names", Baltoro.serviceNames.toString());
 		props.put("app.server.url", Baltoro.serverURL);
 		
 		FileOutputStream output = new FileOutputStream(propFile);
-		props.store(output,"For App "+appName.toUpperCase());
+		props.store(output,"For App "+appTO.name.toUpperCase());
 		
     	
     }

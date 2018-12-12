@@ -19,7 +19,7 @@ public class LocalDBTest
 	public void setup()
 	{
 		System.out.println("...... before ...... ");
-		Baltoro.init("baltoro", Env.JUNIT);
+		Baltoro.init("", "");
 		Baltoro.register("db", "");
 		Baltoro.start();
 		db = Baltoro.getDB();

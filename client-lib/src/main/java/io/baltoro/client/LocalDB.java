@@ -87,11 +87,14 @@ public class LocalDB
 					
 					//String _dbName = "LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
 					
-					dbName = bltDir+"/LDB-"+Baltoro.appName+"-"+serviceName+"-"+Baltoro.hostId;
+					dbName = bltDir+"/LDB-"+Baltoro.appTO.name+"-"+serviceName+"-"+Baltoro.hostId;
 					
 					System.out.println("[[[[[[[[[[[ local db name = "+dbName+" ]]]]]]]]]]]]]]]");
 					db = new LocalDB(dbName);
 					
+					Replicator.start();
+					
+					/*
 					if(Baltoro.env == Env.JUNIT)
 					{
 						System.out.println(" ........ cleaned local db ... for junit tests ");
@@ -100,6 +103,7 @@ public class LocalDB
 					{
 						Replicator.start();
 					}
+					*/
 				}
 			}
 		}
