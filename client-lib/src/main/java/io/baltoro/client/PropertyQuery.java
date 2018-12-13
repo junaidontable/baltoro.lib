@@ -24,14 +24,28 @@ public class PropertyQuery<T extends Base>
 	
 	public PropertyQuery<T> addEquals(String name, String value)
 	{
-		q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value='"+value+"' and version_uuid=b.latest_version_uuid and base_uuid in ");
+		if(count == 0)
+		{
+			q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value='"+value+"' and version_uuid=b.latest_version_uuid ");
+		}
+		else
+		{
+			q.append("\n and base_uuid in (select distinct base_uuid from metadata where name='"+name+"' and value='"+value+"' and version_uuid=b.latest_version_uuid ");
+		}
 		count++;
 		return this;
 	}
 	
 	public PropertyQuery<T> addIn(String name, String value)
 	{
-		q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value in ("+value+") and version_uuid=b.latest_version_uuid and base_uuid in ");
+		if(count == 0)
+		{
+			q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value in ("+value+") and version_uuid=b.latest_version_uuid ");
+		}
+		else
+		{
+			q.append("\n and base_uuid in (select distinct base_uuid from metadata where name='"+name+"' and value in ("+value+") and version_uuid=b.latest_version_uuid ");
+		}
 		count++;
 		return this;
 	}
@@ -52,8 +66,14 @@ public class PropertyQuery<T extends Base>
 			q.append(")");
 		}
 		
-		q.delete(q.length()-20, q.length());
-		q.append(")\n)");
+		//q.append(")\n");
+		
+		/*
+		if(count>1)
+		{
+			q.append(")\n");
+		}
+		*/
 		
 		String objType = db.getType(c);
 		
@@ -66,6 +86,7 @@ public class PropertyQuery<T extends Base>
 		
 		String query = this.q.toString();
 		
+		System.out.println(query);
 		
 		RecordList<String> recList = db.query(String.class, query).execute();
 	

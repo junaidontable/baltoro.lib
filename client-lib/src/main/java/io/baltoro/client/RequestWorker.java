@@ -208,11 +208,15 @@ public class RequestWorker extends Thread
 			userSession = SessionManager.getSession(reqSessionId);
 			if(!userSession.isAuthenticated())
 			{
+				/*
 				long t0 = System.currentTimeMillis();
 				long tc = userSession.getCreatedOn();
 				long dif = t0-tc;
 				if(dif > 59000)
+				*/
+				if(userSession.synced == false)
 				{
+					userSession.synced = true;
 					SessionUserTO to = Baltoro.cs.pullSession(reqSessionId);
 					if(to != null)
 					{

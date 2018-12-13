@@ -20,6 +20,7 @@ public class UserSession
 	private long authenticatedOn;
 	private int timeoutMin = 20;
 	private Map<String, String> cookieMap = new HashMap<>(100);
+	boolean synced = false;
 	
 	UserSession(String sessionId)
 	{

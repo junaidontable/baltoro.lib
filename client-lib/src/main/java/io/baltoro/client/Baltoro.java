@@ -393,7 +393,9 @@ public class Baltoro
 		userSession.setAuthenticated(true);
 		userSession.setRoles(roleNames);
 		userSession.setTimeoutMin(sessionTimeoutMin);
+		userSession.synced = true;
 		userSession.sendSession();
+		
 		
 	}
 	

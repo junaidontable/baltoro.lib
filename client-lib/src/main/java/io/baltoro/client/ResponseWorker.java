@@ -78,7 +78,7 @@ public class ResponseWorker extends  Thread
 				
 				int len = to.responseContext != null ? to.responseContext.getData().length : -1;
 				System.out.println("^^^^^^^^^ response bytes :: "+len);
-				*/
+				//*/
 				
 				to.requestContext = null;
 				byte[] bytes = null;
