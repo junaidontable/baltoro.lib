@@ -162,7 +162,7 @@ public class RequestWorker extends Thread
 			else if (e.getCause() instanceof APIError)
 			{
 				APIError er = (APIError) e.getCause();
-				res.setRedirect(er.getMessage());
+				res.setError(er.getMessage());
 			} 
 			else if (e instanceof AuthException)
 			{

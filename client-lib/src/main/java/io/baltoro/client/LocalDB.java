@@ -1222,6 +1222,13 @@ public class LocalDB
 				obj.setName(obj.getClass().getSimpleName()+"-"+obj.hashCode());
 			}
 			
+			UserSession session = Baltoro.getUserSession();
+			String userName = session.getUserName();
+			
+			if(StringUtil.isNotNullAndNotEmpty(userName))
+			{
+				obj.setCreatedBy(userName);
+			}
 			insertBase(obj);
 			insertVersion(obj);
 			insertMetadata(obj);
