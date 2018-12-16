@@ -1,5 +1,6 @@
 package io.baltoro.ep;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import io.baltoro.client.CSRequestFilter;
 import io.baltoro.client.CSResponseFilter;
 import io.baltoro.client.UserSession;
 import io.baltoro.client.util.ObjectUtil;
+import io.baltoro.client.util.StreamUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.to.APIError;
 
@@ -153,6 +155,14 @@ public class CloudServer
 	
 	public <T> T call(String serverUrl, String path, EPData data, Class<T> returnType)
 	{
+		
+		
+		if (returnType == null)
+		{
+			throw new APIError("return type can't be null");
+		}
+		
+		
 		WebTarget target = client.target(serverUrl).path(path);	
 	
 		log.info("API call URL --> "+serverUrl+path);
@@ -172,11 +182,13 @@ public class CloudServer
 		
 		form.param("appName", Baltoro.getAppName());
 		
+		
 		Invocation.Builder ib =	getIB(target);
 		
 		Response response = ib.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+	
 		
-		
+
 		String error = response.getHeaderString("BALTORO-ERROR");
 		if(StringUtil.isNotNullAndNotEmpty(error))
 		{
@@ -191,9 +203,22 @@ public class CloudServer
 			throw new APIError(error);
 		}
 		
-		if (returnType == null)
+	
+		
+		if(returnType == byte[].class)
 		{
-			return null;
+			try(InputStream in = response.readEntity(InputStream.class))
+			{
+				byte[] bytes = StreamUtil.toBytes(in);
+				return returnType.cast(bytes);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				throw new APIError(e.getMessage());
+			}
+			
+			
 		}
 		
 		String json = response.readEntity(String.class);
