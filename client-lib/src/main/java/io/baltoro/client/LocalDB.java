@@ -1995,6 +1995,74 @@ public class LocalDB
 		return a;
 	}
 	
+	public boolean delete(String baseUuid)
+	{
+			
+		String objType = ObjectUtil.getType(baseUuid);
+		
+		Connection con = getConnection();
+		
+		try
+		{
+			PreparedStatement st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where p_uuid = ?)");
+			st.setString(1, baseUuid);
+			boolean a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from link_att where link_uuid in (select uuid from link where c_uuid = ?)");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from link where p_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from link where c_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from metadata where base_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from version where base_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from base where uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from permission where base_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+			st = con.prepareStatement("delete from content where base_uuid = ?");
+			st.setString(1, baseUuid);
+			a = st.executeAndReplicate(objType);
+			st.close();
+			
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		finally 
+		{
+			con.close();
+		}
+
+		return true;
+	}
+	
 	public boolean deletChildren(String pUuid) throws Exception
 	{
 			
