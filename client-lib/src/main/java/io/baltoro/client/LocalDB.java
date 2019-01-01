@@ -638,27 +638,85 @@ public class LocalDB
 	public List<Base> get(String[] baseUuids)
 	{
 		String uuids = StringUtil.toInClause(baseUuids);
-		return get(uuids);
+		Map<String, Base> map = getObjMap(uuids);
+		
+		List<Base> list = new ArrayList<>(map.size());
+		for (String baseUuid : baseUuids)
+		{
+			Base b = map.get(baseUuid);
+			if(b != null)
+			{
+				list.add(b);
+			}
+		}
+		
+		return list;
 	}
 	
 	public <T extends Base> List<T> get(Class<T> c, String[] baseUuids)
 	{
-		String uuids = StringUtil.toInClause(baseUuids);
-		return (List<T>) get(uuids);
+		List<Base> list = get(baseUuids);
+		return (List<T>) list;
 	}
 	
 	public List<Base> get(Set<String> baseUuids)
 	{
-		String uuids = StringUtil.toInClause(baseUuids);
-		return get(uuids);
+		String[] uuids = baseUuids.toArray(new String[baseUuids.size()]);
+		List<Base> list = get(uuids);
+		return list;
 	}
+	
 	
 	public List<Base> get(List<String> baseUuids)
 	{
-		String uuids = StringUtil.toInClause(baseUuids);
-		return get(uuids);
+		String[] uuids = baseUuids.toArray(new String[baseUuids.size()]);
+		List<Base> list = get(uuids);
+		return list;
 	}
+	
+	
+	private Map<String, Base> getObjMap(String inClasueUuids)
+	{
+		//String inClasueUuids = StringUtil.toInClause(baseUuids);
 		
+		Map<String, Base> objMap = new HashMap<>(1000);
+		
+		Connection con = getConnection();
+		try
+		{
+			
+			
+			String query = ("select * from base where uuid in ("+inClasueUuids+")");
+			Statement st = con.createStatement();
+			Map<String, Base> map = new HashMap<String, Base>();
+			ResultSet rs = st.executeQuery(query);
+			while(rs.next())
+			{
+				String type = rs.getString("type");
+				String objClass = getObjClass(type);
+				Base obj = (Base) Class.forName(objClass).newInstance();
+				buildBO(rs, obj);
+				objMap.put(obj.getBaseUuid(),obj);
+				map.put(obj.getBaseUuid(), obj);
+			}
+			rs.close();
+			st.close();
+			
+			addtMetadata(map);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			con.close();
+		}
+		
+		return objMap;
+	}
+	
+	/*
 	private List<Base> get(String inClasueUuids)
 	{
 		List<Base> objList = new ArrayList<>(200);
@@ -697,6 +755,7 @@ public class LocalDB
 		
 		return objList;
 	}
+	
 	
 	public Map<String, Base> findMap(String[] baseUuids)
 	{
@@ -737,7 +796,7 @@ public class LocalDB
 		
 		return objMap;
 	}
-	
+	*/
 	
 	public <T extends Base> T getByName(String name, Class<T> _class)
 	{
