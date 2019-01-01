@@ -36,6 +36,20 @@ public class PropertyQuery<T extends Base>
 		return this;
 	}
 	
+	public PropertyQuery<T> addLike(String name, String value)
+	{
+		if(count == 0)
+		{
+			q.append("\n(select distinct base_uuid from metadata where name='"+name+"' and value like '"+value+"' and version_uuid=b.latest_version_uuid ");
+		}
+		else
+		{
+			q.append("\n and base_uuid in (select distinct base_uuid from metadata where name='"+name+"' and value like '"+value+"' and version_uuid=b.latest_version_uuid ");
+		}
+		count++;
+		return this;
+	}
+	
 	public PropertyQuery<T> addIn(String name, String value)
 	{
 		if(count == 0)
