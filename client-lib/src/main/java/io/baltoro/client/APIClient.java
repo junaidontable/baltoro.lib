@@ -53,7 +53,7 @@ public class APIClient
 	Client pollerClient;
 	Client rawClient;
 	
-	ObjectMapper mapper = new ObjectMapper();
+	//ObjectMapper mapper = new ObjectMapper();
 	
 	
 	String blHost;
@@ -152,6 +152,8 @@ public class APIClient
 		Response response = ib.get();
 		
 		String json = response.readEntity(String.class);
+		
+		ObjectMapper mapper = new ObjectMapper();
 		
 		AppTO to = mapper.readValue(json, AppTO.class);
 
@@ -260,6 +262,7 @@ public class APIClient
 	
 		WebTarget target = webClient.target(blHost).path(BLTC_SERVICE+"/setappapi");
 		
+		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writeValueAsString(pathList);
 		
 		Form form = new Form();
@@ -462,6 +465,8 @@ public class APIClient
 		form.param("app-uuid", Baltoro.appTO.uuid);
 		form.param("inst-uuid", Baltoro.instanceUuid);
 		form.param("session-id", sessionId);
+		
+		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writeValueAsString(to);
 		form.param("json", json);
 		
@@ -512,6 +517,7 @@ public class APIClient
 		String res = response.readEntity(String.class);
 		if(StringUtil.isNotNullAndNotEmpty(res))
 		{
+			ObjectMapper mapper = new ObjectMapper();
 			return mapper.readValue(res, SessionUserTO.class);
 		}
 		

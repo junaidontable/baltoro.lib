@@ -71,6 +71,16 @@ public class PropertyQuery<T extends Base>
 		return this;
 	}
 	
+	public T executeFirst()
+	{
+		List<T> l = execute();
+		if(l == null || l.isEmpty())
+		{
+			return null;
+		}
+		
+		return l.get(0);
+	}
 	
 	public List<T> execute()
 	{

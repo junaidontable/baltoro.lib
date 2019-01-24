@@ -76,7 +76,9 @@ public class Baltoro
 	static String apiKey;
 	static String authCode;
 	
-	static String serverURL = "https://"+APIClient.BLTC_CLIENT+".baltoro.io";
+	static String domain = "baltoro.io";
+	static String protocol = "https";
+	static String serverURL = protocol+"://"+APIClient.BLTC_CLIENT+"."+domain;
 	static String appURL;
 	
 	static AppTO appTO;
@@ -459,9 +461,15 @@ public class Baltoro
 	}
 	
 	
+	public static void init(String url, String apiKey, String authCode)
+	{
+		serverURL = url;
+		init(apiKey, authCode);
+	}
+
+	
 	public static void init(String apiKey, String authCode)
 	{
-		
 		
 		String url = System.getProperties().getProperty("url");
 		if(StringUtil.isNotNullAndNotEmpty(url))

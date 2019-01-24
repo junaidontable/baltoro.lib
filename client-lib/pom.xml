@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>4.0.7</version>
+  <version>4.0.11</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -69,6 +69,13 @@
       <artifactId>httpclient</artifactId>
       <version>4.5.2</version>
   	</dependency>
+  	
+  		
+	 <dependency>
+	    <groupId>com.fasterxml.jackson.core</groupId>
+	    <artifactId>jackson-annotations</artifactId>
+	    <version>2.9.8</version>
+	</dependency>
   
     <dependency>
     	<groupId>org.glassfish.jersey.core</groupId>
@@ -83,27 +90,13 @@
 	</dependency>
 	
 
-	
-	
-	
-	<!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
 	<dependency>
 	    <groupId>org.reflections</groupId>
 	    <artifactId>reflections</artifactId>
 	    <version>0.9.11</version>
 	</dependency>
 
-	<!--  dependency>
-	    <groupId>org.glassfish.tyrus</groupId>
-	    <artifactId>tyrus-client</artifactId>
-	    <version>1.14</version>
-	</dependency>
-	
-	<dependency>
-	    <groupId>org.glassfish.tyrus</groupId>
-	    <artifactId>tyrus-container-grizzly-client</artifactId>
-	    <version>1.13.1</version>
-	</dependency-->
+
 	
 	<dependency>
     	<groupId>org.glassfish.jersey.media</groupId>
@@ -112,20 +105,6 @@
 	</dependency>
 
 
-<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
-	<!--  dependency>
-	    <groupId>org.apache.commons</groupId>
-	    <artifactId>commons-dbcp2</artifactId>
-	    <version>2.1.1</version>
-	</dependency -->
-
-
-	
-	<!--  dependency>
-		<groupId>javax.websocket</groupId>
-		<artifactId>javax.websocket-api</artifactId>
-		<version>1.1</version>
-	</dependency -->
 	
 	<dependency>
 	    <groupId>org.bouncycastle</groupId>
@@ -133,8 +112,6 @@
 	    <version>1.54</version>
 	</dependency>
 	
-	
-	<!-- https://mvnrepository.com/artifact/org.apache.derby/derby -->
 	<dependency>
 	    <groupId>org.apache.derby</groupId>
 	    <artifactId>derby</artifactId>
@@ -142,7 +119,6 @@
 	</dependency>
 
 
-	<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
 	<dependency>
 	    <groupId>commons-beanutils</groupId>
 	    <artifactId>commons-beanutils</artifactId>
