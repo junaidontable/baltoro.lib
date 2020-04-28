@@ -1,15 +1,14 @@
 package io.baltoro.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
-/**
- * Unit test for simple App.
- */
-public class DBTest extends TestCase
+
+public class DBTest
 {
     
 	private static LocalDB db = LocalDB.instance();
@@ -18,22 +17,8 @@ public class DBTest extends TestCase
 	private static String uuidObj2;
 	private static String uuidObj3;
 	
-	
-    public DBTest( String testName )
-    {
-        super( testName );
-        
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( DBTest.class );
-    }
-
    
+	
     public void testInsert()
     {
     	System.out.println("............. begin insert test ............. ");

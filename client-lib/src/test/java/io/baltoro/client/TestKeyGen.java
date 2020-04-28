@@ -1,27 +1,19 @@
 package io.baltoro.client;
 
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.to.Keys;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 
-public class TestKeyGen extends TestCase
+public class TestKeyGen 
 {
     
-    public TestKeyGen( String testName )
-    {
-        super( testName );
-        
-    }
 
-    public static Test suite()
-    {
-        return new TestSuite( TestKeyGen.class );
-    }
-    
-    
+  
+	//@Test
     public void testInsert()
     {
     	

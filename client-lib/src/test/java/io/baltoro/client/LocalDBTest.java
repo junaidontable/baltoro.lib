@@ -1,7 +1,6 @@
 package io.baltoro.client;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +14,7 @@ public class LocalDBTest
 	ObjectMapper mapper = new ObjectMapper();
 	
 	
-	@Before
+	//@Test
 	public void setup()
 	{
 		System.out.println("...... before ...... ");
@@ -26,14 +25,14 @@ public class LocalDBTest
 		
 	}
 	
-	@After
+	//@After
 	public void tearDown()
 	{
 		System.out.println("..... finished testing ....");
 	}
 	
 	
-	@Test
+	//@Test
 	public void test1()
 	{
 		

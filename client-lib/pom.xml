@@ -4,7 +4,7 @@
 
   <groupId>io.baltoro</groupId>
   <artifactId>client-lib</artifactId>
-  <version>4.0.11</version>
+  <version>4.0.12</version>
   <packaging>jar</packaging>
 
   <name>baltoto client lib</name>
@@ -50,45 +50,52 @@
 
 
    <dependencies>
-    
+   	<dependency>
+	    <groupId>junit</groupId>
+	    <artifactId>junit</artifactId>
+	    <version>4.13</version>
+	    <scope>test</scope>
+	</dependency>
+	
     <dependency>
 	  <groupId>org.apache.maven</groupId>
 	  <artifactId>maven-model</artifactId>
 	  <version>3.3.9</version>
 	</dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
     
      <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.2</version>
   	</dependency>
-  	
-  		
-	 <dependency>
-	    <groupId>com.fasterxml.jackson.core</groupId>
-	    <artifactId>jackson-annotations</artifactId>
-	    <version>2.9.8</version>
-	</dependency>
-  
-    <dependency>
-    	<groupId>org.glassfish.jersey.core</groupId>
-    	<artifactId>jersey-client</artifactId>
-    	<version>2.25.1</version>
-	</dependency>
+
 	
 	<dependency>
-    	<groupId>org.glassfish.jersey.media</groupId>
-    	<artifactId>jersey-media-json-jackson</artifactId>
-    	<version>2.25.1</version>
+		<groupId>org.glassfish.jersey.containers</groupId>
+		<artifactId>jersey-container-servlet-core</artifactId>
+		<version>2.30.1</version>
+		
 	</dependency>
-	
+
+	<dependency>
+	    <groupId>org.glassfish.jersey.inject</groupId>
+	    <artifactId>jersey-hk2</artifactId>
+	    <version>2.30.1</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.glassfish.jersey.media</groupId>
+		<artifactId>jersey-media-json-jackson</artifactId>
+		<version>2.30.1</version>
+	</dependency>
+
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-annotations</artifactId>
+		<version>2.10.3</version>
+	</dependency>
+
 
 	<dependency>
 	    <groupId>org.reflections</groupId>
@@ -97,25 +104,17 @@
 	</dependency>
 
 
+	 <dependency>
+        <groupId>io.baltoro</groupId>
+        <artifactId>storage</artifactId>
+        <version>1</version>   
+    </dependency>
+	
 	
 	<dependency>
     	<groupId>org.glassfish.jersey.media</groupId>
     	<artifactId>jersey-media-multipart</artifactId>
     	<version>2.27</version>
-	</dependency>
-
-
-	
-	<dependency>
-	    <groupId>org.bouncycastle</groupId>
-	    <artifactId>bcprov-jdk15on</artifactId>
-	    <version>1.54</version>
-	</dependency>
-	
-	<dependency>
-	    <groupId>org.apache.derby</groupId>
-	    <artifactId>derby</artifactId>
-	    <version>10.13.1.1</version>
 	</dependency>
 
 
@@ -128,7 +127,7 @@
   </dependencies>
   
   <build>
-    <finalName>baltoro-lib</finalName>
+    <finalName>baltoro</finalName>
     <sourceDirectory>src/main/java</sourceDirectory>
 	<plugins>
 	
@@ -270,22 +269,28 @@
 		</plugin>
 		
 		
-		<!--  
-		<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-antrun-plugin</artifactId>
-		<version>1.8</version>
-			<configuration>
-				<target>
-					<echo>coping file web.xml</echo>
-					  <copy file="${project.build.directory}/baltoro-lib-jar-with-dependencies.jar" 
-					  tofile="${env.TOMCAT_HOME}/webapps/baltoro/baltoro-lib.jar" />
-                     
-				</target>
-			</configuration>
-		</plugin>
-		
-		-->
+	<plugin>
+		<groupId>com.spotify</groupId>
+			<artifactId>dockerfile-maven-plugin</artifactId>
+				  <version>1.4.10</version>
+				  <executions>
+				    <execution>
+				      <id>default</id>
+				      <goals>
+				        <goal>push</goal>
+				        <goal>push</goal>
+				      </goals>
+				    </execution>
+				  </executions>
+				  <configuration>
+				 
+				    <repository>junaidsyed/baltoro</repository>
+				    <tag>latest</tag>
+				    <buildArgs>
+				    	<JAR_FILE>baltoro-jar-with-dependencies.jar</JAR_FILE>
+				    </buildArgs>
+				  </configuration>
+				</plugin>
 		
 		<plugin>
       <groupId>org.apache.maven.plugins</groupId>
