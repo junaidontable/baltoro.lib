@@ -5,7 +5,7 @@ import java.util.Date;
 import io.baltoro.features.NoAuth;
 import io.baltoro.features.Path;
 
-@Path("/")
+
 public class APITest
 {
 	@Path("/helloworld")

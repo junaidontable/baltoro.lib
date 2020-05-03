@@ -2,7 +2,7 @@ package io.baltoro.client;
 
 import java.util.List;
 
-import io.baltoro.obj.Base;
+import io.baltoro.db.Base;
 
 public class PropertyQuery<T extends Base>
 {

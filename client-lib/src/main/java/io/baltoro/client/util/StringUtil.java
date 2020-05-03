@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import io.baltoro.obj.Base;
+import io.baltoro.db.Base;
 
 public class StringUtil 
 {
@@ -265,7 +265,7 @@ public class StringUtil
 		while(it.hasNext())
 		{
 			Base val = it.next();
-			buffer.append("'"+val.getLatestVersionUuid()+"',");
+			buffer.append("'"+val.getLvUuid()+"',");
 		}
 		buffer.deleteCharAt(buffer.length()-1);
 		

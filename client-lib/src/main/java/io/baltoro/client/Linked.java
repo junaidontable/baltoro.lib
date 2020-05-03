@@ -8,7 +8,7 @@ import java.util.Set;
 
 import io.baltoro.client.LocalDB.Direction;
 import io.baltoro.client.util.StringUtil;
-import io.baltoro.obj.Base;
+import io.baltoro.db.Base;
 
 
 public class Linked<T extends Base>

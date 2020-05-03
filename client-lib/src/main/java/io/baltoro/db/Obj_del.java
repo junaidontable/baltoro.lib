@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Obj 
+public @interface Obj_del 
 {
-	UUID uuid();
+	//UUID uuid();
 	Name name();
 }

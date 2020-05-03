@@ -24,33 +24,33 @@ public class DBTest
     	System.out.println("............. begin insert test ............. ");
     	
     	TestObj1 obj1 = new TestObj1();
-    	obj1.setName("name1");
+    	//obj1.setName("name1");
     	obj1.setAtt1("att11");
     	obj1.setAtt2(12);
     	obj1.setAtt3("att13");
    
-    	db.save(obj1);
-    	uuidObj1 = obj1.getUuid();
+    	//db.save(obj1);
+    	//uuidObj1 = obj1.getUuid();
     	System.out.println("obj1 uuid = "+uuidObj1);
     	
     	TestObj2 obj2 = new TestObj2();
-    	obj2.setName("name2");
+    	//obj2.setName("name2");
     	obj2.setAtt1("att21");
     	obj2.setAtt2(22);
     	obj2.setAtt3("att23");
     	
-    	db.save(obj2);
-    	uuidObj2 = obj2.getUuid();
+    	//db.save(obj2);
+    	//uuidObj2 = obj2.getUuid();
     	System.out.println("obj2 uuid = "+uuidObj2);
     	
     	TestObj3 obj3 = new TestObj3();
-    	obj3.setName("name3");
+    	//obj3.setName("name3");
     	obj3.setAtt1("att31");
     	obj3.setAtt2(32);
     	obj3.setAtt3("att33");
     	
-    	db.save(obj3);
-    	uuidObj3 = obj3.getUuid();
+    	//db.save(obj3);
+    	//uuidObj3 = obj3.getUuid();
     	System.out.println("obj3 uuid = "+uuidObj3);
     	
         assertTrue( true );

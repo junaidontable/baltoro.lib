@@ -30,10 +30,10 @@ import io.baltoro.client.util.CryptoUtil;
 import io.baltoro.client.util.ObjectUtil;
 import io.baltoro.client.util.StringUtil;
 import io.baltoro.client.util.UUIDGenerator;
+import io.baltoro.db.Base;
 import io.baltoro.exp.LocalDBException;
 import io.baltoro.features.Store;
 import io.baltoro.obj.BODefaults;
-import io.baltoro.obj.Base;
 import io.baltoro.to.ReplicationTO;
 
 
@@ -1163,7 +1163,7 @@ public class LocalDB
 		try
 		{
 			Statement st = con.createStatement();
-			String inClause = StringUtil.toInClauseForMetadata(objMap.values());
+			String inClause = null;//StringUtil.toInClauseForMetadata(objMap.values());
 			
 			ResultSet rs = st.executeQuery("select * from metadata where version_uuid in ("+inClause+")");
 			
@@ -1243,17 +1243,17 @@ public class LocalDB
 		
 		obj.setBaseUuid(rs.getString("uuid"));
 		obj.setName(rs.getString("name"));
-		obj.setState(rs.getString("state"));
+		//obj.setState(rs.getString("state"));
 		obj.setType(rs.getString("type"));
-		obj.setContainerUuid(rs.getString("container_uuid"));
-		obj.setLatestVersionUuid(rs.getString("latest_version_uuid"));
-		obj.setVersionNumber(rs.getInt("latest_version_number"));
-		obj.setPermissionType(rs.getString("permission_type"));
-		obj.setCreatedBy(rs.getString("created_by"));
-		obj.setCreatedOn(rs.getTimestamp("created_on"));
-		obj.setVersionUuid(rs.getString("latest_version_uuid"));
+		//obj.setContainerUuid(rs.getString("container_uuid"));
+		//obj.setLatestVersionUuid(rs.getString("latest_version_uuid"));
+		//obj.setVersionNumber(rs.getInt("latest_version_number"));
+		//obj.setPermissionType(rs.getString("permission_type"));
+		//obj.setCreatedBy(rs.getString("created_by"));
+		//obj.setCreatedOn(rs.getTimestamp("created_on"));
+		//obj.setVersionUuid(rs.getString("latest_version_uuid"));
 		
-		obj.setVersionUuid(obj.getLatestVersionUuid());
+		//obj.setVersionUuid(obj.getLatestVersionUuid());
 	}
 	
 	public void save(Base obj)
@@ -1272,9 +1272,9 @@ public class LocalDB
 			String versionUuid = UUIDGenerator.uuid(type);
 			
 			obj.setBaseUuid(uuid);
-			obj.setVersionNumber(1);
-			obj.setLatestVersionUuid(versionUuid);
-			obj.setCreatedOn(new Timestamp(System.currentTimeMillis()));
+			//obj.setVersionNumber(1);
+			//obj.setLatestVersionUuid(versionUuid);
+			//obj.setCreatedOn(new Timestamp(System.currentTimeMillis()));
 			
 			if(StringUtil.isNullOrEmpty(obj.getName()))
 			{
@@ -1286,7 +1286,7 @@ public class LocalDB
 			
 			if(StringUtil.isNotNullAndNotEmpty(userName))
 			{
-				obj.setCreatedBy(userName);
+				//obj.setCreatedBy(userName);
 			}
 			insertBase(obj);
 			insertVersion(obj);
@@ -1294,12 +1294,12 @@ public class LocalDB
 		}
 		else
 		{
-			int vn = obj.getVersionNumber();
-			vn++;
-			obj.setVersionNumber(vn);
+			//int vn = obj.getVersionNumber();
+			//vn++;
+			//obj.setVersionNumber(vn);
 			
 			String versionUuid = UUIDGenerator.uuid(obj.getType());
-			obj.setLatestVersionUuid(versionUuid);
+			//obj.setLatestVersionUuid(versionUuid);
 			updateBase(obj);
 			insertVersion(obj);
 			insertMetadata(obj);
@@ -1321,16 +1321,16 @@ public class LocalDB
 			PreparedStatement st = con.prepareStatement("insert into content(version_uuid, base_uuid, name, content_type, content_size, created_by, created_on, data) "
 					+ "values(?,?,?,?,?,?,?,?)");
 			
-			st.setString(1, ct.getLatestVersionUuid());
+			//st.setString(1, ct.getLatestVersionUuid());
 			st.setString(2, ct.getBaseUuid());
 			st.setString(3, ct.getName());
 			st.setString(4, ct.getContentType());
 			st.setLong(5, ct.getSize());
-			st.setString(6, ct.getCreatedBy());
-			st.setTimestamp(7, ct.getCreatedOn());
+			//st.setString(6, ct.getCreatedBy());
+			//st.setTimestamp(7, ct.getCreatedOn());
 			st.setBytes(8, ct.getData().get());
 			
-			st.executeAndReplicate(ct.getType(),"ctUuid:"+ct.getServerUuid(), "vrUuid:"+ct.getLatestVersionUuid());
+			//st.executeAndReplicate(ct.getType(),"ctUuid:"+ct.getServerUuid(), "vrUuid:"+ct.getLatestVersionUuid());
 				
 			st.close();
 			
@@ -1349,7 +1349,7 @@ public class LocalDB
 	
 	public byte[] getContent(Base obj)
 	{
-		return getContent(obj.getLatestVersionUuid());
+		return null;//getContent(obj.getLatestVersionUuid());
 	}
 	
 	public byte[] getContent(String versionUuid)
@@ -1402,14 +1402,14 @@ public class LocalDB
 			
 			st.setString(1, obj.getBaseUuid());
 			st.setString(2, obj.getName());
-			st.setString(3, obj.getState());
+			//st.setString(3, obj.getState());
 			st.setString(4, obj.getType());
-			st.setString(5, obj.getContainerUuid());
-			st.setString(6, obj.getLatestVersionUuid());
-			st.setInt(7, obj.getVersionNumber());
-			st.setString(8, obj.getPermissionType());
-			st.setString(9, obj.getCreatedBy());
-			st.setTimestamp(10, obj.getCreatedOn());
+			//st.setString(5, obj.getContainerUuid());
+			//st.setString(6, obj.getLatestVersionUuid());
+			//st.setInt(7, obj.getVersionNumber());
+			//st.setString(8, obj.getPermissionType());
+			//st.setString(9, obj.getCreatedBy());
+			//st.setTimestamp(10, obj.getCreatedOn());
 			
 			st.executeAndReplicate(obj.getType());
 				
@@ -1438,8 +1438,8 @@ public class LocalDB
 				
 			
 			st.setString(1, obj.getName());
-			st.setString(2, obj.getLatestVersionUuid());
-			st.setInt(3, obj.getVersionNumber());
+			//st.setString(2, obj.getLatestVersionUuid());
+			//st.setInt(3, obj.getVersionNumber());
 			st.setString(4, obj.getBaseUuid());
 			
 			
@@ -1478,12 +1478,12 @@ public class LocalDB
 			st = con.prepareStatement("insert into version(uuid, base_uuid, version_number, name, created_by, created_on) "
 					+ "values(?,?,?,?,?,?)");
 			
-			st.setString(1, obj.getLatestVersionUuid());
+			//st.setString(1, obj.getLatestVersionUuid());
 			st.setString(2, obj.getBaseUuid());
-			st.setInt(3, obj.getVersionNumber());
+			//st.setInt(3, obj.getVersionNumber());
 			st.setString(4, obj.getName());
-			st.setString(5, obj.getCreatedBy());
-			st.setTimestamp(6, obj.getCreatedOn());
+			//st.setString(5, obj.getCreatedBy());
+			//st.setTimestamp(6, obj.getCreatedOn());
 			
 			st.executeAndReplicate(obj.getType());
 			
@@ -1671,11 +1671,11 @@ public class LocalDB
 				
 				
 				st.setString(1, obj.getBaseUuid());
-				st.setString(2, obj.getLatestVersionUuid());
+				//st.setString(2, obj.getLatestVersionUuid());
 				st.setString(3, mdName);
 				st.setString(4, value);
-				st.setString(5, obj.getCreatedBy());
-				st.setTimestamp(6, obj.getCreatedOn());
+				//st.setString(5, obj.getCreatedBy());
+				//st.setTimestamp(6, obj.getCreatedOn());
 				
 				st.addbatch(obj.getType());
 				

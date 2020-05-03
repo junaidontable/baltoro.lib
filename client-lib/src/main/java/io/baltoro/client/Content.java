@@ -4,8 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import io.baltoro.db.Base;
 import io.baltoro.features.Store;
-import io.baltoro.obj.Base;
 
 public class Content extends Base implements BLTContent
 {

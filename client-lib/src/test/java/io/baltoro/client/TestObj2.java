@@ -1,7 +1,7 @@
 package io.baltoro.client;
 
+import io.baltoro.db.Base;
 import io.baltoro.features.Store;
-import io.baltoro.obj.Base;
 
 public class TestObj2 extends Base
 {

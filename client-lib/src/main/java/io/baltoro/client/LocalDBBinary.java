@@ -1,6 +1,6 @@
 package io.baltoro.client;
 
-import io.baltoro.obj.Base;
+import io.baltoro.db.Base;
 
 public class LocalDBBinary
 {
